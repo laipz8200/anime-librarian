@@ -132,6 +132,9 @@ This process helps maintain a well-organized media library that's compatible wit
 # Install development dependencies
 pip install -e ".[dev]"
 
+# Install pre-commit hooks
+pre-commit install
+
 # Run tests
 pytest
 
@@ -141,9 +144,25 @@ pytest --cov
 # Run linting
 ruff check .
 
+# Run formatting
+ruff format .
+
 # Run type checking
 mypy .
+
+# Run all pre-commit hooks manually
+pre-commit run --all-files
 ```
+
+### Pre-commit Hooks
+
+This project uses pre-commit hooks to ensure code quality before committing changes. The hooks include:
+
+- **ruff check**: Lints the code for errors and style issues
+- **ruff format**: Automatically formats the code
+- **mypy**: Performs static type checking
+
+These hooks run automatically when you commit changes, but you can also run them manually with `pre-commit run --all-files`.
 
 ## Troubleshooting
 

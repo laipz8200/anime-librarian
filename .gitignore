@@ -170,6 +170,9 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+# pre-commit
+.pre-commit-cache/
+
 # LSP config files
 pyrightconfig.json
 
