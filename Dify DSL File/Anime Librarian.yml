@@ -1,0 +1,247 @@
+app:
+  description: A command-line tool that uses AI to rename and organize video files.
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: Anime Librarian
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.0.7@11ec0b1909200f62b6ebf2cec1da981a9071d11c1ee0e2ef332ce89bcffa2544
+kind: app
+version: 0.2.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: 1746645878419-source-1746645882563-target
+      source: '1746645878419'
+      sourceHandle: source
+      target: '1746645882563'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: end
+      id: 1746645882563-source-1746645885984-target
+      source: '1746645882563'
+      sourceHandle: source
+      target: '1746645885984'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - allowed_file_extensions: []
+          allowed_file_types: []
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          label: files
+          max_length: null
+          options: []
+          required: true
+          type: paragraph
+          variable: files
+        - label: directories
+          max_length: null
+          options: []
+          required: true
+          type: paragraph
+          variable: directories
+      height: 116
+      id: '1746645878419'
+      position:
+        x: 30
+        y: 258
+      positionAbsolute:
+        x: 30
+        y: 258
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: e5ac37a9-7035-4912-a72c-816bafcb17d3
+          role: system
+          text: 'Find all anime files in the first part and the matched directories
+            in the second part. Then, rename the file to the format: `<matched directory
+            name>/<matched directory name>.S< 2-digit season number>E< 2-digit episode
+            number>.<file suffix>`.
+
+
+            Please note that not every file is an anime file. The anime file should
+            be in a video format.
+
+
+            Your outputs should be JSON objects containing two keys: original_name
+            and new_name. You should only output the JSON parts.
+
+            '
+        - id: 9f0e99aa-a883-4311-b436-dd723653d243
+          role: user
+          text: '## First Part
+
+
+            ```
+
+            小市民系列 第二季 - 15 [1080P][WEB-DL][AAC AVC][CHT].mp4
+
+            Summer Pockets - 05 [1080P][WEB-DL][AAC AVC][CHT].mp4
+
+            ```
+
+
+            ## Second Part
+
+
+            ```
+
+            Summer Pockets
+
+            小市民シリーズ
+
+            ```'
+        - id: 74518762-628e-4147-bba3-93774bec7f45
+          role: assistant
+          text: "{\n  \"result\": [\n    {\"original_name\": \"小市民系列 第二季 - 15 [1080P][WEB-DL][AAC\
+            \ AVC][CHT].mp4\", \"new_name\": \"小市民シリーズ/小市民シリーズ.S01E15.mp4\"},\n  \
+            \  {\"original_name\": \"Summer Pockets - 05 [1080P][WEB-DL][AAC AVC][CHT].mp4\"\
+            , \"new_name\": \"Summer Pockets/Summer Pockets.S01E05.mp4\"}\n  ]\n}"
+        - id: 8d9d6d58-99bd-43e1-b1cb-9b2016c5a159
+          role: user
+          text: '## First Part
+
+
+            ```
+
+            {{#1746645878419.files#}}
+
+            ```
+
+
+            ## Second Part
+
+
+            ```
+
+            {{#1746645878419.directories#}}
+
+            ```'
+        selected: false
+        title: LLM
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1746645882563'
+      position:
+        x: 334
+        y: 258
+      positionAbsolute:
+        x: 334
+        y: 258
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1746645882563'
+          - text
+          variable: text
+        selected: false
+        title: End
+        type: end
+      height: 90
+      id: '1746645885984'
+      position:
+        x: 638
+        y: 258
+      positionAbsolute:
+        x: 638
+        y: 258
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 52.00000000000006
+      y: 224.4
+      zoom: 0.7

@@ -1,0 +1,75 @@
+[project]
+name = "anime-librarian"
+version = "0.1.0"
+description = "A command-line tool that uses AI to rename and organize video files"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "httpx>=0.28.1",
+    "json-repair>=0.44.1",
+    "loguru>=0.7.3",
+    "pydantic>=2.11.4",
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+    "ruff>=0.11.8",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"  # Target Python 3.13
+extend-exclude = [".venv", "__pycache__", ".pytest_cache", ".ruff_cache"]
+
+[tool.ruff.lint]
+# Rule selections
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear (detects likely bugs and design problems)
+    "C4",   # flake8-comprehensions (better list/dict/set comprehensions)
+    "UP",   # pyupgrade (upgrade syntax for newer Python)
+    "N",    # pep8-naming (PEP8 naming conventions)
+    "SIM",  # flake8-simplify (code simplification suggestions)
+    "TCH",  # flake8-type-checking (move type annotations to stub files)
+    "RUF",  # Ruff-specific rules
+    "D",    # pydocstyle (docstring style checking)
+    "PT",   # flake8-pytest-style (pytest best practices)
+    "TRY",  # flake8-try-except-raise (try/except/raise best practices)
+    "ARG",  # flake8-unused-arguments (detect unused arguments)
+]
+
+# Ignore specific rules
+ignore = [
+    "D203",  # one-blank-line-before-class (conflicts with D211)
+    "D212",  # multi-line-summary-first-line (conflicts with D213)
+    "D107",  # Missing docstring in __init__
+]
+
+# Unfixable rules - don't auto-fix these
+unfixable = [
+    "B",    # Don't auto-fix bugbear rules
+    "F401",  # Don't remove unused imports automatically
+]
+
+# Rule configuration
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # Use Google-style docstrings
+
+# Import sorting configuration
+[tool.ruff.lint.isort]
+known-first-party = ["anime-librarian"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+# Per-file rule ignores
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "D",     # No need for docstring rules in tests
+    "ARG001", # Unused function arguments are common in tests
+    "PT004",  # Use underscore for fixture names that are only used indirectly
+]
