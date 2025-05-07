@@ -1,0 +1,14 @@
+# These owners will be the default owners for everything in the repo.
+# Unless a later match takes precedence, they will be requested for
+# review when someone opens a pull request.
+* @laipz8200
+
+# GitHub Actions workflows
+.github/workflows/ @laipz8200
+
+# Core application code
+*.py @laipz8200
+
+# Configuration files
+pyproject.toml @laipz8200
+.pre-commit-config.yaml @laipz8200
