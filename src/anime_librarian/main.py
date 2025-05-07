@@ -10,9 +10,9 @@ import argparse
 import sys
 from pathlib import Path
 
-import config
-from file_renamer import FileRenamer
-from logger import logger, set_verbose_mode
+from . import config
+from .file_renamer import FileRenamer
+from .logger import logger, set_verbose_mode
 
 
 def _parse_arguments():

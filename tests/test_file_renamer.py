@@ -1,16 +1,11 @@
 """Tests for the FileRenamer class."""
 
-import os
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Add the parent directory to sys.path to import modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from file_renamer import FileRenamer
-from http_client import HttpClient
+from anime_librarian.file_renamer import FileRenamer
+from anime_librarian.http_client import HttpClient
 
 
 @pytest.fixture
@@ -187,7 +182,7 @@ def test_create_directories(file_renamer, mock_target_path):
     assert (mock_target_path / "NewDir2" / "SubDir").exists()
 
 
-@patch("file_renamer.shutil.move")
+@patch("anime_librarian.file_renamer.shutil.move")
 def test_rename_files(mock_move, file_renamer, mock_source_path, mock_target_path):
     """Test the rename_files method."""
     # Create file pairs
@@ -214,7 +209,7 @@ def test_rename_files(mock_move, file_renamer, mock_source_path, mock_target_pat
     assert not errors
 
 
-@patch("file_renamer.shutil.move")
+@patch("anime_librarian.file_renamer.shutil.move")
 def test_rename_files_with_error(
     mock_move, file_renamer, mock_source_path, mock_target_path
 ):

@@ -28,7 +28,7 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install dependencies
-pip install -e .
+pip install .
 ```
 
 ## Dify Workflow Setup
@@ -81,22 +81,22 @@ This application uses environment variables for configuration. You can set these
 
 ```bash
 # Basic usage
-python -m main
+python -m anime_librarian.main
 
 # With custom source and target directories
-python -m main --source /path/to/downloads --target /path/to/videos
+python -m anime_librarian.main --source /path/to/downloads --target /path/to/videos
 
 # Dry run (show what would be done without actually renaming files)
-python -m main --dry-run
+python -m anime_librarian.main --dry-run
 
 # Automatically answer yes to all prompts
-python -m main --yes
+python -m anime_librarian.main --yes
 
 # Enable verbose logging
-python -m main --verbose
+python -m anime_librarian.main --verbose
 
 # View command-line help and all available options
-python -m main --help
+python -m anime_librarian.main --help
 ```
 
 ### Configuration Methods
@@ -108,7 +108,7 @@ AnimeLibrarian supports multiple configuration methods:
 2. **Command-line arguments** that override environment variables:
 
    ```bash
-   python -m main --source /path/to/downloads --target /path/to/videos
+   python -m anime_librarian.main --source /path/to/downloads --target /path/to/videos
    ```
 
 This flexibility allows you to use the tool in various workflows and automation scenarios.
@@ -191,7 +191,7 @@ If you encounter issues:
 5. **Missing Target Directories**: If the AI suggests moving files to directories that don't exist, create those directories first or use the `--dry-run` option to preview changes
 6. **Logging**: Use the `--verbose` flag to enable detailed logging for troubleshooting
 
-You can also run `python -m main --help` to see all available command-line options that might help address specific issues.
+You can also run `python -m anime_librarian.main --help` to see all available command-line options that might help address specific issues.
 
 ## Contributing
 

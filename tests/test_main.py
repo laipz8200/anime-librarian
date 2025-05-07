@@ -1,16 +1,11 @@
 """Tests for the main module."""
 
-import os
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Add the parent directory to sys.path to import modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from file_renamer import FileRenamer
-from http_client import HttpClient
+from anime_librarian.file_renamer import FileRenamer
+from anime_librarian.http_client import HttpClient
 
 
 @pytest.fixture
@@ -59,7 +54,7 @@ def mock_file_renamer(mock_source_path, mock_target_path, mock_http_client):
     return renamer
 
 
-@patch("main.FileRenamer")
+@patch("anime_librarian.main.FileRenamer")
 def test_main_basic_functionality(
     mock_file_renamer_class, mock_source_path, mock_target_path, mock_file_renamer
 ):
@@ -85,7 +80,7 @@ def test_main_basic_functionality(
         patch("sys.argv", ["main.py", "--yes"]),
     ):
         # Import and run the main function
-        from main import main
+        from anime_librarian.main import main
 
         main()
 
@@ -111,7 +106,7 @@ def test_main_basic_functionality(
     assert args[0] == mock_file_renamer.get_file_pairs.return_value
 
 
-@patch("main.FileRenamer")
+@patch("anime_librarian.main.FileRenamer")
 def test_main_no_files_to_rename(mock_file_renamer_class, mock_file_renamer):
     """Test main function when there are no files to rename."""
     # Configure the mock FileRenamer class to return our mock instance
@@ -123,7 +118,7 @@ def test_main_no_files_to_rename(mock_file_renamer_class, mock_file_renamer):
     # Mock sys.argv to simulate command-line arguments
     with patch("sys.argv", ["main.py"]):
         # Import and run the main function
-        from main import main
+        from anime_librarian.main import main
 
         main()
 
@@ -139,7 +134,7 @@ def test_main_no_files_to_rename(mock_file_renamer_class, mock_file_renamer):
     mock_file_renamer.rename_files.assert_not_called()
 
 
-@patch("main.FileRenamer")
+@patch("anime_librarian.main.FileRenamer")
 def test_main_dry_run(
     mock_file_renamer_class, mock_source_path, mock_target_path, mock_file_renamer
 ):
@@ -158,7 +153,7 @@ def test_main_dry_run(
     # Mock sys.argv to simulate command-line arguments
     with patch("sys.argv", ["main.py", "--dry-run"]):
         # Import and run the main function
-        from main import main
+        from anime_librarian.main import main
 
         main()
 
@@ -174,7 +169,7 @@ def test_main_dry_run(
     mock_file_renamer.rename_files.assert_not_called()
 
 
-@patch("main.FileRenamer")
+@patch("anime_librarian.main.FileRenamer")
 def test_main_user_cancellation(
     mock_file_renamer_class, mock_source_path, mock_target_path, mock_file_renamer
 ):
@@ -194,7 +189,7 @@ def test_main_user_cancellation(
     # Mock sys.argv to simulate command-line arguments
     with patch("builtins.input", return_value="n"), patch("sys.argv", ["main.py"]):
         # Import and run the main function
-        from main import main
+        from anime_librarian.main import main
 
         main()
 
