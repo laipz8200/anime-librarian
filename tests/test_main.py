@@ -1,5 +1,6 @@
 """Tests for the main module."""
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -54,9 +55,27 @@ def mock_file_renamer(mock_source_path, mock_target_path, mock_http_client):
     return renamer
 
 
+@pytest.fixture
+def mock_config():
+    """Mock the config module to avoid needing a .env file."""
+    with (
+        patch(
+            "anime_librarian.config.get_source_path", return_value=Path("/tmp/source")
+        ),
+        patch(
+            "anime_librarian.config.get_target_path", return_value=Path("/tmp/target")
+        ),
+    ):
+        yield
+
+
 @patch("anime_librarian.main.FileRenamer")
 def test_main_basic_functionality(
-    mock_file_renamer_class, mock_source_path, mock_target_path, mock_file_renamer
+    mock_file_renamer_class,
+    mock_source_path,
+    mock_target_path,
+    mock_file_renamer,
+    mock_config,
 ):
     """Test basic functionality of the main function."""
     # Configure the mock FileRenamer class to return our mock instance
@@ -107,7 +126,9 @@ def test_main_basic_functionality(
 
 
 @patch("anime_librarian.main.FileRenamer")
-def test_main_no_files_to_rename(mock_file_renamer_class, mock_file_renamer):
+def test_main_no_files_to_rename(
+    mock_file_renamer_class, mock_file_renamer, mock_config
+):
     """Test main function when there are no files to rename."""
     # Configure the mock FileRenamer class to return our mock instance
     mock_file_renamer_class.return_value = mock_file_renamer
@@ -136,7 +157,11 @@ def test_main_no_files_to_rename(mock_file_renamer_class, mock_file_renamer):
 
 @patch("anime_librarian.main.FileRenamer")
 def test_main_dry_run(
-    mock_file_renamer_class, mock_source_path, mock_target_path, mock_file_renamer
+    mock_file_renamer_class,
+    mock_source_path,
+    mock_target_path,
+    mock_file_renamer,
+    mock_config,
 ):
     """Test main function with --dry-run flag."""
     # Configure the mock FileRenamer class to return our mock instance
@@ -171,7 +196,11 @@ def test_main_dry_run(
 
 @patch("anime_librarian.main.FileRenamer")
 def test_main_user_cancellation(
-    mock_file_renamer_class, mock_source_path, mock_target_path, mock_file_renamer
+    mock_file_renamer_class,
+    mock_source_path,
+    mock_target_path,
+    mock_file_renamer,
+    mock_config,
 ):
     """Test main function when user cancels the operation."""
     # Configure the mock FileRenamer class to return our mock instance
