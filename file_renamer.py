@@ -12,7 +12,7 @@ from pathlib import Path
 import json_repair
 
 import config
-from errors import _raise_parse_error
+from errors import raise_parse_error
 from http_client import HttpClient, HttpxClient
 from logger import logger
 from models import AIResponse
@@ -114,7 +114,7 @@ class FileRenamer:
             # Log the error and re-raise with a more specific error type
             logger.exception("Error parsing AI response")
             # This will always raise, so mypy knows we don't need an else clause
-            _raise_parse_error(exc)
+            raise_parse_error(exc)
         # Return the name pairs in the try block to satisfy ruff TRY300
         # and use else to make it clear this is the success path
         else:

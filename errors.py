@@ -17,7 +17,7 @@ class AIParseError(ValueError):
         super().__init__(message)
 
 
-def _raise_parse_error(error) -> NoReturn:
+def raise_parse_error(error) -> NoReturn:
     """Raise an AIParseError with the given error as the cause."""
     # Using a separate function to abstract the raise statement
     # This satisfies TRY301 (raise-within-try)
