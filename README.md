@@ -99,20 +99,6 @@ python -m anime_librarian.main --verbose
 python -m anime_librarian.main --help
 ```
 
-### Configuration Methods
-
-AnimeLibrarian supports multiple configuration methods:
-
-1. **Environment variables** in a `.env` file (as shown above)
-
-2. **Command-line arguments** that override environment variables:
-
-   ```bash
-   python -m anime_librarian.main --source /path/to/downloads --target /path/to/videos
-   ```
-
-This flexibility allows you to use the tool in various workflows and automation scenarios.
-
 ## How It Works
 
 AnimeLibrarian uses AI to intelligently rename and organize your video files:
@@ -127,8 +113,6 @@ AnimeLibrarian uses AI to intelligently rename and organize your video files:
 6. Upon confirmation, it moves and renames the files according to the AI suggestions
 
 This process helps maintain a well-organized media library that's compatible with media players like Infuse, Plex, and others.
-
-**Note**: The AI makes better decisions when you have already created appropriate category folders in your target directory. For example, having folders like "Anime", "Movies", and "TV Shows" helps the AI correctly categorize your files.
 
 ## Development
 
