@@ -81,22 +81,22 @@ This application uses environment variables for configuration. You can set these
 
 ```bash
 # Basic usage
-python -m anime_librarian.main
+anime-librarian
 
 # With custom source and target directories
-python -m anime_librarian.main --source /path/to/downloads --target /path/to/videos
+anime_librarian --source /path/to/downloads --target /path/to/videos
 
 # Dry run (show what would be done without actually renaming files)
-python -m anime_librarian.main --dry-run
+anime_librarian --dry-run
 
 # Automatically answer yes to all prompts
-python -m anime_librarian.main --yes
+anime_librarian --yes
 
 # Enable verbose logging
-python -m anime_librarian.main --verbose
+anime_librarian --verbose
 
 # View command-line help and all available options
-python -m anime_librarian.main --help
+anime_librarian --help
 ```
 
 ## How It Works
@@ -175,7 +175,7 @@ If you encounter issues:
 5. **Missing Target Directories**: If the AI suggests moving files to directories that don't exist, create those directories first or use the `--dry-run` option to preview changes
 6. **Logging**: Use the `--verbose` flag to enable detailed logging for troubleshooting
 
-You can also run `python -m anime_librarian.main --help` to see all available command-line options that might help address specific issues.
+You can also run `anime-librarian --help` to see all available command-line options that might help address specific issues.
 
 ## Contributing
 
