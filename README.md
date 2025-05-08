@@ -84,19 +84,19 @@ This application uses environment variables for configuration. You can set these
 anime-librarian
 
 # With custom source and target directories
-anime_librarian --source /path/to/downloads --target /path/to/videos
+anime-librarian --source /path/to/downloads --target /path/to/videos
 
 # Dry run (show what would be done without actually renaming files)
-anime_librarian --dry-run
+anime-librarian --dry-run
 
 # Automatically answer yes to all prompts
-anime_librarian --yes
+anime-librarian --yes
 
 # Enable verbose logging
-anime_librarian --verbose
+anime-librarian --verbose
 
 # View command-line help and all available options
-anime_librarian --help
+anime-librarian --help
 ```
 
 ## How It Works
