@@ -59,10 +59,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
 
-    - name: Test with pytest
-      run: |
-        pytest
-
-    - name: Test with coverage
+    - name: Test with pytest and coverage
       run: |
         pytest --cov=.
