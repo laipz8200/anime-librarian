@@ -21,7 +21,7 @@ logger.add(
         "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
         "<level>{message}</level>"
     ),
-    level="INFO",
+    level="WARNING",
 )
 
 # Add a handler for file logging

@@ -13,9 +13,10 @@ import json_repair
 
 from . import config
 from .errors import raise_parse_error
-from .http_client import HttpClient, HttpxClient
+from .http_client import HttpxClient
 from .logger import logger
 from .models import AIResponse
+from .types import HttpClient
 
 
 class FileRenamer:
@@ -209,7 +210,7 @@ class FileRenamer:
         for directory in directories:
             try:
                 directory.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Created directory: {directory}")
+                logger.debug(f"Created directory: {directory}")
             except Exception:
                 logger.exception(f"Error creating directory {directory}")
                 return False
@@ -230,7 +231,7 @@ class FileRenamer:
         errors = []
         for source_file, target_file in file_pairs:
             try:
-                logger.info(f"Moving {source_file} to {target_file}")
+                logger.debug(f"Moving {source_file} to {target_file}")
                 shutil.move(str(source_file), str(target_file))
             except Exception as e:
                 error_msg = str(e)

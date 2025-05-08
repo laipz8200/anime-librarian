@@ -1,33 +1,8 @@
-"""HTTP client interfaces and implementations for the AnimeLibrarian application."""
+"""HTTP client implementation for the AnimeLibrarian application."""
 
-from typing import Any, Protocol, runtime_checkable
+from typing import Any
 
 import httpx
-
-
-@runtime_checkable
-class HttpClient(Protocol):
-    """Protocol for HTTP clients used in the application."""
-
-    def post(
-        self, url: str, *, headers: dict[str, str], json: dict[str, Any], timeout: float
-    ) -> dict[str, Any]:
-        """
-        Send a POST request to the specified URL.
-
-        Args:
-            url: The URL to send the request to
-            headers: HTTP headers to include in the request
-            json: JSON payload to send in the request body
-            timeout: Request timeout in seconds
-
-        Returns:
-            The parsed JSON response as a dictionary
-
-        Raises:
-            Exception: If the request fails
-        """
-        ...
 
 
 class HttpxClient:

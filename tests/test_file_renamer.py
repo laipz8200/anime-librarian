@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from anime_librarian.file_renamer import FileRenamer
-from anime_librarian.http_client import HttpClient
+from anime_librarian.types import HttpClient
 
 
 @pytest.fixture

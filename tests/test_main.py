@@ -1,12 +1,15 @@
 """Tests for the main module."""
 
+import io
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from anime_librarian.file_renamer import FileRenamer
-from anime_librarian.http_client import HttpClient
+from anime_librarian.output_writer import ConsoleOutputWriter
+from anime_librarian.types import HttpClient
 
 
 @pytest.fixture
@@ -232,3 +235,146 @@ def test_main_user_cancellation(
     mock_file_renamer.check_for_conflicts.assert_not_called()
     mock_file_renamer.find_missing_directories.assert_not_called()
     mock_file_renamer.rename_files.assert_not_called()
+
+
+def test_output_class_verbose_mode():
+    """Test the ConsoleOutputWriter class with verbose mode enabled and disabled."""
+    # Redirect stdout to capture print statements
+    stdout_backup = sys.stdout
+    sys.stdout = io.StringIO()
+
+    try:
+        # Test with verbose mode off
+        output_non_verbose = ConsoleOutputWriter(verbose=False)
+
+        # Message (info/success) should not be printed in non-verbose mode
+        output_non_verbose.message("This is a message")
+
+        # Legacy methods should behave the same
+        output_non_verbose.info("This is an info message")
+        output_non_verbose.success("This is a success message")
+
+        # Notice (error/warning) messages should always be printed
+        output_non_verbose.notice("This is a notice")
+
+        # Legacy methods should behave the same
+        output_non_verbose.error("This is an error message")
+        output_non_verbose.warning("This is a warning message")
+
+        # List items should not be printed in non-verbose mode unless always_show=True
+        output_non_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
+        output_non_verbose.list_items(
+            "Always show items:", ["item3", "item4"], always_show=True
+        )
+
+        # Get the output
+        non_verbose_output = sys.stdout.getvalue()
+        sys.stdout = io.StringIO()  # Reset for next test
+
+        # Test with verbose mode on
+        output_verbose = ConsoleOutputWriter(verbose=True)
+
+        # All messages should be printed in verbose mode
+        output_verbose.message("This is a message")
+        output_verbose.notice("This is a notice")
+
+        # Legacy methods should behave the same
+        output_verbose.info("This is an info message")
+        output_verbose.success("This is a success message")
+        output_verbose.error("This is an error message")
+        output_verbose.warning("This is a warning message")
+
+        # List items should be printed in verbose mode regardless of always_show
+        output_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
+        output_verbose.list_items(
+            "Always show items:", ["item3", "item4"], always_show=True
+        )
+
+        # Get the output
+        verbose_output = sys.stdout.getvalue()
+
+        # Verify non-verbose output
+        assert "This is a message" not in non_verbose_output
+        assert "This is an info message" not in non_verbose_output
+        assert "This is a success message" not in non_verbose_output
+        assert "This is a notice" in non_verbose_output
+        assert "This is an error message" in non_verbose_output
+        assert "This is a warning message" in non_verbose_output
+        assert "Items:" not in non_verbose_output
+        assert "item1" not in non_verbose_output
+        assert "item2" not in non_verbose_output
+        assert "Always show items:" in non_verbose_output
+        assert "item3" in non_verbose_output
+        assert "item4" in non_verbose_output
+
+        # Verify verbose output
+        assert "This is a message" in verbose_output
+        assert "This is an info message" in verbose_output
+        assert "This is a success message" in verbose_output
+        assert "This is a notice" in verbose_output
+        assert "This is an error message" in verbose_output
+        assert "This is a warning message" in verbose_output
+        assert "Items:" in verbose_output
+        assert "item1" in verbose_output
+        assert "item2" in verbose_output
+        assert "Always show items:" in verbose_output
+        assert "item3" in verbose_output
+        assert "item4" in verbose_output
+
+    finally:
+        # Restore stdout
+        sys.stdout = stdout_backup
+
+
+def test_main_verbose_option(
+    mock_source_path,
+    mock_target_path,
+):
+    """Test the application with verbose flag using the test_application module."""
+    # This test is now covered by test_application_verbose_mode in test_application.py
+    # We'll keep a simplified version here for backward compatibility
+    from anime_librarian.core import AnimeLibrarian
+    from anime_librarian.output_writer import ConsoleOutputWriter
+    from anime_librarian.types import CommandLineArgs
+
+    # Create mock components
+    mock_arg_parser = MagicMock()
+    mock_arg_parser.parse_args.return_value = CommandLineArgs(
+        source=None,
+        target=None,
+        dry_run=False,
+        yes=True,
+        verbose=True,
+    )
+
+    mock_input_reader = MagicMock()
+    mock_config_provider = MagicMock()
+    mock_config_provider.get_source_path.return_value = mock_source_path
+    mock_config_provider.get_target_path.return_value = mock_target_path
+
+    mock_file_renamer = MagicMock()
+    mock_file_renamer.get_file_pairs.return_value = []
+
+    mock_file_renamer_factory = MagicMock(return_value=mock_file_renamer)
+    mock_output_writer = MagicMock(spec=ConsoleOutputWriter)
+    mock_output_writer_factory = MagicMock(return_value=mock_output_writer)
+    mock_set_verbose_mode = MagicMock()
+
+    # Create the application
+    app = AnimeLibrarian(
+        arg_parser=mock_arg_parser,
+        input_reader=mock_input_reader,
+        config_provider=mock_config_provider,
+        file_renamer_factory=mock_file_renamer_factory,
+        output_writer_factory=mock_output_writer_factory,
+        set_verbose_mode_fn=mock_set_verbose_mode,
+    )
+
+    # Run the application
+    app.run()
+
+    # Verify set_verbose_mode was called with True
+    mock_set_verbose_mode.assert_called_once_with(True)
+
+    # Verify output factory was called with verbose=True
+    mock_output_writer_factory.assert_called_once_with(True)
