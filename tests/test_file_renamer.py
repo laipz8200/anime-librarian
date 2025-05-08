@@ -86,6 +86,33 @@ def test_get_name_pairs_from_ai(file_renamer, mock_http_client):
     assert result[0] == ("test.mp4", "renamed.mp4")
 
 
+def test_user_name_in_api_request(mock_source_path, mock_target_path, mock_http_client):
+    """Test that the USER_NAME from config is used in the API request."""
+    with patch("anime_librarian.config.USER_NAME", "Test User"):
+        # Create a FileRenamer instance with the patched config
+        file_renamer = FileRenamer(
+            source_path=mock_source_path,
+            target_path=mock_target_path,
+            http_client=mock_http_client,
+        )
+
+        # Configure the mock client to return a valid response
+        mock_http_client.post.return_value = {
+            "data": {"outputs": {"text": '{"result": []}'}}
+        }
+
+        # Call the method
+        file_renamer._get_name_pairs_from_ai(
+            source_files_list=["test.mp4"],
+            target_files_list=["videos"],
+        )
+
+        # Verify the client was called with the correct user value
+        mock_http_client.post.assert_called_once()
+        _, kwargs = mock_http_client.post.call_args
+        assert kwargs["json"]["user"] == "Test User"
+
+
 def test_get_file_pairs_basic(file_renamer, mock_source_path, mock_target_path):
     """Test basic functionality of get_file_pairs."""
     # Mock the _get_name_pairs_from_ai method to return predefined pairs

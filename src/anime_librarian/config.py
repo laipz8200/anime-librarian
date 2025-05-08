@@ -37,6 +37,9 @@ DEFAULT_TARGET_PATH = os.environ.get(
 # API request timeout in seconds
 API_TIMEOUT = int(os.environ.get("ANIMELIBRARIAN_API_TIMEOUT", "300"))
 
+# User name for API requests
+USER_NAME = os.environ.get("ANIMELIBRARIAN_USER_NAME", "Anime Librarian")
+
 
 def get_source_path() -> Path:
     """

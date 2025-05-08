@@ -85,7 +85,7 @@ class FileRenamer:
                 "files": "\n".join(str(f) for f in source_files_list),
                 "directories": "\n".join(str(f) for f in target_files_list),
             },
-            "user": "-LAN-",
+            "user": config.USER_NAME,
             "response_mode": "blocking",
         }
 

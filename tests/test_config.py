@@ -43,3 +43,31 @@ def test_get_target_path_error():
         with pytest.raises(ValueError, match="Target path not set") as excinfo:
             get_target_path()
         assert "ANIMELIBRARIAN_TARGET_PATH" in str(excinfo.value)
+
+
+def test_user_name_default():
+    """Test USER_NAME has the correct default value."""
+    with patch.dict(os.environ, {}, clear=True):
+        # Reload the config module to reset USER_NAME
+        import importlib
+
+        import anime_librarian.config
+
+        importlib.reload(anime_librarian.config)
+
+        # Check the default value
+        assert anime_librarian.config.USER_NAME == "Anime Librarian"
+
+
+def test_user_name_from_env():
+    """Test USER_NAME can be set from environment variable."""
+    with patch.dict(os.environ, {"ANIMELIBRARIAN_USER_NAME": "Custom User"}):
+        # Reload the config module to reset USER_NAME
+        import importlib
+
+        import anime_librarian.config
+
+        importlib.reload(anime_librarian.config)
+
+        # Check the value from environment
+        assert anime_librarian.config.USER_NAME == "Custom User"
