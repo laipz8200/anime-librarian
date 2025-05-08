@@ -76,6 +76,9 @@ anime-librarian --yes
 # Enable verbose logging
 anime-librarian --verbose
 
+# Show version information
+anime-librarian --version
+
 # View command-line help and all available options
 anime-librarian --help
 ```

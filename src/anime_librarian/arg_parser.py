@@ -49,6 +49,11 @@ class DefaultArgumentParser(ArgumentParser):
             action="store_true",
             help="Enable verbose logging",
         )
+        parser.add_argument(
+            "--version",
+            action="store_true",
+            help="Show version information and exit",
+        )
         args = parser.parse_args()
 
         # Convert argparse.Namespace to CommandLineArgs
@@ -58,4 +63,5 @@ class DefaultArgumentParser(ArgumentParser):
             dry_run=args.dry_run,
             yes=args.yes,
             verbose=args.verbose,
+            version=args.version,
         )

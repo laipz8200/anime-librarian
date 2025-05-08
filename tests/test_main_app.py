@@ -15,7 +15,13 @@ class MockArgumentParser:
     """Mock implementation of ArgumentParser for testing."""
 
     def __init__(
-        self, source=None, target=None, dry_run=False, yes=False, verbose=False
+        self,
+        source=None,
+        target=None,
+        dry_run=False,
+        yes=False,
+        verbose=False,
+        version=False,
     ):
         """Initialize with predefined arguments."""
         self.source = source
@@ -23,6 +29,7 @@ class MockArgumentParser:
         self.dry_run = dry_run
         self.yes = yes
         self.verbose = verbose
+        self.version = version
 
     def parse_args(self) -> CommandLineArgs:
         """Return CommandLineArgs with the predefined arguments."""
@@ -32,6 +39,7 @@ class MockArgumentParser:
             dry_run=self.dry_run,
             yes=self.yes,
             verbose=self.verbose,
+            version=self.version,
         )
 
 
@@ -360,3 +368,40 @@ def test_main_verbose_option(monkeypatch, mock_app_dependencies, mock_file_renam
 
     # Verify output factory was called with verbose=True
     mock_app_dependencies["output_writer_factory"].assert_called_with(True)
+
+
+def test_main_version_option(monkeypatch, mock_app_dependencies, mock_file_renamer):
+    """Test the application with version flag."""
+    # Configure the mock arg parser to simulate --version flag
+    mock_app_dependencies["arg_parser"] = MockArgumentParser(version=True)
+
+    # Create a custom main function that uses our mocks
+    def custom_main():
+        app = AnimeLibrarian(
+            arg_parser=mock_app_dependencies["arg_parser"],
+            input_reader=mock_app_dependencies["input_reader"],
+            config_provider=mock_app_dependencies["config_provider"],
+            file_renamer_factory=mock_app_dependencies["file_renamer_factory"],
+            output_writer_factory=mock_app_dependencies["output_writer_factory"],
+            set_verbose_mode_fn=mock_app_dependencies["set_verbose_mode_fn"],
+        )
+        return app.run()
+
+    # Patch the main function
+    monkeypatch.setattr("anime_librarian.main.main", custom_main)
+
+    # Run the main function
+    result = custom_main()
+
+    # Verify the result
+    assert result == 0
+
+    # Verify version message was shown
+    from anime_librarian import __version__
+
+    mock_app_dependencies[
+        "output_writer_factory"
+    ].return_value.notice.assert_called_with(f"{__version__}")
+
+    # Verify no file operations were performed
+    mock_file_renamer.get_file_pairs.assert_not_called()

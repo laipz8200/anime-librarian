@@ -25,6 +25,9 @@ class CommandLineArgs:
     verbose: bool
     """Whether to enable verbose logging."""
 
+    version: bool
+    """Whether to show the version information and exit."""
+
 
 @runtime_checkable
 class HttpClient(Protocol):

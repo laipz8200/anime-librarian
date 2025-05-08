@@ -21,6 +21,7 @@ def test_parse_args_default():
         assert args.dry_run is False
         assert args.yes is False
         assert args.verbose is False
+        assert args.version is False
 
 
 def test_parse_args_with_options():
@@ -49,6 +50,7 @@ def test_parse_args_with_options():
         assert args.dry_run is True
         assert args.yes is True
         assert args.verbose is True
+        assert args.version is False
 
 
 def test_parse_args_with_short_options():
@@ -72,3 +74,27 @@ def test_parse_args_with_short_options():
         assert args.dry_run is False
         assert args.yes is True
         assert args.verbose is True
+        assert args.version is False
+
+
+def test_parse_args_with_version_flag():
+    """Test parsing arguments with the version flag."""
+    # Mock sys.argv to simulate command-line arguments
+    with patch(
+        "sys.argv",
+        [
+            "main.py",
+            "--version",
+        ],
+    ):
+        parser = DefaultArgumentParser()
+        args = parser.parse_args()
+
+        # Verify the parsed values
+        assert isinstance(args, CommandLineArgs)
+        assert args.source is None
+        assert args.target is None
+        assert args.dry_run is False
+        assert args.yes is False
+        assert args.verbose is False
+        assert args.version is True

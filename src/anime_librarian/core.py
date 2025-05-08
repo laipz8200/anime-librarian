@@ -3,6 +3,7 @@
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
+from . import __version__
 from .file_renamer import FileRenamer
 from .logger import logger, set_verbose_mode
 from .types import (
@@ -266,6 +267,13 @@ class AnimeLibrarian:
         """
         # Parse command-line arguments
         args = self.arg_parser.parse_args()
+
+        # Check if version flag is set
+        if args.version:
+            # Create output writer for version display
+            writer = self.output_writer_factory(args.verbose)
+            writer.notice(f"{__version__}")
+            return 0
 
         # Initialize application components
         writer, _, _, renamer = self._initialize_application(args)

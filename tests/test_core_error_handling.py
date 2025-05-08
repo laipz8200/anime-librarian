@@ -23,6 +23,7 @@ def mock_dependencies():
         dry_run=False,
         yes=False,
         verbose=False,
+        version=False,
     )
 
     mock_input_reader = MagicMock()
@@ -88,6 +89,7 @@ def test_conflicts_with_user_cancellation(mock_dependencies):
         dry_run=False,
         yes=False,
         verbose=False,
+        version=False,
     )
 
     # Configure the mock renamer to return file pairs and conflicts
@@ -142,6 +144,7 @@ def test_missing_directories_with_user_cancellation(mock_dependencies):
         dry_run=False,
         yes=False,
         verbose=False,
+        version=False,
     )
 
     # Configure the mock renamer to return file pairs and missing directories
@@ -240,6 +243,7 @@ def test_rename_files_with_errors(mock_dependencies):
         dry_run=False,
         yes=True,
         verbose=False,
+        version=False,
     )
 
     # Configure the mock renamer to return file pairs

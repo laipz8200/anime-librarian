@@ -15,7 +15,13 @@ class MockArgumentParser:
     """Mock implementation of ArgumentParser for testing."""
 
     def __init__(
-        self, source=None, target=None, dry_run=False, yes=False, verbose=False
+        self,
+        source=None,
+        target=None,
+        dry_run=False,
+        yes=False,
+        verbose=False,
+        version=False,
     ):
         """Initialize with predefined arguments."""
         self.source = source
@@ -23,6 +29,7 @@ class MockArgumentParser:
         self.dry_run = dry_run
         self.yes = yes
         self.verbose = verbose
+        self.version = version
 
     def parse_args(self) -> CommandLineArgs:
         """Return CommandLineArgs with the predefined arguments."""
@@ -32,6 +39,7 @@ class MockArgumentParser:
             dry_run=self.dry_run,
             yes=self.yes,
             verbose=self.verbose,
+            version=self.version,
         )
 
 
@@ -249,3 +257,39 @@ def test_anime_librarian_verbose_mode(
 
     # Verify output factory was called with verbose=True
     mock_output_factory.assert_called_once_with(True)
+
+
+def test_anime_librarian_version_flag(
+    mock_file_renamer_factory, mock_output_writer_factory, mock_set_verbose_mode
+):
+    """Test the application with version flag."""
+    # Setup
+    mock_factory, mock_renamer = mock_file_renamer_factory
+    mock_output_factory, mock_output = mock_output_writer_factory
+
+    # Create the application with version flag
+    app = AnimeLibrarian(
+        arg_parser=MockArgumentParser(version=True),
+        input_reader=MockInputReader(),
+        config_provider=MockConfigProvider(),
+        file_renamer_factory=mock_factory,
+        output_writer_factory=mock_output_factory,
+        set_verbose_mode_fn=mock_set_verbose_mode,
+    )
+
+    # Run the application
+    result = app.run()
+
+    # Verify the result
+    assert result == 0
+
+    # Verify version message was shown
+    from anime_librarian import __version__
+
+    mock_output.notice.assert_called_once_with(f"{__version__}")
+
+    # Verify no other methods were called
+    mock_renamer.get_file_pairs.assert_not_called()
+    mock_renamer.check_for_conflicts.assert_not_called()
+    mock_renamer.find_missing_directories.assert_not_called()
+    mock_renamer.rename_files.assert_not_called()
