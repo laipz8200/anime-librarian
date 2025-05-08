@@ -1,11 +1,18 @@
 """Core functionality for the AnimeLibrarian application."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from .file_renamer import FileRenamer
 from .logger import logger, set_verbose_mode
-from .types import ArgumentParser, ConfigProvider, HttpClient, InputReader, OutputWriter
+from .types import (
+    ArgumentParser,
+    CommandLineArgs,
+    ConfigProvider,
+    HttpClient,
+    InputReader,
+    OutputWriter,
+)
 
 
 class AnimeLibrarian:
@@ -38,16 +45,18 @@ class AnimeLibrarian:
         self.output_writer_factory = output_writer_factory
         self.set_verbose_mode_fn = set_verbose_mode_fn
 
-    def run(self) -> int:
+    def _initialize_application(
+        self, args: CommandLineArgs
+    ) -> tuple[OutputWriter, Path, Path, FileRenamer]:
         """
-        Run the application.
+        Initialize the application with command line arguments.
+
+        Args:
+            args: Parsed command line arguments
 
         Returns:
-            Exit code (0 for success, non-zero for error)
+            Tuple of (writer, source_path, target_path, renamer)
         """
-        # Parse command-line arguments
-        args = self.arg_parser.parse_args()
-
         # Configure logging level
         if args.verbose:
             self.set_verbose_mode_fn(True)
@@ -65,19 +74,52 @@ class AnimeLibrarian:
         # Create the FileRenamer instance
         renamer = self.file_renamer_factory(source_path, target_path, None)
 
-        # Get file pairs
+        return writer, source_path, target_path, renamer
+
+    def _get_file_pairs(
+        self, renamer: FileRenamer, writer: OutputWriter
+    ) -> tuple[Sequence[tuple[Path, Path]] | None, int | None]:
+        """
+        Get file pairs from the renamer.
+
+        Args:
+            renamer: The FileRenamer instance
+            writer: The OutputWriter instance
+
+        Returns:
+            Tuple of (file_pairs, exit_code) where exit_code is None if successful
+            or an integer if the operation should exit
+        """
         try:
             file_pairs = renamer.get_file_pairs()
         except Exception as e:
             logger.exception("Error getting file pairs")
             writer.notice(f"Error: {e}")
-            return 1
+            return None, 1
 
-        # List move plan for user check
         if not file_pairs:
             writer.message("No files to rename. Exiting.")
-            return 0
+            return None, 0
 
+        return file_pairs, None
+
+    def _display_move_plan(
+        self,
+        file_pairs: Sequence[tuple[Path, Path]],
+        writer: OutputWriter,
+        args: CommandLineArgs,
+    ) -> int | None:
+        """
+        Display the planned file moves.
+
+        Args:
+            file_pairs: List of (source, target) file path pairs
+            writer: The OutputWriter instance
+            args: Parsed command line arguments
+
+        Returns:
+            Exit code if the operation should exit, None otherwise
+        """
         # Display planned file moves
         file_move_pairs = [(source.name, target.name) for source, target in file_pairs]
         move_descriptions = [f"{src} -> {dst}" for src, dst in file_move_pairs]
@@ -90,53 +132,121 @@ class AnimeLibrarian:
             writer.message("\nDry run completed. No files were renamed.")
             return 0
 
-        # Before doing move, wait for user confirmation
-        if not args.yes:
-            prompt = "\nContinue with the file moves? (y/n): "
-            response = self.input_reader.read_input(prompt)
-            if response != "y":
-                writer.message("Operation cancelled by user.")
-                return 0
+        return None
 
-        # Check for conflicts
+    def _confirm_operation(
+        self, prompt: str, writer: OutputWriter, args: CommandLineArgs
+    ) -> bool:
+        """
+        Ask for user confirmation if not in auto-yes mode.
+
+        Args:
+            prompt: The prompt to display to the user
+            writer: The OutputWriter instance
+            args: Parsed command line arguments
+
+        Returns:
+            True if confirmed, False otherwise
+        """
+        if args.yes:
+            return True
+
+        response = self.input_reader.read_input(prompt)
+        if response != "y":
+            writer.message("Operation cancelled by user.")
+            return False
+
+        return True
+
+    def _handle_conflicts(
+        self,
+        renamer: FileRenamer,
+        file_pairs: Sequence[tuple[Path, Path]],
+        writer: OutputWriter,
+        args: CommandLineArgs,
+    ) -> int | None:
+        """
+        Handle file conflicts.
+
+        Args:
+            renamer: The FileRenamer instance
+            file_pairs: List of (source, target) file path pairs
+            writer: The OutputWriter instance
+            args: Parsed command line arguments
+
+        Returns:
+            Exit code if the operation should exit, None otherwise
+        """
         conflicts = renamer.check_for_conflicts(file_pairs)
 
-        # If any file will be overwritten, ask user to confirm
         if conflicts and not args.yes:
             writer.notice("\nWarning: The following files will be overwritten:")
             for conflict in conflicts:
                 writer.notice(f"  {conflict}")
 
-            prompt = "\nDo you want to continue? (y/n): "
-            response = self.input_reader.read_input(prompt)
-            if response != "y":
-                writer.message("Operation cancelled by user.")
+            if not self._confirm_operation(
+                "\nDo you want to continue? (y/n): ", writer, args
+            ):
                 return 0
 
-        # Check for missing directories
+        return None
+
+    def _handle_directories(
+        self,
+        renamer: FileRenamer,
+        file_pairs: Sequence[tuple[Path, Path]],
+        writer: OutputWriter,
+        args: CommandLineArgs,
+    ) -> int | None:
+        """
+        Handle directory creation.
+
+        Args:
+            renamer: The FileRenamer instance
+            file_pairs: List of (source, target) file path pairs
+            writer: The OutputWriter instance
+            args: Parsed command line arguments
+
+        Returns:
+            Exit code if the operation should exit, None otherwise
+        """
         missing_dirs = renamer.find_missing_directories(file_pairs)
 
-        # If directories need to be created, ask for confirmation
         if missing_dirs:
             header = "\nThe following directories need to be created:"
             writer.list_items(header, missing_dirs, always_show=not args.yes)
 
-            if not args.yes:
-                prompt = "\nCreate these directories? (y/n): "
-                dir_response = self.input_reader.read_input(prompt)
-                if dir_response != "y":
-                    writer.message("Operation cancelled by user.")
-                    return 0
+            if not args.yes and not self._confirm_operation(
+                "\nCreate these directories? (y/n): ", writer, args
+            ):
+                return 0
 
             # Create the directories
             if not renamer.create_directories(missing_dirs):
                 writer.notice("Failed to create directories. Operation cancelled.")
                 return 1
 
-        # Perform the file moves
+        return None
+
+    def _rename_files_and_report(
+        self,
+        renamer: FileRenamer,
+        file_pairs: Sequence[tuple[Path, Path]],
+        writer: OutputWriter,
+    ) -> int:
+        """
+        Rename files and report results.
+
+        Args:
+            renamer: The FileRenamer instance
+            file_pairs: List of (source, target) file path pairs
+            writer: The OutputWriter instance
+
+        Returns:
+            Exit code (0 for success, non-zero for error)
+        """
         errors = renamer.rename_files(file_pairs)
 
-        # Report results
         if errors:
             writer.notice("\nThe following errors occurred during file renaming:")
             for source, target, error in errors:
@@ -146,3 +256,49 @@ class AnimeLibrarian:
         else:
             writer.message("\nFile renaming completed successfully.")
             return 0
+
+    def run(self) -> int:
+        """
+        Run the application.
+
+        Returns:
+            Exit code (0 for success, non-zero for error)
+        """
+        # Parse command-line arguments
+        args = self.arg_parser.parse_args()
+
+        # Initialize application components
+        writer, _, _, renamer = self._initialize_application(args)
+
+        # Get file pairs
+        file_pairs_result, exit_code = self._get_file_pairs(renamer, writer)
+        if exit_code is not None:
+            return exit_code
+
+        # At this point, file_pairs_result is guaranteed to be not None
+        assert file_pairs_result is not None
+        file_pairs = file_pairs_result
+
+        # Display move plan and handle dry run
+        exit_code = self._display_move_plan(file_pairs, writer, args)
+        if exit_code is not None:
+            return exit_code
+
+        # Confirm operation with user
+        if not self._confirm_operation(
+            "\nContinue with the file moves? (y/n): ", writer, args
+        ):
+            return 0
+
+        # Handle conflicts
+        exit_code = self._handle_conflicts(renamer, file_pairs, writer, args)
+        if exit_code is not None:
+            return exit_code
+
+        # Handle directory creation
+        exit_code = self._handle_directories(renamer, file_pairs, writer, args)
+        if exit_code is not None:
+            return exit_code
+
+        # Perform file renaming and report results
+        return self._rename_files_and_report(renamer, file_pairs, writer)
