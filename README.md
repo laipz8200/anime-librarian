@@ -54,26 +54,7 @@ This application uses environment variables for configuration. You can set these
    cp .env.example .env
    ```
 
-2. Edit the `.env` file and update the values:
-
-   ```env
-   # API configuration
-   ANIMELIBRARIAN_DIFY_WORKFLOW_RUN_ENDPOINT=https://api.dify.ai/v1/workflows/run
-   ANIMELIBRARIAN_DIFY_API_KEY=your-api-key-here
-
-   # Default paths - update these to your actual directories
-   ANIMELIBRARIAN_SOURCE_PATH=/path/to/your/downloads
-   ANIMELIBRARIAN_TARGET_PATH=/path/to/your/video/collection
-
-   # API request timeout in seconds
-   ANIMELIBRARIAN_API_TIMEOUT=300
-   ```
-
-   Make sure to update:
-   - `ANIMELIBRARIAN_DIFY_WORKFLOW_RUN_ENDPOINT` with your Dify workflow endpoint URL
-   - `ANIMELIBRARIAN_DIFY_API_KEY` with your Dify API key
-   - `ANIMELIBRARIAN_SOURCE_PATH` with the path to your downloads folder
-   - `ANIMELIBRARIAN_TARGET_PATH` with the path to your video collection
+2. Edit the `.env` file and update the values according to the comments in the file.
 
    **Important**: Before running the application, you should create subdirectories in your `ANIMELIBRARIAN_TARGET_PATH` with the expected names for your media categories. This helps the AI make more stable and accurate file organization decisions.
 
