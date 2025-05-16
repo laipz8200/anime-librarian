@@ -11,7 +11,7 @@ dependencies:
   value:
     marketplace_plugin_unique_identifier: langgenius/openai:0.0.7@11ec0b1909200f62b6ebf2cec1da981a9071d11c1ee0e2ef332ce89bcffa2544
 kind: app
-version: 0.2.0
+version: 0.3.0
 workflow:
   conversation_variables: []
   environment_variables: []
@@ -128,25 +128,25 @@ workflow:
         desc: ''
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0
           mode: chat
           name: gpt-4o
           provider: langgenius/openai/openai
         prompt_template:
         - id: e5ac37a9-7035-4912-a72c-816bafcb17d3
           role: system
-          text: 'Find all anime files in the first part and the matched directories
-            in the second part. Then, rename the file to the format: `<matched directory
-            name>/<matched directory name>.S< 2-digit season number>E< 2-digit episode
-            number>.<file suffix>`.
+          text: 'Find all video and subtitle files in the first part and the matched
+            directories in the second part. Then, rename the file to the format: `<matched
+            directory name>/<matched directory name>.S< 2-digit season number>E< 2-digit
+            episode number>.<file suffix>`.
 
 
-            Please note that not every file is an anime file. The anime file should
-            be in a video format.
+            For the OVA files, use the specials season "00".
 
 
             Your outputs should be JSON objects containing two keys: original_name
-            and new_name. You should only output the JSON parts.
+            and new_name. You should only output the JSON parts. Make sure to put
+            the results list in the "results" field.
 
             '
         - id: 9f0e99aa-a883-4311-b436-dd723653d243
@@ -158,7 +158,9 @@ workflow:
 
             小市民系列 第二季 - 15 [1080P][WEB-DL][AAC AVC][CHT].mp4
 
-            Summer Pockets - 05 [1080P][WEB-DL][AAC AVC][CHT].mp4
+            Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].mkv
+
+            Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].sc.ass
 
             ```
 
@@ -168,17 +170,46 @@ workflow:
 
             ```
 
-            Summer Pockets
-
             小市民シリーズ
+
+            ぼくたちは勉強ができない
+
+            Other Anime
 
             ```'
         - id: 74518762-628e-4147-bba3-93774bec7f45
           role: assistant
           text: "{\n  \"result\": [\n    {\"original_name\": \"小市民系列 第二季 - 15 [1080P][WEB-DL][AAC\
             \ AVC][CHT].mp4\", \"new_name\": \"小市民シリーズ/小市民シリーズ.S01E15.mp4\"},\n  \
-            \  {\"original_name\": \"Summer Pockets - 05 [1080P][WEB-DL][AAC AVC][CHT].mp4\"\
-            , \"new_name\": \"Summer Pockets/Summer Pockets.S01E05.mp4\"}\n  ]\n}"
+            \  {\"original_name\": \"Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].mkv\"\
+            , \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S01E01.mkv\"},\n    {\"original_name\"\
+            : \"Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].sc.ass\"\
+            , \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S01E01.sc.ass\"}\n  ]\n}"
+        - id: 63cf558c-1dec-4815-8619-92820ad2adde
+          role: user
+          text: '## First Part
+
+
+            ```
+
+            Bokutachi wa Benkyou ga Dekinai [OAD01][Ma10p_1080p][x265_flac].mkv
+
+            ```
+
+
+            ## Second Part
+
+
+            ```
+
+            ぼくたちは勉強ができない
+
+            ```'
+        - id: 5c406104-f6c4-4d2b-9bd0-adbe9025b5d7
+          role: assistant
+          text: "{\n  \"result\": [\n    {\"original_name\": \"Bokutachi wa Benkyou\
+            \ ga Dekinai [OAD01][Ma10p_1080p][x265_flac].mkv, \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S00E01.mkv\"\
+            }\n  ]\n}"
         - id: 8d9d6d58-99bd-43e1-b1cb-9b2016c5a159
           role: user
           text: '## First Part
@@ -242,6 +273,6 @@ workflow:
       type: custom
       width: 244
     viewport:
-      x: 52.00000000000006
-      y: 224.4
+      x: 0
+      y: 0
       zoom: 0.7
