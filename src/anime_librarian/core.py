@@ -4,6 +4,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from . import __version__
+from .errors import FilePairsNotFoundError
 from .file_renamer import FileRenamer
 from .logger import logger, set_verbose_mode
 from .types import (
@@ -284,7 +285,8 @@ class AnimeLibrarian:
             return exit_code
 
         # At this point, file_pairs_result is guaranteed to be not None
-        assert file_pairs_result is not None
+        if file_pairs_result is None:
+            raise FilePairsNotFoundError()
         file_pairs = file_pairs_result
 
         # Display move plan and handle dry run

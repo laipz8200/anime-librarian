@@ -17,6 +17,14 @@ class AIParseError(ValueError):
         super().__init__(message)
 
 
+class FilePairsNotFoundError(RuntimeError):
+    """Error raised when file pairs are expected but not found."""
+
+    def __init__(self):
+        message = "File pairs result is None when it was expected to be not None"
+        super().__init__(message)
+
+
 def raise_parse_error(error) -> NoReturn:
     """Raise an AIParseError with the given error as the cause."""
     # Using a separate function to abstract the raise statement
