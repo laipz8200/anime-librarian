@@ -122,8 +122,13 @@ class AnimeLibrarian:
         Returns:
             Exit code if the operation should exit, None otherwise
         """
+        # Sort file pairs by source file name
+        sorted_file_pairs = sorted(file_pairs, key=lambda pair: pair[0].name)
+
         # Display planned file moves
-        file_move_pairs = [(source.name, target.name) for source, target in file_pairs]
+        file_move_pairs = [
+            (source.name, target.name) for source, target in sorted_file_pairs
+        ]
         move_descriptions = [f"{src} -> {dst}" for src, dst in file_move_pairs]
         writer.list_items(
             "\nPlanned file moves:", move_descriptions, always_show=not args.yes
