@@ -8,6 +8,7 @@ renaming and organizing video files using AI suggestions.
 import shutil
 from collections.abc import Sequence
 from pathlib import Path
+from typing import ClassVar
 
 import json_repair
 
@@ -28,6 +29,19 @@ class FileRenamer:
     2. Mapping source files to target files
     3. Handling the file renaming and organization process
     """
+
+    # File extension constants
+    VIDEO_EXTENSIONS: ClassVar[set[str]] = {
+        ".mp4",
+        ".mkv",
+        ".avi",
+        ".mov",
+        ".wmv",
+        ".flv",
+        ".webm",
+    }
+    SUBTITLE_EXTENSIONS: ClassVar[set[str]] = {".srt", ".ass", ".ssa", ".sub", ".vtt"}
+    MEDIA_EXTENSIONS: ClassVar[set[str]] = VIDEO_EXTENSIONS.union(SUBTITLE_EXTENSIONS)
 
     def __init__(
         self,
@@ -129,8 +143,15 @@ class FileRenamer:
             A sequence of tuples containing (source_file_path, target_file_path)
         """
         # Get list of files and directories
-        source_files = list(self.source_path.glob("*"))
-        target_dirs = list(self.target_path.glob("*"))
+        # Filter for video and subtitle files only
+        source_files = [
+            f
+            for f in self.source_path.glob("*")
+            if f.is_file() and f.suffix.lower() in self.MEDIA_EXTENSIONS
+        ]
+
+        # Filter for directories only
+        target_dirs = [d for d in self.target_path.glob("*") if d.is_dir()]
 
         # Get just the file/directory names
         source_file_names = [f.name for f in source_files]
