@@ -18,3 +18,26 @@ class AIResponse(BaseModel):
     """Model for the AI response."""
 
     result: list[NamePair]
+
+
+class ApiOutputs(BaseModel):
+    """Model for the outputs field in the API response."""
+
+    text: str
+
+
+class ApiData(BaseModel):
+    """Model for the data field in the API response."""
+
+    outputs: ApiOutputs
+
+
+class ApiResponse(BaseModel):
+    """Model for the API response from the AI service."""
+
+    data: ApiData
+
+    @property
+    def response_text(self) -> str:
+        """Get the response text from the API response."""
+        return self.data.outputs.text

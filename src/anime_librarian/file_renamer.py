@@ -16,7 +16,7 @@ from . import config
 from .errors import raise_parse_error
 from .http_client import HttpxClient
 from .logger import logger
-from .models import AIResponse
+from .models import AIResponse, ApiResponse
 from .types import HttpClient
 
 
@@ -109,9 +109,17 @@ class FileRenamer:
             self.api_endpoint, headers=headers, json=payload, timeout=self.api_timeout
         )
 
-        response_text = resp["data"]["outputs"]["text"]
-        logger.debug(f"Response text: {response_text}")
+        # Log raw response for debugging
+        logger.debug(f"Raw response from AI service: {resp}")
 
+        # Validate response structure using Pydantic model
+        try:
+            api_response = ApiResponse.model_validate(resp)
+            response_text = api_response.response_text
+            logger.debug(f"Response text: {response_text}")
+        except Exception as exc:
+            logger.exception("Invalid response structure from AI service")
+            raise_parse_error(exc)
         # Parse the JSON response
         try:
             # Repair the JSON response if needed

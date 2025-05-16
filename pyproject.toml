@@ -55,7 +55,6 @@ ignore = [
 # Unfixable rules - don't auto-fix these
 unfixable = [
     "B",    # Don't auto-fix bugbear rules
-    "F401",  # Don't remove unused imports automatically
 ]
 
 # Rule configuration
