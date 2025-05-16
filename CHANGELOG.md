@@ -16,11 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-05-17
+
 ### Added
 
 - Sorts file pairs before displaying planned moves
 - Media extension filtering to file renaming
 - Custom error handling for missing file pairs
+- DSL updates to handle OVA files and JSON output
 
 ### Changed
 
