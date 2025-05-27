@@ -14,7 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed** for any bug fixes.
 - **Security** in case of vulnerabilities.
 
-## [Unreleased]
+## [0.3.0] - 2025-05-27
+
+### Changed
+
+- Upgrade Dify DSL to version 0.3.0 to support fetch information from TMDB.
 
 ## [0.2.0] - 2025-05-17
 

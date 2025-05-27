@@ -1,5 +1,8 @@
 app:
-  description: A command-line tool that uses AI to rename and organize video files.
+  description: 'A workflow for the project: https://github.com/laipz8200/anime-librarian
+
+
+    A command-line tool that uses AI to rename and organize video files.'
   icon: 🤖
   icon_background: '#FFEAD5'
   mode: workflow
@@ -9,12 +12,20 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai:0.0.7@11ec0b1909200f62b6ebf2cec1da981a9071d11c1ee0e2ef332ce89bcffa2544
+    marketplace_plugin_unique_identifier: langgenius/openai:0.0.22@fa668d0ec3b434270453ede311196acaad0531ad9e3d5561cd622e6508cd3254
 kind: app
 version: 0.3.0
 workflow:
   conversation_variables: []
-  environment_variables: []
+  environment_variables:
+  - description: ''
+    id: 3a28243c-32af-4ad2-9219-a1c5f6c4679c
+    name: TMDB_API_TOKEN
+    selector:
+    - env
+    - TMDB_API_TOKEN
+    value: ''
+    value_type: secret
   features:
     file_upload:
       allowed_file_extensions:
@@ -63,24 +74,291 @@ workflow:
     - data:
         isInIteration: false
         isInLoop: false
-        sourceType: start
-        targetType: llm
-      id: 1746645878419-source-1746645882563-target
-      source: '1746645878419'
+        sourceType: llm
+        targetType: end
+      id: 17474207593550-source-1747420923459-target
+      selected: false
+      source: '17474207593550'
       sourceHandle: source
-      target: '1746645882563'
+      target: '1747420923459'
       targetHandle: target
       type: custom
       zIndex: 0
     - data:
         isInIteration: false
         isInLoop: false
+        sourceType: iteration
+        targetType: template-transform
+      id: 1747417424520-source-1747421288829-target
+      selected: false
+      source: '1747417424520'
+      sourceHandle: source
+      target: '1747421288829'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: template-transform
+        targetType: llm
+      id: 1747421288829-source-17474207593550-target
+      selected: false
+      source: '1747421288829'
+      sourceHandle: source
+      target: '17474207593550'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: iteration
+      id: 1747415683590-source-1747417424520-target
+      selected: false
+      source: '1747415683590'
+      sourceHandle: source
+      target: '1747417424520'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: http-request
+        targetType: code
+      id: 1747677772635-source-1747677918638-target
+      selected: false
+      source: '1747677772635'
+      sourceHandle: source
+      target: '1747677918638'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: code
+        targetType: if-else
+      id: 1747677918638-source-1747678146445-target
+      selected: false
+      source: '1747677918638'
+      sourceHandle: source
+      target: '1747678146445'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: if-else
+        targetType: template-transform
+      id: 1747678146445-true-1747678171263-target
+      selected: false
+      source: '1747678146445'
+      sourceHandle: 'true'
+      target: '1747678171263'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: llm
+        targetType: http-request
+      id: 1747678507236-source-1747678347028-target
+      selected: false
+      source: '1747678507236'
+      sourceHandle: source
+      target: '1747678347028'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: if-else
+        targetType: template-transform
+      id: 1747678146445-false-1747678651619-target
+      selected: false
+      source: '1747678146445'
+      sourceHandle: 'false'
+      target: '1747678651619'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: template-transform
+        targetType: llm
+      id: 1747678651619-source-1747678507236-target
+      selected: false
+      source: '1747678651619'
+      sourceHandle: source
+      target: '1747678507236'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: http-request
+        targetType: code
+      id: 1747678347028-source-1747678859297-target
+      selected: false
+      source: '1747678347028'
+      sourceHandle: source
+      target: '1747678859297'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: code
+        targetType: template-transform
+      id: 1747678859297-source-1747678994707-target
+      selected: false
+      source: '1747678859297'
+      sourceHandle: source
+      target: '1747678994707'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: template-transform
+        targetType: llm
+      id: 1747678994707-source-1747679092910-target
+      selected: false
+      source: '1747678994707'
+      sourceHandle: source
+      target: '1747679092910'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: llm
+        targetType: template-transform
+      id: 1747679092910-source-1747679233230-target
+      selected: false
+      source: '1747679092910'
+      sourceHandle: source
+      target: '1747679233230'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: template-transform
+        targetType: variable-aggregator
+      id: 1747678171263-source-1747679327091-target
+      selected: false
+      source: '1747678171263'
+      sourceHandle: source
+      target: '1747679327091'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: template-transform
+        targetType: variable-aggregator
+      id: 1747679233230-source-1747679327091-target
+      selected: false
+      source: '1747679233230'
+      sourceHandle: source
+      target: '1747679327091'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: iteration-start
+        targetType: llm
+      id: 1747417424520start-source-1747679778024-target
+      selected: false
+      source: 1747417424520start
+      sourceHandle: source
+      target: '1747679778024'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: llm
+        targetType: http-request
+      id: 1747679778024-source-1747677772635-target
+      selected: false
+      source: '1747679778024'
+      sourceHandle: source
+      target: '1747677772635'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: if-else
+      id: 1746645878419-source-1747762835507-target
+      source: '1746645878419'
+      sourceHandle: source
+      target: '1747762835507'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1747762835507-true-1747415683590-target
+      source: '1747762835507'
+      sourceHandle: 'true'
+      target: '1747415683590'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1747762835507-false-17477628577180-target
+      source: '1747762835507'
+      sourceHandle: 'false'
+      target: '17477628577180'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
         sourceType: llm
         targetType: end
-      id: 1746645882563-source-1746645885984-target
-      source: '1746645882563'
+      id: 17477628577180-source-17477628577181-target
+      source: '17477628577180'
       sourceHandle: source
-      target: '1746645885984'
+      target: '17477628577181'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -112,10 +390,10 @@ workflow:
       id: '1746645878419'
       position:
         x: 30
-        y: 258
+        y: 388.5
       positionAbsolute:
         x: 30
-        y: 258
+        y: 388.5
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -125,7 +403,865 @@ workflow:
         context:
           enabled: false
           variable_selector: []
+        desc: Identify the names of the series we want to query from the input file.
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-4.1-2025-04-14
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 356f09f5-70a1-4f97-a634-14da7e45370e
+          role: system
+          text: Identify how many TV series are contained in the given files, and
+            list the name of each series.
+        - id: c788344e-5195-4a73-8822-475c160e4995
+          role: user
+          text: '{{#1746645878419.files#}}'
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              series:
+                items:
+                  type: string
+                type: array
+            required:
+            - series
+            type: object
+        structured_output_enabled: true
+        title: parse series
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 134
+      id: '1747415683590'
+      position:
+        x: 638
+        y: 388.5
+      positionAbsolute:
+        x: 638
+        y: 388.5
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
         desc: ''
+        error_handle_mode: remove-abnormal-output
+        height: 377
+        is_parallel: true
+        iterator_selector:
+        - '1747415683590'
+        - structured_output
+        - series
+        output_selector:
+        - '1747679327091'
+        - output
+        output_type: array[string]
+        parallel_nums: 5
+        selected: false
+        start_node_id: 1747417424520start
+        title: Iteration
+        type: iteration
+        width: 3852
+      height: 377
+      id: '1747417424520'
+      position:
+        x: 942
+        y: 388.5
+      positionAbsolute:
+        x: 942
+        y: 388.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 3852
+      zIndex: 1
+    - data:
+        desc: ''
+        isInIteration: true
+        selected: false
+        title: ''
+        type: iteration-start
+      draggable: false
+      height: 48
+      id: 1747417424520start
+      parentId: '1747417424520'
+      position:
+        x: 60
+        y: 121
+      positionAbsolute:
+        x: 1002
+        y: 509.5
+      selectable: false
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-iteration-start
+      width: 44
+      zIndex: 1002
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0
+          mode: chat
+          name: gpt-4o
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: e5ac37a9-7035-4912-a72c-816bafcb17d3
+          role: system
+          text: 'Find all video and subtitle files in the first part and the matched
+            directories in the second part. Then, rename the file to the format: `<matched
+            directory name>/<matched directory name>.S< 2-digit season number>E< 2-digit
+            episode number>.<file suffix>`.
+
+
+            For the OVA files, use the specials season "00".
+
+
+            Notice we already know those `name -> season` matches:
+
+
+            {{#1747421288829.output#}}
+
+
+            Your outputs should be JSON objects containing two keys: original_name
+            and new_name. You should only output the JSON parts. Make sure to put
+            the results list in the "results" field.
+
+            '
+        - id: 9f0e99aa-a883-4311-b436-dd723653d243
+          role: user
+          text: '## First Part
+
+
+            ```
+
+            小市民系列 第二季 - 15 [1080P][WEB-DL][AAC AVC][CHT].mp4
+
+            Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].mkv
+
+            Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].sc.ass
+
+            ```
+
+
+            ## Second Part
+
+
+            ```
+
+            小市民シリーズ
+
+            ぼくたちは勉強ができない
+
+            Other Anime
+
+            ```'
+        - id: 74518762-628e-4147-bba3-93774bec7f45
+          role: assistant
+          text: "{\n  \"result\": [\n    {\"original_name\": \"小市民系列 第二季 - 15 [1080P][WEB-DL][AAC\
+            \ AVC][CHT].mp4\", \"new_name\": \"小市民シリーズ/小市民シリーズ.S01E15.mp4\"},\n  \
+            \  {\"original_name\": \"Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].mkv\"\
+            , \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S01E01.mkv\"},\n    {\"original_name\"\
+            : \"Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].sc.ass\"\
+            , \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S01E01.sc.ass\"}\n  ]\n}"
+        - id: 8d9d6d58-99bd-43e1-b1cb-9b2016c5a159
+          role: user
+          text: '## First Part
+
+
+            ```
+
+            {{#1746645878419.files#}}
+
+            ```
+
+
+            ## Second Part
+
+
+            ```
+
+            {{#1746645878419.directories#}}
+
+            ```'
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              result:
+                items:
+                  additionalProperties: false
+                  properties:
+                    new_name:
+                      type: string
+                    original_name:
+                      type: string
+                  required:
+                  - original_name
+                  - new_name
+                  type: object
+                type: array
+            required:
+            - result
+            type: object
+        structured_output_enabled: true
+        title: rename with context
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '17474207593550'
+      position:
+        x: 5158
+        y: 388.5
+      positionAbsolute:
+        x: 5158
+        y: 388.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '17474207593550'
+          - text
+          variable: text
+        selected: false
+        title: End
+        type: end
+      height: 90
+      id: '1747420923459'
+      position:
+        x: 5462
+        y: 388.5
+      positionAbsolute:
+        x: 5462
+        y: 388.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        selected: false
+        template: '{% for match in matches %}
+
+          {{ match }}
+
+          {% endfor %}'
+        title: combine matches
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1747417424520'
+          - output
+          variable: matches
+      height: 54
+      id: '1747421288829'
+      position:
+        x: 4854
+        y: 388.5
+      positionAbsolute:
+        x: 4854
+        y: 388.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        authorization:
+          config:
+            api_key: '{{#env.TMDB_API_TOKEN#}}'
+            type: bearer
+          type: api-key
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        method: get
+        params: 'query:{{#1747679778024.structured_output.keyword#}}
+
+          language:ja'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: query tmdb
+        type: http-request
+        url: https://api.themoviedb.org/3/search/tv
+        variables: []
+      height: 139
+      id: '1747677772635'
+      parentId: '1747417424520'
+      position:
+        x: 508
+        y: 75.5
+      positionAbsolute:
+        x: 1450
+        y: 464
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        code: "\ndef main(resp_text: str) -> dict:\n    import json\n\n\n    data\
+          \ = json.loads(resp_text)\n    return {\n        \"results\": [\n      \
+          \      {\n                \"id\": item[\"id\"],\n                \"name\"\
+          : item[\"name\"]\n            }\n            for item in data['results']\n\
+          \        ],\n        \"total\": len(data['results'])\n    }\n"
+        code_language: python3
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        outputs:
+          results:
+            children: null
+            type: array[object]
+          total:
+            children: null
+            type: number
+        selected: false
+        title: parse results
+        type: code
+        variables:
+        - value_selector:
+          - '1747677772635'
+          - body
+          variable: resp_text
+      height: 54
+      id: '1747677918638'
+      parentId: '1747417424520'
+      position:
+        x: 812
+        y: 118
+      positionAbsolute:
+        x: 1754
+        y: 506.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: '='
+            id: f64c32e5-3aa2-49d8-9cd7-16cd97dae29f
+            value: '1'
+            varType: number
+            variable_selector:
+            - '1747677918638'
+            - total
+          id: 'true'
+          logical_operator: and
+        desc: If there is only one result, it indicates that season will only be 1.
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        selected: false
+        title: if only 1
+        type: if-else
+      height: 170
+      id: '1747678146445'
+      parentId: '1747417424520'
+      position:
+        x: 1116
+        y: 60
+      positionAbsolute:
+        x: 2058
+        y: 448.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        selected: false
+        template: '{{ name }} -> season 1'
+        title: season is 1
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1747417424520'
+          - item
+          variable: name
+      height: 54
+      id: '1747678171263'
+      parentId: '1747417424520'
+      position:
+        x: 3244
+        y: 118
+      positionAbsolute:
+        x: 4186
+        y: 506.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        authorization:
+          config:
+            api_key: '{{#env.TMDB_API_TOKEN#}}'
+            type: bearer
+          type: api-key
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        method: get
+        params: language:ja
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: query series detail
+        type: http-request
+        url: https://api.themoviedb.org/3/tv/{{#1747678507236.structured_output.result_id#}}
+        variables: []
+      height: 142
+      id: '1747678347028'
+      parentId: '1747417424520'
+      position:
+        x: 2028
+        y: 175
+      positionAbsolute:
+        x: 2970
+        y: 563.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 6990757d-8269-4337-8c40-aa60f82f2eb6
+          role: system
+          text: Which search result is closest to the keyword? Tell me its ID.
+        - id: 14d725c9-d74d-41d2-8d26-fc532d0b509e
+          role: user
+          text: 'keyword: {{#1747417424520.item#}}
+
+
+            results:
+
+
+            {{#1747678651619.output#}}'
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              result_id:
+                type: number
+            required:
+            - result_id
+            type: object
+        structured_output_enabled: true
+        title: choice result id
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1747678507236'
+      parentId: '1747417424520'
+      position:
+        x: 1724
+        y: 201
+      positionAbsolute:
+        x: 2666
+        y: 589.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        selected: false
+        template: '{% for result in results %}
+
+          ID: {{ result["id"] }}
+
+          Name: {{ result["name"] }}
+
+          {% endfor %}'
+        title: result to template
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1747677918638'
+          - results
+          variable: results
+      height: 54
+      id: '1747678651619'
+      parentId: '1747417424520'
+      position:
+        x: 1420
+        y: 219
+      positionAbsolute:
+        x: 2362
+        y: 607.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        code: "\ndef main(resp_text: str) -> dict:\n    import json\n\n\n    data\
+          \ = json.loads(resp_text)\n    return {\n        \"result\": [\n       \
+          \     {\n                \"season_number\": item[\"season_number\"],\n \
+          \               \"name\": item[\"name\"]\n            }\n            for\
+          \ item in data[\"seasons\"]\n        ],\n    }\n"
+        code_language: python3
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        outputs:
+          result:
+            children: null
+            type: array[object]
+        selected: false
+        title: parse seasons
+        type: code
+        variables:
+        - value_selector:
+          - '1747678347028'
+          - body
+          variable: resp_text
+      height: 54
+      id: '1747678859297'
+      parentId: '1747417424520'
+      position:
+        x: 2332
+        y: 219
+      positionAbsolute:
+        x: 3274
+        y: 607.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        selected: false
+        template: '{% for season in seasons %}
+
+          Season Number: {{ season["season_number"] }}
+
+          Name: {{ season["name"] }}
+
+          {% endfor%}'
+        title: season to template
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1747678859297'
+          - result
+          variable: seasons
+      height: 54
+      id: '1747678994707'
+      parentId: '1747417424520'
+      position:
+        x: 2636
+        y: 219
+      positionAbsolute:
+        x: 3578
+        y: 607.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: f4892db2-825a-4a8e-996e-a4593d6fbb25
+          role: system
+          text: Which season number best matches the keyword?
+        - id: 556f853e-e9d2-4b6c-9129-70211b7886cc
+          role: user
+          text: 'Keyword: {{#1747417424520.item#}}
+
+
+            Results:
+
+
+            {{#1747678994707.output#}}'
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              season_number:
+                type: number
+            required:
+            - season_number
+            type: object
+        structured_output_enabled: true
+        title: choice season number
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1747679092910'
+      parentId: '1747417424520'
+      position:
+        x: 2940
+        y: 201
+      positionAbsolute:
+        x: 3882
+        y: 589.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        selected: false
+        template: '{{ name }} -> {{ season }}'
+        title: season number
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1747417424520'
+          - item
+          variable: name
+        - value_selector:
+          - '1747679092910'
+          - structured_output
+          - season_number
+          variable: season
+      height: 54
+      id: '1747679233230'
+      parentId: '1747417424520'
+      position:
+        x: 3244
+        y: 219
+      positionAbsolute:
+        x: 4186
+        y: 607.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        desc: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        output_type: string
+        selected: false
+        title: result aggregator
+        type: variable-aggregator
+        variables:
+        - - '1747678171263'
+          - output
+        - - '1747679233230'
+          - output
+      height: 131
+      id: '1747679327091'
+      parentId: '1747417424520'
+      position:
+        x: 3548
+        y: 79.5
+      positionAbsolute:
+        x: 4490
+        y: 468
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: TMDB's handling of redundant information is poor. Here, the keyword
+          to be queried is processed to remove unnecessary parts.
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        model:
+          completion_params:
+            frequency_penalty: 0.5
+            presence_penalty: 0.5
+            temperature: 0.2
+            top_p: 0.75
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 1c5a816d-4a86-4bdf-a794-63b066d1a10e
+          role: system
+          text: You are a search expert. You need to search for a TV series on TMDB.
+            Knowing that TMDB will fail to find results when the keywords contain
+            more than the original title, please refine the following keywords and
+            output the new keywords.
+        - id: ae4fd9ab-98d5-4967-a6b6-327b550d09c9
+          role: user
+          text: '{{#1747417424520.item#}}'
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              keyword:
+                type: string
+            required:
+            - keyword
+            type: object
+        structured_output_enabled: true
+        title: process keyword
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 166
+      id: '1747679778024'
+      parentId: '1747417424520'
+      position:
+        x: 204
+        y: 62
+      positionAbsolute:
+        x: 1146
+        y: 450.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+      zIndex: 1002
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: not empty
+            id: d4d866ed-0c93-4759-9e2f-c935b43677ef
+            value: ''
+            varType: secret
+            variable_selector:
+            - env
+            - TMDB_API_TOKEN
+          id: 'true'
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: if has tmdb token
+        type: if-else
+      height: 126
+      id: '1747762835507'
+      position:
+        x: 334
+        y: 388.5
+      positionAbsolute:
+        x: 334
+        y: 388.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: If there is no TMDB API key, we will directly use the model's capabilities
+          for identification.
         model:
           completion_params:
             temperature: 0
@@ -185,31 +1321,6 @@ workflow:
             , \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S01E01.mkv\"},\n    {\"original_name\"\
             : \"Bokutachi wa Benkyou ga Dekinai [01][Ma10p_1080p][x265_flac].sc.ass\"\
             , \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S01E01.sc.ass\"}\n  ]\n}"
-        - id: 63cf558c-1dec-4815-8619-92820ad2adde
-          role: user
-          text: '## First Part
-
-
-            ```
-
-            Bokutachi wa Benkyou ga Dekinai [OAD01][Ma10p_1080p][x265_flac].mkv
-
-            ```
-
-
-            ## Second Part
-
-
-            ```
-
-            ぼくたちは勉強ができない
-
-            ```'
-        - id: 5c406104-f6c4-4d2b-9bd0-adbe9025b5d7
-          role: assistant
-          text: "{\n  \"result\": [\n    {\"original_name\": \"Bokutachi wa Benkyou\
-            \ ga Dekinai [OAD01][Ma10p_1080p][x265_flac].mkv, \"new_name\": \"ぼくたちは勉強ができない/ぼくたちは勉強ができない.S00E01.mkv\"\
-            }\n  ]\n}"
         - id: 8d9d6d58-99bd-43e1-b1cb-9b2016c5a159
           role: user
           text: '## First Part
@@ -231,20 +1342,41 @@ workflow:
 
             ```'
         selected: false
-        title: LLM
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              result:
+                items:
+                  additionalProperties: false
+                  properties:
+                    new_name:
+                      type: string
+                    original_name:
+                      type: string
+                  required:
+                  - original_name
+                  - new_name
+                  type: object
+                type: array
+            required:
+            - result
+            type: object
+        structured_output_enabled: true
+        title: rename without context
         type: llm
         variables: []
         vision:
           enabled: false
-      height: 90
-      id: '1746645882563'
+      height: 150
+      id: '17477628577180'
       position:
-        x: 334
-        y: 258
+        x: 638
+        y: 654
       positionAbsolute:
-        x: 334
-        y: 258
-      selected: true
+        x: 638
+        y: 654
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -253,26 +1385,27 @@ workflow:
         desc: ''
         outputs:
         - value_selector:
-          - '1746645882563'
-          - text
+          - '17477628577180'
+          - structured_output
+          - result
           variable: text
         selected: false
         title: End
         type: end
       height: 90
-      id: '1746645885984'
+      id: '17477628577181'
       position:
-        x: 638
-        y: 258
+        x: 2746
+        y: 805.5
       positionAbsolute:
-        x: 638
-        y: 258
+        x: 2746
+        y: 805.5
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 244
     viewport:
-      x: 0
-      y: 0
-      zoom: 0.7
+      x: 32.03205555354367
+      y: -424.82066544646034
+      zoom: 1.3767255305975106
