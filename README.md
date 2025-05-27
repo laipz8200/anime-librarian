@@ -8,7 +8,7 @@ A command-line tool that uses AI to rename and organize video files.
 
 This project aims to facilitate moving local video files to corresponding directories and renaming them to be recognizable by software like Infuse. While originally focused on anime, it works for all types of video content including movies and TV shows. Since original filenames often differ from standard naming conventions, this project uses LLM to automate this conversion process.
 
-<img width="1392" alt="anime-librarian-preview" src="https://github.com/user-attachments/assets/8e7cd70f-bf70-4dd4-8c05-745287e368e1" />
+![anime-librarian-preview](https://github.com/user-attachments/assets/8e7cd70f-bf70-4dd4-8c05-745287e368e1)
 
 ## Prerequisites
 
@@ -45,6 +45,9 @@ Before configuring the application, you need to set up the required workflow in 
 4. Open the imported workflow
 5. Navigate to the API section and create a new API key
 6. Copy the API key and workflow endpoint URL for use in the next section
+
+> [!TIP]
+> After importing the Dify DSL file, you can set a TMDB API key in the workflow's environment variables. This will enable the workflow to use TMDB data to improve the accuracy of media identification and naming results.
 
 ## Configuration
 
