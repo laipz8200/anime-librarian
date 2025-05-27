@@ -17,20 +17,20 @@ Fixes # (issue)
 
 <!-- Please delete options that are not relevant. -->
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
+- [x] My code follows the style guidelines of this project
+- [x] I have performed a self-review of my own code
+- [x] I have commented my code, particularly in hard-to-understand areas
+- [x] I have made corresponding changes to the documentation
+- [x] My changes generate no new warnings
+- [x] I have added tests that prove my fix is effective or that my feature works
+- [x] New and existing unit tests pass locally with my changes
+- [x] Any dependent changes have been merged and published in downstream modules
 
 ## Code Quality Checks
 
 <!-- These checks will be run automatically by GitHub Actions. -->
 
-- [ ] Linting with ruff passes
-- [ ] Formatting with ruff passes
-- [ ] Type checking with mypy passes
-- [ ] Unit tests with pytest pass
+- [x] Linting with ruff passes
+- [x] Formatting with ruff passes
+- [x] Type checking with mypy passes
+- [x] Unit tests with pytest pass
