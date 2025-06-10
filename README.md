@@ -8,7 +8,7 @@
 
 🎬 AI-powered video file organizer that makes your media library beautiful
 
-[Getting Started](#🚀-quick-start) • [Features](#✨-key-features) • [Documentation](#📖-documentation) • [Development](#👩‍💻-development)
+[Getting Started](#-quick-start) • [Features](#-key-features) • [Documentation](#-documentation) • [Development](#-development)
 
 ![anime-librarian-preview](https://github.com/user-attachments/assets/8e7cd70f-bf70-4dd4-8c05-745287e368e1)
 
