@@ -1,24 +1,54 @@
 # AnimeLibrarian
 
+<div align="center">
+
 [![Code Quality](https://github.com/laipz8200/anime-librarian/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laipz8200/anime-librarian/actions/workflows/code-quality.yml)
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/release/python-3130/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A command-line tool that uses AI to rename and organize video files.
+🎬 AI-powered video file organizer that makes your media library beautiful
 
-This project aims to facilitate moving local video files to corresponding directories and renaming them to be recognizable by software like Infuse. While originally focused on anime, it works for all types of video content including movies and TV shows. Since original filenames often differ from standard naming conventions, this project uses LLM to automate this conversion process.
+[Getting Started](#installation) • [Features](#key-features) • [Documentation](#documentation) • [Contributing](#contributing)
 
 ![anime-librarian-preview](https://github.com/user-attachments/assets/8e7cd70f-bf70-4dd4-8c05-745287e368e1)
 
-## Prerequisites
+</div>
 
-Before you begin, you'll need:
+---
 
-1. A [Dify](https://cloud.dify.ai) account
-2. Access to a language model through Dify
-3. The AnimeLibrarian workflow imported into your Dify account
+## ✨ Key Features
 
-## Installation
+- 🤖 **AI-Powered Naming**: Intelligently renames files using LLM technology
+- 📁 **Smart Organization**: Automatically moves files to appropriate directories
+- 🎯 **Media Player Compatible**: Ensures compatibility with Infuse, Plex, and more
+- 🔍 **Preview Changes**: Dry-run option to review changes before applying
+- 🚀 **Easy to Use**: Simple CLI interface with sensible defaults
+- 📺 **Universal Support**: Works with anime, movies, TV shows, and more
+
+## 🚀 Quick Start
+
+```bash
+# Install AnimeLibrarian
+pip install git+https://github.com/laipz8200/anime-librarian.git
+
+# Set up your environment
+cp .env.example .env
+# Edit .env with your Dify API credentials
+
+# Run with default settings
+anime-librarian
+
+# Or specify custom paths
+anime-librarian --source ~/Downloads --target ~/Media
+```
+
+## 📋 Prerequisites
+
+- [Dify](https://cloud.dify.ai) account
+- Language model access through Dify
+- AnimeLibrarian workflow in your Dify account
+
+## 🛠️ Installation
 
 ```bash
 # Clone the repository
@@ -33,139 +63,99 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install .
 ```
 
-## Dify Workflow Setup
+## 📖 Documentation
 
-Before configuring the application, you need to set up the required workflow in Dify:
+### Dify Workflow Setup
 
-1. Sign up for an account at [Dify](https://cloud.dify.ai) if you don't already have one
-2. Configure a language model in your Dify account according to their documentation
-3. Import the AnimeLibrarian workflow:
-   - Use the DSL import feature
-   - Import the `Anime Librarian.yml` file from the `Dify DSL File` directory in this repository
-4. Open the imported workflow
-5. Navigate to the API section and create a new API key
-6. Copy the API key and workflow endpoint URL for use in the next section
+1. Sign up at [Dify](https://cloud.dify.ai)
+2. Configure your language model
+3. Import the workflow:
+   - Use DSL import
+   - Import `Anime Librarian.yml` from `Dify DSL File`
+4. Create an API key
+5. Copy API key and endpoint URL
 
 > [!TIP]
-> After importing the Dify DSL file, you can set a TMDB API key in the workflow's environment variables. This will enable the workflow to use TMDB data to improve the accuracy of media identification and naming results.
+> Add a TMDB API key to enhance media identification accuracy!
 
-## Configuration
+### Configuration
 
-This application uses environment variables for configuration. You can set these in a `.env` file in the root directory of the project.
-
-1. Copy the example environment file:
-
+1. Copy and edit the environment file:
    ```bash
    cp .env.example .env
    ```
 
-2. Edit the `.env` file and update the values according to the comments in the file.
+2. Update `.env` values per the comments
 
-   **Important**: Before running the application, you should create subdirectories in your `ANIMELIBRARIAN_TARGET_PATH` with the expected names for your media categories. This helps the AI make more stable and accurate file organization decisions.
+⚠️ **Important**: Create media category subdirectories in your `ANIMELIBRARIAN_TARGET_PATH` for optimal AI organization.
 
-## Usage
+### Advanced Usage
 
 ```bash
-# Basic usage
-anime-librarian
-
-# With custom source and target directories
-anime-librarian --source /path/to/downloads --target /path/to/videos
-
-# Dry run (show what would be done without actually renaming files)
+# Preview changes (dry run)
 anime-librarian --dry-run
 
-# Automatically answer yes to all prompts
+# Auto-confirm all prompts
 anime-librarian --yes
 
-# Enable verbose logging
+# Enable detailed logging
 anime-librarian --verbose
 
-# Show version information
-anime-librarian --version
-
-# View command-line help and all available options
+# View all options
 anime-librarian --help
 ```
 
-## How It Works
+## 🔄 How It Works
 
-AnimeLibrarian uses AI to intelligently rename and organize your video files:
+1. 📂 Scans source directory for videos
+2. 🗂️ Identifies existing media categories
+3. 🤖 AI analyzes filenames via Dify
+4. ✨ Generates standardized names
+5. 📝 Shows proposed changes
+6. ✅ Moves and renames upon confirmation
 
-1. The application scans your source directory for video files
-2. It also scans your target directory to identify existing media category folders
-3. It sends both the source filenames and target directory names to a Dify workflow powered by a language model
-4. The AI analyzes each filename and suggests:
-   - A proper standardized name for the file
-   - The appropriate target directory for the file (chosen from your existing directories)
-5. The application shows you the proposed changes before making them
-6. Upon confirmation, it moves and renames the files according to the AI suggestions
-
-This process helps maintain a well-organized media library that's compatible with media players like Infuse, Plex, and others.
-
-## Development
+## 👩‍💻 Development
 
 ```bash
-# Install development dependencies
+# Setup development environment
 pip install -e ".[dev]"
-
-# Install pre-commit hooks
 pre-commit install
 
-# Run tests
-pytest
-
-# Run tests with coverage
-pytest --cov
-
-# Run linting
-ruff check .
-
-# Run formatting
-ruff format .
-
-# Run type checking
-mypy .
-
-# Run all pre-commit hooks manually
-pre-commit run --all-files
+# Quality checks
+pytest                    # Run tests
+pytest --cov             # Test coverage
+ruff check .             # Linting
+ruff format .            # Formatting
+mypy .                   # Type checking
 ```
 
-### Pre-commit Hooks
+### Quality Assurance
 
-This project uses pre-commit hooks to ensure code quality before committing changes. The hooks include:
+- **Pre-commit Hooks**: Automatic code quality checks
+  - Linting (ruff)
+  - Formatting (ruff)
+  - Type checking (mypy)
 
-- **ruff check**: Lints the code for errors and style issues
-- **ruff format**: Automatically formats the code
-- **mypy**: Performs static type checking
+- **CI/CD**: GitHub Actions workflow
+  - Code quality checks
+  - Test suite execution
+  - Automated PR validation
 
-These hooks run automatically when you commit changes, but you can also run them manually with `pre-commit run --all-files`.
+## 🔍 Troubleshooting
 
-### Continuous Integration
+Common solutions for:
 
-This project uses GitHub Actions for continuous integration:
+- 🔑 **API Issues**: Verify Dify credentials in `.env`
+- 📁 **Access Errors**: Check directory permissions
+- 🤖 **AI Problems**: Validate Dify workflow setup
+- 📂 **Organization**: Ensure target directories exist
+- 🔍 **Testing**: Use `--dry-run` to preview changes
+- 📝 **Debugging**: Enable `--verbose` logging
 
-- **Code Quality**: Runs on every push to main and pull requests
-  - Linting with ruff
-  - Formatting check with ruff
-  - Type checking with mypy
-  - Unit tests with pytest
+## 🤝 Contributing
 
-The workflow ensures that all code merged into the main branch meets the project's quality standards.
+Contributions are welcome! Feel free to:
 
-## Troubleshooting
-
-If you encounter issues:
-
-1. **API Connection Problems**: Verify your Dify API key and endpoint URL are correct in the `.env` file
-2. **Permission Errors**: Ensure the application has read/write access to both source and target directories
-3. **Workflow Issues**: Check that the Dify workflow is properly configured and the language model is responding correctly
-4. **Incorrect File Organization**: Make sure you have created appropriate subdirectories in your target path before running the application
-5. **Missing Target Directories**: If the AI suggests moving files to directories that don't exist, create those directories first or use the `--dry-run` option to preview changes
-6. **Logging**: Use the `--verbose` flag to enable detailed logging for troubleshooting
-
-You can also run `anime-librarian --help` to see all available command-line options that might help address specific issues.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- 🐛 Report bugs
+- 💡 Suggest features
+- 🔧 Submit pull requests
