@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=75.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "anime-librarian"
 version = "0.1.0"
@@ -11,6 +15,9 @@ dependencies = [
     "pydantic>=2.11.4",
     "python-dotenv>=1.0.0",
 ]
+
+[project.scripts]
+anime-librarian = "anime_librarian.main:main"
 
 [project.optional-dependencies]
 dev = [
@@ -73,3 +80,9 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
     "ARG001", # Unused function arguments are common in tests
     "PT004",  # Use underscore for fixture names that are only used indirectly
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+anime_librarian = ["py.typed"]
