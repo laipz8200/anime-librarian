@@ -12,9 +12,9 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai:0.0.22@fa668d0ec3b434270453ede311196acaad0531ad9e3d5561cd622e6508cd3254
+    marketplace_plugin_unique_identifier: langgenius/openai:0.0.30@1f5ecdef108418a467e54da2dcf5de2cf22b47632abc8633194ac9fb96317ede
 kind: app
-version: 0.3.0
+version: 0.3.1
 workflow:
   conversation_variables: []
   environment_variables:
@@ -323,6 +323,7 @@ workflow:
         sourceType: start
         targetType: if-else
       id: 1746645878419-source-1747762835507-target
+      selected: false
       source: '1746645878419'
       sourceHandle: source
       target: '1747762835507'
@@ -334,6 +335,7 @@ workflow:
         sourceType: if-else
         targetType: llm
       id: 1747762835507-true-1747415683590-target
+      selected: false
       source: '1747762835507'
       sourceHandle: 'true'
       target: '1747415683590'
@@ -345,6 +347,7 @@ workflow:
         sourceType: if-else
         targetType: llm
       id: 1747762835507-false-17477628577180-target
+      selected: false
       source: '1747762835507'
       sourceHandle: 'false'
       target: '17477628577180'
@@ -356,6 +359,7 @@ workflow:
         sourceType: llm
         targetType: end
       id: 17477628577180-source-17477628577181-target
+      selected: false
       source: '17477628577180'
       sourceHandle: source
       target: '17477628577181'
@@ -390,11 +394,11 @@ workflow:
       id: '1746645878419'
       position:
         x: 30
-        y: 388.5
+        y: 176.5
       positionAbsolute:
         x: 30
-        y: 388.5
-      selected: false
+        y: 176.5
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -438,11 +442,11 @@ workflow:
       height: 134
       id: '1747415683590'
       position:
-        x: 638
-        y: 388.5
+        x: 531.2135849892466
+        y: 176.5
       positionAbsolute:
-        x: 638
-        y: 388.5
+        x: 531.2135849892466
+        y: 176.5
       selected: true
       sourcePosition: right
       targetPosition: left
@@ -451,7 +455,7 @@ workflow:
     - data:
         desc: ''
         error_handle_mode: remove-abnormal-output
-        height: 377
+        height: 698
         is_parallel: true
         iterator_selector:
         - '1747415683590'
@@ -466,20 +470,20 @@ workflow:
         start_node_id: 1747417424520start
         title: Iteration
         type: iteration
-        width: 3852
-      height: 377
+        width: 2854
+      height: 698
       id: '1747417424520'
       position:
-        x: 942
-        y: 388.5
+        x: 1032.427169978493
+        y: 176.5
       positionAbsolute:
-        x: 942
-        y: 388.5
-      selected: false
+        x: 1032.427169978493
+        y: 176.5
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 3852
+      width: 2854
       zIndex: 1
     - data:
         desc: ''
@@ -495,8 +499,8 @@ workflow:
         x: 60
         y: 121
       positionAbsolute:
-        x: 1002
-        y: 509.5
+        x: 1092.427169978493
+        y: 297.5
       selectable: false
       selected: false
       sourcePosition: right
@@ -524,13 +528,16 @@ workflow:
             episode number>.<file suffix>`.
 
 
-            For the OVA files, use the specials season "00".
+            For the OVA files, use the special season "00".
 
 
             Notice we already know those `name -> season` matches:
 
 
             {{#1747421288829.output#}}
+
+
+            You have to respect the ''season'' part, whatever its name.
 
 
             Your outputs should be JSON objects containing two keys: original_name
@@ -624,12 +631,12 @@ workflow:
       height: 90
       id: '17474207593550'
       position:
-        x: 5158
-        y: 388.5
+        x: 4394.247547462364
+        y: 176.5
       positionAbsolute:
-        x: 5158
-        y: 388.5
-      selected: false
+        x: 4394.247547462364
+        y: 176.5
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -647,12 +654,12 @@ workflow:
       height: 90
       id: '1747420923459'
       position:
-        x: 5462
-        y: 388.5
+        x: 4644.854339956986
+        y: 176.5
       positionAbsolute:
-        x: 5462
-        y: 388.5
-      selected: false
+        x: 4644.854339956986
+        y: 176.5
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -675,12 +682,12 @@ workflow:
       height: 54
       id: '1747421288829'
       position:
-        x: 4854
-        y: 388.5
+        x: 4143.640754967741
+        y: 176.5
       positionAbsolute:
-        x: 4854
-        y: 388.5
-      selected: false
+        x: 4143.640754967741
+        y: 176.5
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -721,12 +728,12 @@ workflow:
       id: '1747677772635'
       parentId: '1747417424520'
       position:
-        x: 508
-        y: 75.5
+        x: 490.89389117462304
+        y: 91.29025430034807
       positionAbsolute:
-        x: 1450
-        y: 464
-      selected: false
+        x: 1523.3210611531163
+        y: 267.79025430034807
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -762,12 +769,12 @@ workflow:
       id: '1747677918638'
       parentId: '1747417424520'
       position:
-        x: 812
-        y: 118
+        x: 801.473163799768
+        y: 91.6829094994199
       positionAbsolute:
-        x: 1754
-        y: 506.5
-      selected: false
+        x: 1833.900333778261
+        y: 268.1829094994199
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -797,12 +804,12 @@ workflow:
       id: '1747678146445'
       parentId: '1747417424520'
       position:
-        x: 1116
-        y: 60
+        x: 802.8266230430964
+        y: 240.2720699289739
       positionAbsolute:
-        x: 2058
-        y: 448.5
-      selected: false
+        x: 1835.2537930215894
+        y: 416.7720699289739
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -826,12 +833,12 @@ workflow:
       id: '1747678171263'
       parentId: '1747417424520'
       position:
-        x: 3244
-        y: 118
+        x: 2138.6821989756345
+        y: 157.4756357508702
       positionAbsolute:
-        x: 4186
-        y: 506.5
-      selected: false
+        x: 3171.1093689541276
+        y: 333.9756357508702
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -867,16 +874,16 @@ workflow:
         type: http-request
         url: https://api.themoviedb.org/3/tv/{{#1747678507236.structured_output.result_id#}}
         variables: []
-      height: 142
+      height: 158
       id: '1747678347028'
       parentId: '1747417424520'
       position:
-        x: 2028
-        y: 175
+        x: 1479.288663062904
+        y: 384.220869479612
       positionAbsolute:
-        x: 2970
-        y: 563.5
-      selected: false
+        x: 2511.715833041397
+        y: 560.720869479612
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -928,12 +935,12 @@ workflow:
       id: '1747678507236'
       parentId: '1747417424520'
       position:
-        x: 1724
-        y: 201
+        x: 1150.287427087353
+        y: 476.0135957310624
       positionAbsolute:
-        x: 2666
-        y: 589.5
-      selected: false
+        x: 2182.714597065846
+        y: 652.5135957310624
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -963,12 +970,12 @@ workflow:
       id: '1747678651619'
       parentId: '1747417424520'
       position:
-        x: 1420
-        y: 219
+        x: 1147.6181133189957
+        y: 361.11228870313266
       positionAbsolute:
-        x: 2362
-        y: 607.5
-      selected: false
+        x: 2180.045283297489
+        y: 537.6122887031327
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1001,12 +1008,12 @@ workflow:
       id: '1747678859297'
       parentId: '1747417424520'
       position:
-        x: 2332
-        y: 219
+        x: 1795.1313537881656
+        y: 309.79396222700154
       positionAbsolute:
-        x: 3274
-        y: 607.5
-      selected: false
+        x: 2827.5585237666587
+        y: 486.29396222700154
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1036,12 +1043,12 @@ workflow:
       id: '1747678994707'
       parentId: '1747417424520'
       position:
-        x: 2636
-        y: 219
+        x: 1795.168958506465
+        y: 421.641596854467
       positionAbsolute:
-        x: 3578
-        y: 607.5
-      selected: false
+        x: 2827.596128484958
+        y: 598.141596854467
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1063,7 +1070,10 @@ workflow:
         prompt_template:
         - id: f4892db2-825a-4a8e-996e-a4593d6fbb25
           role: system
-          text: Which season number best matches the keyword?
+          text: 'Which season number best matches the keyword?
+
+
+            Remember to respect the **Results**, not anything contained in the **Keyword**.'
         - id: 556f853e-e9d2-4b6c-9129-70211b7886cc
           role: user
           text: 'Keyword: {{#1747417424520.item#}}
@@ -1093,12 +1103,12 @@ workflow:
       id: '1747679092910'
       parentId: '1747417424520'
       position:
-        x: 2940
-        y: 201
+        x: 1799.1541267998518
+        y: 523.3843586321066
       positionAbsolute:
-        x: 3882
-        y: 589.5
-      selected: false
+        x: 2831.581296778345
+        y: 699.8843586321066
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1127,12 +1137,12 @@ workflow:
       id: '1747679233230'
       parentId: '1747417424520'
       position:
-        x: 3244
-        y: 219
+        x: 2137.366344450605
+        y: 421.641596854467
       positionAbsolute:
-        x: 4186
-        y: 607.5
-      selected: false
+        x: 3169.793514429098
+        y: 598.141596854467
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1152,16 +1162,16 @@ workflow:
           - output
         - - '1747679233230'
           - output
-      height: 131
+      height: 137
       id: '1747679327091'
       parentId: '1747417424520'
       position:
-        x: 3548
-        y: 79.5
+        x: 2549.003244597978
+        y: 284.77330590452505
       positionAbsolute:
-        x: 4490
-        y: 468
-      selected: false
+        x: 3581.4304145764713
+        y: 461.27330590452505
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1215,12 +1225,12 @@ workflow:
       id: '1747679778024'
       parentId: '1747417424520'
       position:
-        x: 204
-        y: 62
+        x: 175.051200449362
+        y: 90.94879955063817
       positionAbsolute:
-        x: 1146
-        y: 450.5
-      selected: false
+        x: 1207.4783704278552
+        y: 267.44879955063817
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1246,12 +1256,12 @@ workflow:
       height: 126
       id: '1747762835507'
       position:
-        x: 334
-        y: 388.5
+        x: 280.6067924946233
+        y: 176.5
       positionAbsolute:
-        x: 334
-        y: 388.5
-      selected: false
+        x: 280.6067924946233
+        y: 176.5
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1371,12 +1381,12 @@ workflow:
       height: 150
       id: '17477628577180'
       position:
-        x: 638
-        y: 654
+        x: 781.8203774838698
+        y: 1116.768235997596
       positionAbsolute:
-        x: 638
-        y: 654
-      selected: false
+        x: 781.8203774838698
+        y: 1116.768235997596
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1395,17 +1405,17 @@ workflow:
       height: 90
       id: '17477628577181'
       position:
-        x: 2746
-        y: 805.5
+        x: 3893.0339624731164
+        y: 1116.768235997596
       positionAbsolute:
-        x: 2746
-        y: 805.5
-      selected: false
+        x: 3893.0339624731164
+        y: 1116.768235997596
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 244
     viewport:
-      x: 32.03205555354367
-      y: -424.82066544646034
-      zoom: 1.3767255305975106
+      x: -6337.962609784996
+      y: -104.07154820540666
+      zoom: 1.638073395719657
