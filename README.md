@@ -22,8 +22,9 @@
 - 📁 **Smart Organization**: Automatically moves files to appropriate directories
 - 🎯 **Media Player Compatible**: Ensures compatibility with Infuse, Plex, and more
 - 🔍 **Preview Changes**: Dry-run option to review changes before applying
-- 🚀 **Easy to Use**: Simple CLI interface with sensible defaults
+- 🚀 **Beautiful CLI**: Rich terminal interface with tables, progress bars, and styled output
 - 📺 **Universal Support**: Works with anime, movies, TV shows, and more
+- 🎨 **Interactive UX**: Color-coded output, confirmation prompts, and clear progress indicators
 
 ## 🚀 Quick Start
 
@@ -110,10 +111,33 @@ anime-librarian --help
 
 1. 📂 Scans source directory for videos
 2. 🗂️ Identifies existing media categories
-3. 🤖 AI analyzes filenames via Dify
+3. 🤖 AI analyzes filenames via Dify (with progress indicator)
 4. ✨ Generates standardized names
-5. 📝 Shows proposed changes
-6. ✅ Moves and renames upon confirmation
+5. 📝 Shows proposed changes in a formatted table
+6. ✅ Moves and renames with real-time progress bar
+
+## 🎨 Enhanced User Experience
+
+AnimeLibrarian now features a beautiful Rich-powered terminal interface:
+
+- **Color-coded Messages**: 
+  - 🟢 Success messages in green
+  - 🔴 Errors in red  
+  - 🟡 Warnings in yellow
+  - 🔵 Info messages in blue
+
+- **Interactive Tables**: File moves displayed in formatted tables with clear source → target mapping
+
+- **Progress Indicators**: 
+  - Spinning indicators for AI analysis
+  - Progress bars for file operations
+  - Real-time status updates
+
+- **Smart Prompts**: Interactive confirmation dialogs with sensible defaults
+
+- **Summary Panels**: Operation summaries in styled panels after completion
+
+- **Terminal Compatibility**: Colors and formatting are automatically enabled, even in non-standard terminal environments
 
 ## 👩‍💻 Development
 

@@ -1,0 +1,197 @@
+"""Rich-enhanced output writer implementation for the AnimeLibrarian application."""
+
+from collections.abc import Sequence
+from typing import Any
+
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm
+from rich.table import Table
+
+from .types import OutputWriter
+
+
+class RichOutputWriter(OutputWriter):
+    """Rich-enhanced implementation of OutputWriter for better UX."""
+
+    def __init__(self, verbose: bool = False) -> None:
+        """
+        Initialize with verbosity setting.
+
+        Args:
+            verbose: If True, show verbose output
+        """
+        self.verbose = verbose
+        # Force color output even when not detected as terminal
+        self.console = Console(force_terminal=True, color_system="auto")
+
+    def message(self, message: str) -> None:
+        """
+        Print informational or success message only in verbose mode.
+
+        Args:
+            message: The message to print
+        """
+        if self.verbose:
+            self.console.print(f"[dim]{message}[/dim]")
+
+    def notice(self, message: str) -> None:
+        """
+        Always print error or warning message.
+
+        Args:
+            message: The message to print
+        """
+        # Determine the style based on message content
+        if "error" in message.lower():
+            style = "bold red"
+        elif "warning" in message.lower():
+            style = "bold yellow"
+        else:
+            style = "bold cyan"
+
+        self.console.print(message, style=style)
+
+    def list_items(
+        self, header: str, items: Sequence[Any], always_show: bool = False
+    ) -> None:
+        """
+        Print a list of items with a header using Rich formatting.
+
+        Args:
+            header: The header to display
+            items: The items to list
+            always_show: If True, show even in non-verbose mode
+        """
+        if not self.verbose and not always_show:
+            return
+
+        # Create a styled header
+        self.console.print()
+        self.console.print(header, style="bold cyan")
+
+        # Display items with bullet points and indentation
+        for item in items:
+            self.console.print(f"  • {item}", style="dim")
+
+    def display_file_moves_table(self, file_pairs: Sequence[tuple[str, str]]) -> None:
+        """
+        Display planned file moves in a rich table format.
+
+        Args:
+            file_pairs: List of (source, target) file name pairs
+        """
+        table = Table(
+            title="Planned File Moves", show_header=True, header_style="bold cyan"
+        )
+        table.add_column("Source", style="yellow", no_wrap=False)
+        table.add_column("→", justify="center", style="dim", width=3)
+        table.add_column("Target", style="green", no_wrap=False)
+
+        for source, target in file_pairs:
+            table.add_row(source, "→", target)
+
+        self.console.print()
+        self.console.print(table)
+
+    def display_progress(self, description: str) -> Progress:
+        """
+        Create and return a progress indicator.
+
+        Args:
+            description: Description of the operation
+
+        Returns:
+            A Rich Progress instance
+        """
+        progress = Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=self.console,
+        )
+        progress.add_task(description, total=None)
+        return progress
+
+    def success(self, message: str) -> None:
+        """
+        Display a success message with green styling.
+
+        Args:
+            message: The message to print
+        """
+        self.console.print(f"✅ {message}", style="bold green")
+
+    def error(self, message: str) -> None:
+        """
+        Display an error message with red styling.
+
+        Args:
+            message: The message to print
+        """
+        self.console.print(f"❌ {message}", style="bold red")
+
+    def warning(self, message: str) -> None:
+        """
+        Display a warning message with yellow styling.
+
+        Args:
+            message: The message to print
+        """
+        self.console.print(f"⚠️  {message}", style="bold yellow")
+
+    def info(self, message: str) -> None:
+        """
+        Display an info message with blue styling.
+
+        Args:
+            message: The message to print
+        """
+        if self.verbose:
+            self.console.print(f"[INFO] {message}", style="blue")
+
+    def display_summary_panel(self, title: str, content: str) -> None:
+        """
+        Display a summary panel with formatted content.
+
+        Args:
+            title: Panel title
+            content: Panel content
+        """
+        panel = Panel(content, title=title, border_style="cyan", padding=(1, 2))
+        self.console.print()
+        self.console.print(panel)
+
+
+class RichInputReader:
+    """Rich-enhanced input reader for interactive prompts."""
+
+    def __init__(self) -> None:
+        """Initialize the Rich input reader."""
+        # Force color output even when not detected as terminal
+        self.console = Console(force_terminal=True, color_system="auto")
+
+    def confirm(self, prompt: str, default: bool = False) -> bool:
+        """
+        Ask for user confirmation with a styled prompt.
+
+        Args:
+            prompt: The prompt to display
+            default: Default value if user just presses Enter
+
+        Returns:
+            True if confirmed, False otherwise
+        """
+        return Confirm.ask(prompt, default=default, console=self.console)
+
+    def read_input(self, prompt: str) -> str:
+        """
+        Read user input with a styled prompt.
+
+        Args:
+            prompt: The prompt to display
+
+        Returns:
+            User input as a string
+        """
+        return self.console.input(f"[bold cyan]{prompt}[/bold cyan]")
