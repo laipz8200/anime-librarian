@@ -82,18 +82,57 @@ class RichOutputWriter(OutputWriter):
         Args:
             file_pairs: List of (source, target) file name pairs
         """
-        table = Table(
-            title="Planned File Moves", show_header=True, header_style="bold cyan"
-        )
-        table.add_column("Source", style="yellow", no_wrap=False)
-        table.add_column("→", justify="center", style="dim", width=3)
-        table.add_column("Target", style="green", no_wrap=False)
+        # Check terminal width to decide on table layout
+        term_width = self.console.width
 
-        for source, target in file_pairs:
-            table.add_row(source, "→", target)
+        # For very narrow terminals, use a list format instead of table
+        if term_width < 100:
+            self.console.print()
+            self.console.print("[bold cyan]Planned File Moves[/bold cyan]")
+            self.console.print()
+            for source, target in file_pairs:
+                self.console.print(f"  [yellow]{source}[/yellow]")
+                if target != source:
+                    self.console.print(f"    [dim]→[/dim] [green]{target}[/green]")
+                self.console.print()
+        else:
+            # Use table for wider terminals
+            table = Table(
+                title="Planned File Moves",
+                show_header=True,
+                header_style="bold cyan",
+                expand=True,  # Use full terminal width
+                padding=(0, 1),  # Reduce padding to save space
+            )
 
-        self.console.print()
-        self.console.print(table)
+            # Calculate column widths dynamically
+            # Reserve 5 chars for arrow column, split rest between source and target
+            available = term_width - 7  # Account for borders and arrow
+            col_width = available // 2
+
+            table.add_column(
+                "Source",
+                style="yellow",
+                no_wrap=False,
+                overflow="fold",  # Fold long text instead of truncating
+                min_width=20,
+                max_width=col_width,
+            )
+            table.add_column("→", justify="center", style="dim", width=3)
+            table.add_column(
+                "Target",
+                style="green",
+                no_wrap=False,
+                overflow="fold",  # Fold long text instead of truncating
+                min_width=20,
+                max_width=col_width,
+            )
+
+            for source, target in file_pairs:
+                table.add_row(source, "→", target)
+
+            self.console.print()
+            self.console.print(table)
 
     def display_progress(self, description: str) -> Progress:
         """

@@ -4,14 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anime-librarian"
-version = "0.1.0"
+version = "0.4.0"
 description = "A command-line tool that uses AI to rename and organize video files"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "httpx>=0.28.1",
     "json-repair>=0.44.1",
-    "loguru>=0.7.3",
     "pydantic>=2.11.4",
     "python-dotenv>=1.0.0",
     "rich>=14.1.0",
