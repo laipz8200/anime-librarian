@@ -11,10 +11,8 @@ from pathlib import Path
 
 from .arg_parser import DefaultArgumentParser
 from .config_provider import DefaultConfigProvider
-from .core import AnimeLibrarian
 from .file_renamer import FileRenamer
-from .input_reader import ConsoleInputReader
-from .output_writer import ConsoleOutputWriter
+from .rich_core import RichAnimeLibrarian
 from .types import HttpClient
 
 
@@ -37,19 +35,6 @@ def create_file_renamer(
     )
 
 
-def create_output_writer(verbose: bool) -> ConsoleOutputWriter:
-    """
-    Create an OutputWriter instance.
-
-    Args:
-        verbose: Whether to enable verbose output
-
-    Returns:
-        A ConsoleOutputWriter instance
-    """
-    return ConsoleOutputWriter(verbose=verbose)
-
-
 def main() -> int:
     """
     Execute the main program flow for renaming and organizing video files.
@@ -59,12 +44,10 @@ def main() -> int:
     Returns:
         Exit code (0 for success, non-zero for error)
     """
-    app = AnimeLibrarian(
+    app = RichAnimeLibrarian(
         arg_parser=DefaultArgumentParser(),
-        input_reader=ConsoleInputReader(),
         config_provider=DefaultConfigProvider(),
         file_renamer_factory=create_file_renamer,
-        output_writer_factory=create_output_writer,
     )
     return app.run()
 

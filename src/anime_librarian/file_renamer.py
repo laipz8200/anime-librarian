@@ -161,6 +161,16 @@ class FileRenamer:
         # Filter for directories only
         target_dirs = [d for d in self.target_path.glob("*") if d.is_dir()]
 
+        # Check if we have files to process
+        if not source_files:
+            logger.info(f"No media files found in {self.source_path}")
+            return []
+
+        # Check if we have target directories
+        if not target_dirs:
+            logger.info(f"No target directories found in {self.target_path}")
+            return []
+
         # Get just the file/directory names
         source_file_names = [f.name for f in source_files]
         target_dir_names = [d.name for d in target_dirs]

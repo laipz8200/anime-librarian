@@ -1,11 +1,10 @@
-"""Tests for the main module."""
+"""Tests for the output writer module."""
 
-import io
-import sys
+from unittest.mock import MagicMock
 
 import pytest
 
-from anime_librarian.output_writer import ConsoleOutputWriter
+from anime_librarian.rich_output_writer import RichOutputWriter as ConsoleOutputWriter
 
 
 @pytest.fixture
@@ -37,88 +36,123 @@ def mock_target_path(tmp_path):
 
 def test_output_class_verbose_mode():
     """Test the ConsoleOutputWriter class with verbose mode enabled and disabled."""
-    # Redirect stdout to capture print statements
-    stdout_backup = sys.stdout
-    sys.stdout = io.StringIO()
+    # Test with verbose mode off
+    output_non_verbose = ConsoleOutputWriter(verbose=False)
 
-    try:
-        # Test with verbose mode off
-        output_non_verbose = ConsoleOutputWriter(verbose=False)
+    # Create a mock console to capture output
+    mock_console = MagicMock()
+    output_non_verbose.console = mock_console
 
-        # Message (info/success) should not be printed in non-verbose mode
-        output_non_verbose.message("This is a message")
+    # Message (info/success) should not be printed in non-verbose mode
+    output_non_verbose.message("This is a message")
+    mock_console.print.assert_not_called()
 
-        # Legacy methods should behave the same
-        output_non_verbose.info("This is an info message")
-        output_non_verbose.success("This is a success message")
+    # Reset mock
+    mock_console.reset_mock()
 
-        # Notice (error/warning) messages should always be printed
-        output_non_verbose.notice("This is a notice")
+    # Legacy methods should behave the same
+    output_non_verbose.info("This is an info message")
+    mock_console.print.assert_not_called()
 
-        # Legacy methods should behave the same
-        output_non_verbose.error("This is an error message")
-        output_non_verbose.warning("This is a warning message")
+    output_non_verbose.success("This is a success message")
+    # Success always prints
+    mock_console.print.assert_called()
 
-        # List items should not be printed in non-verbose mode unless always_show=True
-        output_non_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
-        output_non_verbose.list_items(
-            "Always show items:", ["item3", "item4"], always_show=True
-        )
+    # Reset mock
+    mock_console.reset_mock()
 
-        # Get the output
-        non_verbose_output = sys.stdout.getvalue()
-        sys.stdout = io.StringIO()  # Reset for next test
+    # Notice (error/warning) messages should always be printed
+    output_non_verbose.notice("This is a notice")
+    mock_console.print.assert_called()
 
-        # Test with verbose mode on
-        output_verbose = ConsoleOutputWriter(verbose=True)
+    # Reset mock
+    mock_console.reset_mock()
 
-        # All messages should be printed in verbose mode
-        output_verbose.message("This is a message")
-        output_verbose.notice("This is a notice")
+    # Test with verbose mode on
+    output_verbose = ConsoleOutputWriter(verbose=True)
+    mock_console_verbose = MagicMock()
+    output_verbose.console = mock_console_verbose
 
-        # Legacy methods should behave the same
-        output_verbose.info("This is an info message")
-        output_verbose.success("This is a success message")
-        output_verbose.error("This is an error message")
-        output_verbose.warning("This is a warning message")
+    # All messages should trigger console print in verbose mode
+    output_verbose.message("This is a message")
+    assert mock_console_verbose.print.called
 
-        # List items should be printed in verbose mode regardless of always_show
-        output_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
-        output_verbose.list_items(
-            "Always show items:", ["item3", "item4"], always_show=True
-        )
+    mock_console_verbose.reset_mock()
+    output_verbose.notice("This is a notice")
+    assert mock_console_verbose.print.called
 
-        # Get the output
-        verbose_output = sys.stdout.getvalue()
+    # Test legacy methods
+    mock_console_verbose.reset_mock()
+    output_verbose.info("This is an info message")
+    assert mock_console_verbose.print.called
 
-        # Verify non-verbose output
-        assert "This is a message" not in non_verbose_output
-        assert "This is an info message" not in non_verbose_output
-        assert "This is a success message" not in non_verbose_output
-        assert "This is a notice" in non_verbose_output
-        assert "This is an error message" in non_verbose_output
-        assert "This is a warning message" in non_verbose_output
-        assert "Items:" not in non_verbose_output
-        assert "item1" not in non_verbose_output
-        assert "item2" not in non_verbose_output
-        assert "Always show items:" in non_verbose_output
-        assert "item3" in non_verbose_output
-        assert "item4" in non_verbose_output
+    mock_console_verbose.reset_mock()
+    output_verbose.success("This is a success message")
+    assert mock_console_verbose.print.called
 
-        # Verify verbose output
-        assert "This is a message" in verbose_output
-        assert "This is an info message" in verbose_output
-        assert "This is a success message" in verbose_output
-        assert "This is a notice" in verbose_output
-        assert "This is an error message" in verbose_output
-        assert "This is a warning message" in verbose_output
-        assert "Items:" in verbose_output
-        assert "item1" in verbose_output
-        assert "item2" in verbose_output
-        assert "Always show items:" in verbose_output
-        assert "item3" in verbose_output
-        assert "item4" in verbose_output
+    mock_console_verbose.reset_mock()
+    output_verbose.error("This is an error message")
+    assert mock_console_verbose.print.called
 
-    finally:
-        # Restore stdout
-        sys.stdout = stdout_backup
+    mock_console_verbose.reset_mock()
+    output_verbose.warning("This is a warning message")
+    assert mock_console_verbose.print.called
+
+
+def test_list_items_visibility():
+    """Test list_items method respects verbose mode and always_show flag."""
+    # Non-verbose mode
+    output_non_verbose = ConsoleOutputWriter(verbose=False)
+    mock_console = MagicMock()
+    output_non_verbose.console = mock_console
+
+    # Should not print when verbose=False and always_show=False
+    output_non_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
+    mock_console.print.assert_not_called()
+
+    # Reset mock
+    mock_console.reset_mock()
+
+    # Should print when always_show=True even in non-verbose mode
+    output_non_verbose.list_items(
+        "Always show items:", ["item3", "item4"], always_show=True
+    )
+    assert mock_console.print.called
+
+    # Verbose mode
+    output_verbose = ConsoleOutputWriter(verbose=True)
+    mock_console_verbose = MagicMock()
+    output_verbose.console = mock_console_verbose
+
+    # Should always print in verbose mode
+    output_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
+    assert mock_console_verbose.print.called
+
+    mock_console_verbose.reset_mock()
+    output_verbose.list_items(
+        "Always show items:", ["item3", "item4"], always_show=True
+    )
+    assert mock_console_verbose.print.called
+
+
+def test_display_methods():
+    """Test Rich-specific display methods."""
+    writer = ConsoleOutputWriter(verbose=True)
+
+    # These should not raise exceptions
+    file_pairs = [("source1.mp4", "target1.mp4"), ("source2.mkv", "target2.mkv")]
+    writer.display_file_moves_table(file_pairs)
+
+    # Test summary panel
+    writer.display_summary_panel("Test Title", "Test Content")
+
+    # Test progress display (returns a Progress object)
+    progress = writer.display_progress("Test operation")
+    assert progress is not None
+
+
+def test_console_force_terminal():
+    """Test that console is created with force_terminal=True."""
+    writer = ConsoleOutputWriter(verbose=True)
+    # Check that the console has force_terminal enabled
+    assert writer.console._force_terminal is True

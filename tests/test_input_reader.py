@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from anime_librarian.input_reader import ConsoleInputReader
+from anime_librarian.rich_output_writer import RichInputReader as ConsoleInputReader
 
 
 def test_console_input_reader():
