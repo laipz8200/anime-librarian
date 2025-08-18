@@ -124,6 +124,9 @@ def test_anime_librarian_basic_functionality(
     mock_renamer.get_file_pairs.return_value = file_pairs
     mock_renamer.check_for_conflicts.return_value = []
     mock_renamer.find_missing_directories.return_value = []
+    # Add source_path and target_path attributes
+    mock_renamer.source_path = source_path
+    mock_renamer.target_path = target_path
 
     # Create the application
     app = AnimeLibrarian(
@@ -141,8 +144,13 @@ def test_anime_librarian_basic_functionality(
     # Verify the result
     assert result == 0
 
-    # Verify the factory was called with the correct arguments
-    mock_factory.assert_called_once_with(source_path, target_path, None)
+    # Verify the factory was called with the correct arguments (including console)
+    assert mock_factory.call_count == 1
+    args = mock_factory.call_args[0]
+    assert args[0] == source_path
+    assert args[1] == target_path
+    assert args[2] is None  # http_client
+    # args[3] is the console instance
 
     # Verify the methods were called on the renamer
     mock_renamer.get_file_pairs.assert_called_once()
@@ -167,6 +175,9 @@ def test_anime_librarian_dry_run(mock_file_renamer_factory, mock_set_verbose_mod
         (source_path / "file1.mp4", target_path / "Anime1" / "renamed_file1.mp4"),
     ]
     mock_renamer.get_file_pairs.return_value = file_pairs
+    # Add source_path and target_path attributes
+    mock_renamer.source_path = source_path
+    mock_renamer.target_path = target_path
 
     # Create the application with dry run flag
     app = AnimeLibrarian(
@@ -290,6 +301,9 @@ def test_anime_librarian_with_conflicts_yes_mode(
         target_path / "Anime1" / "renamed_file1.mp4"
     ]
     mock_renamer.find_missing_directories.return_value = []
+    # Add source_path and target_path attributes
+    mock_renamer.source_path = source_path
+    mock_renamer.target_path = target_path
 
     # Create the application with yes flag
     app = AnimeLibrarian(
@@ -331,6 +345,9 @@ def test_anime_librarian_with_missing_directories(
     mock_renamer.check_for_conflicts.return_value = []
     mock_renamer.find_missing_directories.return_value = missing_dirs
     mock_renamer.create_directories.return_value = True
+    # Add source_path and target_path attributes
+    mock_renamer.source_path = source_path
+    mock_renamer.target_path = target_path
 
     # Create the application with yes flag
     app = AnimeLibrarian(

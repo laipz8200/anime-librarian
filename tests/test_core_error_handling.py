@@ -31,6 +31,9 @@ def mock_dependencies():
     mock_config_provider.get_target_path.return_value = target_path
 
     mock_file_renamer = MagicMock()
+    # Add source_path and target_path attributes for the renamer
+    mock_file_renamer.source_path = source_path
+    mock_file_renamer.target_path = target_path
     mock_file_renamer_factory = MagicMock(return_value=mock_file_renamer)
 
     mock_set_verbose_mode = MagicMock()
@@ -48,8 +51,8 @@ def mock_dependencies():
 
 def test_get_file_pairs_error_handling(mock_dependencies):
     """Test error handling when get_file_pairs fails."""
-    # Configure the mock renamer to raise an exception
-    mock_dependencies["file_renamer"].get_file_pairs.side_effect = Exception(
+    # Configure the mock renamer to raise a specific exception
+    mock_dependencies["file_renamer"].get_file_pairs.side_effect = ValueError(
         "API error"
     )
 
@@ -216,8 +219,8 @@ def test_file_rename_errors(mock_move, mock_dependencies):
     mock_dependencies["file_renamer"].check_for_conflicts.return_value = []
     mock_dependencies["file_renamer"].find_missing_directories.return_value = []
 
-    # Configure shutil.move to fail on the first file
-    mock_move.side_effect = [Exception("Permission denied"), None]
+    # Configure shutil.move to fail on the first file with an OSError
+    mock_move.side_effect = [OSError("Permission denied"), None]
 
     # Configure the arg parser to auto-confirm (yes mode)
     mock_dependencies["arg_parser"].parse_args.return_value = CommandLineArgs(

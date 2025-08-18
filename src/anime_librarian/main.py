@@ -13,11 +13,14 @@ from .arg_parser import DefaultArgumentParser
 from .config_provider import DefaultConfigProvider
 from .file_renamer import FileRenamer
 from .rich_core import RichAnimeLibrarian
-from .types import HttpClient
+from .types import Console, HttpClient
 
 
 def create_file_renamer(
-    source_path: Path, target_path: Path, http_client: HttpClient | None = None
+    source_path: Path,
+    target_path: Path,
+    http_client: HttpClient | None = None,
+    console: Console | None = None,
 ) -> FileRenamer:
     """
     Create a FileRenamer instance.
@@ -26,12 +29,16 @@ def create_file_renamer(
         source_path: The source path
         target_path: The target path
         http_client: Optional HTTP client to use
+        console: Optional console for output
 
     Returns:
         A FileRenamer instance
     """
     return FileRenamer(
-        source_path=source_path, target_path=target_path, http_client=http_client
+        source_path=source_path,
+        target_path=target_path,
+        http_client=http_client,
+        console=console,
     )
 
 
