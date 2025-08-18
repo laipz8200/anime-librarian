@@ -4,7 +4,6 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from . import __version__
-from . import console as console_module
 from .console import set_verbose_mode
 from .errors import FilePairsNotFoundError
 from .file_renamer import FileRenamer
@@ -28,6 +27,7 @@ class RichAnimeLibrarian:
         file_renamer_factory: Callable[
             [Path, Path, HttpClient | None, Console | None], FileRenamer
         ],
+        console: Console | None = None,
         set_verbose_mode_fn: Callable[[bool], None] = set_verbose_mode,
     ):
         """
@@ -37,12 +37,20 @@ class RichAnimeLibrarian:
             arg_parser: The argument parser to use
             config_provider: The configuration provider to use
             file_renamer_factory: Factory function to create FileRenamer instances
+            console: Console instance to use (defaults to global console)
             set_verbose_mode_fn: Function to set verbose mode
         """
         self.arg_parser = arg_parser
         self.config_provider = config_provider
         self.file_renamer_factory = file_renamer_factory
         self.set_verbose_mode_fn = set_verbose_mode_fn
+        # Use injected console or import default
+        if console is None:
+            from .console import console as default_console
+
+            self.console: Console = default_console
+        else:
+            self.console = console
 
     def _initialize_application(
         self, args: CommandLineArgs
@@ -68,17 +76,17 @@ class RichAnimeLibrarian:
         source_path = args.source or self.config_provider.get_source_path()
         target_path = args.target or self.config_provider.get_target_path()
 
-        if console_module.console.verbose:
-            console_module.console.debug("Configuration loaded:")
-            console_module.console.debug(f"  Source path: {source_path}")
-            console_module.console.debug(f"  Target path: {target_path}")
-            console_module.console.debug(f"  Verbose mode: {args.verbose}")
-            console_module.console.debug(f"  Dry run: {args.dry_run}")
-            console_module.console.debug(f"  Auto-confirm: {args.yes}")
+        if self.console.verbose:
+            self.console.debug("Configuration loaded:")
+            self.console.debug(f"  Source path: {source_path}")
+            self.console.debug(f"  Target path: {target_path}")
+            self.console.debug(f"  Verbose mode: {args.verbose}")
+            self.console.debug(f"  Dry run: {args.dry_run}")
+            self.console.debug(f"  Auto-confirm: {args.yes}")
 
         # Create the FileRenamer instance with console
         renamer = self.file_renamer_factory(
-            source_path, target_path, None, console_module.console
+            source_path, target_path, None, self.console
         )
 
         return writer, reader, source_path, target_path, renamer
@@ -97,31 +105,27 @@ class RichAnimeLibrarian:
             Tuple of (file_pairs, exit_code) where exit_code is None if successful
             or an integer if the operation should exit
         """
-        if console_module.console.verbose:
-            console_module.console.debug("Starting file analysis...")
-            console_module.console.debug(f"Scanning source: {renamer.source_path}")
-            console_module.console.debug(f"Scanning target: {renamer.target_path}")
+        if self.console.verbose:
+            self.console.debug("Starting file analysis...")
+            self.console.debug(f"Scanning source: {renamer.source_path}")
+            self.console.debug(f"Scanning target: {renamer.target_path}")
 
         msg = "Analyzing files and fetching AI suggestions..."
-        with console_module.console.create_progress(msg) as progress:
+        with self.console.create_progress(msg) as progress:
             task = progress.add_task("", total=None)
 
             try:
                 file_pairs = renamer.get_file_pairs()
                 progress.update(task, completed=100)
 
-                if console_module.console.verbose and file_pairs:
-                    console_module.console.debug(
-                        f"Found {len(file_pairs)} file(s) to process"
-                    )
+                if self.console.verbose and file_pairs:
+                    self.console.debug(f"Found {len(file_pairs)} file(s) to process")
                     for src, tgt in file_pairs[:3]:  # Show first 3 as examples
-                        console_module.console.debug(f"  • {src.name} → {tgt.name}")
+                        self.console.debug(f"  • {src.name} → {tgt.name}")
                     if len(file_pairs) > 3:
-                        console_module.console.debug(
-                            f"  ... and {len(file_pairs) - 3} more"
-                        )
+                        self.console.debug(f"  ... and {len(file_pairs) - 3} more")
             except (OSError, ValueError, TypeError) as e:
-                console_module.console.exception("Error getting file pairs", e)
+                self.console.exception("Error getting file pairs", e)
                 writer.error(f"Error: {e}")
                 return None, 1
 
@@ -272,20 +276,16 @@ class RichAnimeLibrarian:
                     return 0
 
             # Create the directories with progress
-            if console_module.console.verbose:
-                console_module.console.debug(
-                    f"Creating {len(missing_dirs)} directories..."
-                )
+            if self.console.verbose:
+                self.console.debug(f"Creating {len(missing_dirs)} directories...")
 
-            with console_module.console.create_progress(
-                "Creating directories..."
-            ) as progress:
+            with self.console.create_progress("Creating directories...") as progress:
                 task = progress.add_task("", total=len(missing_dirs))
 
                 for dir_path in missing_dirs:
                     progress.update(task, description=f"[cyan]{dir_path.name}[/cyan]")
-                    if console_module.console.verbose:
-                        console_module.console.debug(f"Creating: {dir_path}")
+                    if self.console.verbose:
+                        self.console.debug(f"Creating: {dir_path}")
 
                     if not renamer.create_directories([dir_path]):
                         writer.error(
@@ -300,6 +300,7 @@ class RichAnimeLibrarian:
         self,
         file_pairs: Sequence[tuple[Path, Path]],
         writer: RichOutputWriter,
+        renamer: FileRenamer,
     ) -> int:
         """
         Rename files with progress bar and report results.
@@ -307,6 +308,7 @@ class RichAnimeLibrarian:
         Args:
             file_pairs: List of (source, target) file path pairs
             writer: The RichOutputWriter instance
+            renamer: The FileRenamer instance to use for moving files
 
         Returns:
             Exit code (0 for success, non-zero for error)
@@ -317,10 +319,10 @@ class RichAnimeLibrarian:
         writer.console.print()
         writer.console.print("[bold]Moving files...[/bold]")
 
-        if console_module.console.verbose:
-            console_module.console.debug(f"Starting to move {len(file_pairs)} file(s)")
+        if self.console.verbose:
+            self.console.debug(f"Starting to move {len(file_pairs)} file(s)")
 
-        with console_module.console.create_progress("Processing files") as progress:
+        with self.console.create_progress("Processing files") as progress:
             task = progress.add_task("", total=len(file_pairs))
 
             for idx, (source_file, target_file) in enumerate(file_pairs, 1):
@@ -328,27 +330,23 @@ class RichAnimeLibrarian:
                 filename = source_file.name
                 progress.update(task, description=f"[cyan]{filename}[/cyan]")
 
-                if console_module.console.verbose:
+                if self.console.verbose:
                     total = len(file_pairs)
-                    console_module.console.debug(
-                        f"Processing file {idx}/{total}: {filename}"
-                    )
+                    self.console.debug(f"Processing file {idx}/{total}: {filename}")
 
-                try:
-                    import shutil
+                # Process single file pair using FileRenamer
+                file_errors = renamer.rename_files([(source_file, target_file)])
 
-                    shutil.move(str(source_file), str(target_file))
-                    if console_module.console.verbose:
-                        console_module.console.debug(
-                            f"  ✅ Successfully moved to: {target_file}"
-                        )
-                    progress.advance(task)
-                except (OSError, shutil.Error) as e:
-                    error_msg = str(e)
-                    if console_module.console.verbose:
-                        console_module.console.debug(f"  ❌ Failed: {error_msg}")
-                    errors.append((source_file, target_file, error_msg))
-                    progress.advance(task)
+                if file_errors:
+                    error_msg = file_errors[0][2]
+                    if self.console.verbose:
+                        self.console.debug(f"  ❌ Failed: {error_msg}")
+                    errors.extend(file_errors)
+                else:
+                    if self.console.verbose:
+                        self.console.debug(f"  ✅ Successfully moved to: {target_file}")
+
+                progress.advance(task)
 
         if errors:
             writer.error(f"Completed with {len(errors)} errors:")
@@ -388,7 +386,7 @@ class RichAnimeLibrarian:
         writer, reader, _, _, renamer = self._initialize_application(args)
 
         # Display header
-        console_module.console.print_header(
+        self.console.print_header(
             "🎬 Anime Librarian", "AI-powered video file organizer"
         )
 
@@ -427,4 +425,4 @@ class RichAnimeLibrarian:
             return exit_code
 
         # Perform file renaming with progress and report results
-        return self._rename_files_with_progress(file_pairs, writer)
+        return self._rename_files_with_progress(file_pairs, writer, renamer)

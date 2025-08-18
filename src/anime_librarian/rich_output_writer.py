@@ -1,7 +1,6 @@
 """Rich-enhanced output writer implementation for the AnimeLibrarian application."""
 
 from collections.abc import Sequence
-from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -54,7 +53,7 @@ class RichOutputWriter(OutputWriter):
         self.console.print(message, style=style)
 
     def list_items(
-        self, header: str, items: Sequence[Any], always_show: bool = False
+        self, header: str, items: Sequence[str], always_show: bool = False
     ) -> None:
         """
         Print a list of items with a header using Rich formatting.

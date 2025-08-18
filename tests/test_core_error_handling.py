@@ -201,8 +201,7 @@ def test_directory_creation_failure(mock_dependencies):
     assert result == 1
 
 
-@patch("shutil.move")
-def test_file_rename_errors(mock_move, mock_dependencies):
+def test_file_rename_errors(mock_dependencies):
     """Test handling of errors during file renaming."""
     # Configure the mock renamer to return file pairs
     file_pairs = [
@@ -219,8 +218,11 @@ def test_file_rename_errors(mock_move, mock_dependencies):
     mock_dependencies["file_renamer"].check_for_conflicts.return_value = []
     mock_dependencies["file_renamer"].find_missing_directories.return_value = []
 
-    # Configure shutil.move to fail on the first file with an OSError
-    mock_move.side_effect = [OSError("Permission denied"), None]
+    # Configure rename_files to return errors for the first file
+    mock_dependencies["file_renamer"].rename_files.side_effect = [
+        [(file_pairs[0][0], file_pairs[0][1], "Permission denied")],
+        [],
+    ]
 
     # Configure the arg parser to auto-confirm (yes mode)
     mock_dependencies["arg_parser"].parse_args.return_value = CommandLineArgs(
