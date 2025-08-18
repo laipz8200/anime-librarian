@@ -98,7 +98,7 @@ class OutputWriter(Protocol):
         ...
 
     def list_items(
-        self, header: str, items: Sequence[Any], always_show: bool = False
+        self, header: str, items: Sequence[str], always_show: bool = False
     ) -> None:
         """Print a list of items with a header."""
         ...

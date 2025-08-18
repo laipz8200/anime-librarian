@@ -1,7 +1,7 @@
 """Tests for the AnimeLibrarian class."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -106,9 +106,8 @@ def mock_set_verbose_mode():
     return MagicMock()
 
 
-@patch("shutil.move")
 def test_anime_librarian_basic_functionality(
-    mock_move, mock_file_renamer_factory, mock_set_verbose_mode
+    mock_file_renamer_factory, mock_set_verbose_mode
 ):
     """Test basic functionality of the AnimeLibrarian."""
     # Setup
@@ -124,6 +123,8 @@ def test_anime_librarian_basic_functionality(
     mock_renamer.get_file_pairs.return_value = file_pairs
     mock_renamer.check_for_conflicts.return_value = []
     mock_renamer.find_missing_directories.return_value = []
+    # Mock rename_files to return no errors
+    mock_renamer.rename_files.return_value = []
     # Add source_path and target_path attributes
     mock_renamer.source_path = source_path
     mock_renamer.target_path = target_path
@@ -157,10 +158,9 @@ def test_anime_librarian_basic_functionality(
     mock_renamer.check_for_conflicts.assert_called_once_with(file_pairs)
     mock_renamer.find_missing_directories.assert_called_once_with(file_pairs)
 
-    # Verify that shutil.move was called for each file pair
-    assert mock_move.call_count == 2
-    mock_move.assert_any_call(str(file_pairs[0][0]), str(file_pairs[0][1]))
-    mock_move.assert_any_call(str(file_pairs[1][0]), str(file_pairs[1][1]))
+    # Verify that rename_files was called for each file pair
+    # Since we process files one by one, rename_files should be called twice
+    assert mock_renamer.rename_files.call_count == 2
 
 
 def test_anime_librarian_dry_run(mock_file_renamer_factory, mock_set_verbose_mode):
@@ -282,9 +282,8 @@ def test_anime_librarian_no_files():
     mock_renamer.find_missing_directories.assert_not_called()
 
 
-@patch("shutil.move")
 def test_anime_librarian_with_conflicts_yes_mode(
-    mock_move, mock_file_renamer_factory, mock_set_verbose_mode
+    mock_file_renamer_factory, mock_set_verbose_mode
 ):
     """Test handling of conflicts in yes mode (auto-confirm)."""
     # Setup
@@ -301,6 +300,8 @@ def test_anime_librarian_with_conflicts_yes_mode(
         target_path / "Anime1" / "renamed_file1.mp4"
     ]
     mock_renamer.find_missing_directories.return_value = []
+    # Mock rename_files to return no errors
+    mock_renamer.rename_files.return_value = []
     # Add source_path and target_path attributes
     mock_renamer.source_path = source_path
     mock_renamer.target_path = target_path
@@ -321,13 +322,12 @@ def test_anime_librarian_with_conflicts_yes_mode(
     # Verify the result
     assert result == 0
 
-    # Verify that the file was still moved despite conflicts (yes mode)
-    mock_move.assert_called_once()
+    # Verify that rename_files was called despite conflicts (yes mode)
+    assert mock_renamer.rename_files.call_count == 1
 
 
-@patch("shutil.move")
 def test_anime_librarian_with_missing_directories(
-    mock_move, mock_file_renamer_factory, mock_set_verbose_mode
+    mock_file_renamer_factory, mock_set_verbose_mode
 ):
     """Test handling of missing directories."""
     # Setup
@@ -345,6 +345,8 @@ def test_anime_librarian_with_missing_directories(
     mock_renamer.check_for_conflicts.return_value = []
     mock_renamer.find_missing_directories.return_value = missing_dirs
     mock_renamer.create_directories.return_value = True
+    # Mock rename_files to return no errors
+    mock_renamer.rename_files.return_value = []
     # Add source_path and target_path attributes
     mock_renamer.source_path = source_path
     mock_renamer.target_path = target_path
@@ -368,5 +370,5 @@ def test_anime_librarian_with_missing_directories(
     # Verify create_directories was called
     mock_renamer.create_directories.assert_called()
 
-    # Verify that the file was moved
-    mock_move.assert_called_once()
+    # Verify that rename_files was called
+    assert mock_renamer.rename_files.call_count == 1
