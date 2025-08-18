@@ -6,6 +6,7 @@ This module provides a Rich-based console interface with beautiful UI/UX.
 
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -389,7 +390,7 @@ class BeautifulConsole:
             # Not enough space - use multi-line format
             self._print_narrow_format(icon, color, source_name, source, target)
 
-    def create_progress(self, description: str = "Processing...") -> Progress:  # noqa: ARG002
+    def create_progress(self, description: str = "Processing...") -> Any:  # noqa: ARG002
         """
         Create a beautiful progress bar for long operations.
 

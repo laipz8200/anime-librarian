@@ -144,8 +144,13 @@ def test_anime_librarian_basic_functionality(
     # Verify the result
     assert result == 0
 
-    # Verify the factory was called with the correct arguments
-    mock_factory.assert_called_once_with(source_path, target_path, None)
+    # Verify the factory was called with the correct arguments (including console)
+    assert mock_factory.call_count == 1
+    args = mock_factory.call_args[0]
+    assert args[0] == source_path
+    assert args[1] == target_path
+    assert args[2] is None  # http_client
+    # args[3] is the console instance
 
     # Verify the methods were called on the renamer
     mock_renamer.get_file_pairs.assert_called_once()

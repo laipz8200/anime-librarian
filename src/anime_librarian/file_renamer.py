@@ -13,11 +13,10 @@ from typing import ClassVar
 import json_repair
 
 from . import config
-from . import console as console_module
 from .errors import raise_parse_error
 from .http_client import HttpxClient
 from .models import AIResponse, ApiResponse
-from .types import HttpClient
+from .types import Console, HttpClient
 
 
 class FileRenamer:
@@ -48,6 +47,7 @@ class FileRenamer:
         source_path: Path,
         target_path: Path,
         http_client: HttpClient | None = None,
+        console: Console | None = None,
         api_endpoint: str = config.DIFY_WORKFLOW_RUN_ENDPOINT,
         api_key: str = config.DIFY_API_KEY,
         api_timeout: int = config.API_TIMEOUT,
@@ -59,6 +59,7 @@ class FileRenamer:
             source_path: Path to the directory containing source files
             target_path: Path to the directory containing target directories
             http_client: Optional HTTP client to use for AI requests
+            console: Optional console for output (if None, no output)
             api_endpoint: API endpoint for the AI service
             api_key: API key for the AI service
             api_timeout: Timeout for API requests in seconds
@@ -66,6 +67,7 @@ class FileRenamer:
         self.source_path = source_path
         self.target_path = target_path
         self.http_client = http_client or HttpxClient()
+        self.console = console
         self.api_endpoint = api_endpoint
         self.api_key = api_key
         self.api_timeout = api_timeout
@@ -104,27 +106,31 @@ class FileRenamer:
         }
 
         # Send POST request to the AI service
-        console_module.console.debug("Sending request to AI service")
-        console_module.console.debug(f"Payload: {payload}")
+        if self.console:
+            self.console.debug("Sending request to AI service")
+            self.console.debug(f"Payload: {payload}")
         resp = self.http_client.post(
             self.api_endpoint, headers=headers, json=payload, timeout=self.api_timeout
         )
 
         # Log raw response for debugging
-        console_module.console.debug("Received response from AI service")
-        status = resp.status_code if hasattr(resp, "status_code") else "OK"
-        console_module.console.debug(f"Status: {status}")
-        console_module.console.debug(f"Response data: {resp}")
+        if self.console:
+            self.console.debug("Received response from AI service")
+            status = resp.status_code if hasattr(resp, "status_code") else "OK"
+            self.console.debug(f"Status: {status}")
+            self.console.debug(f"Response data: {resp}")
 
         # Validate response structure using Pydantic model
         try:
             api_response = ApiResponse.model_validate(resp)
             response_text = api_response.response_text
-            console_module.console.debug(f"Extracted response text: {response_text}")
-        except Exception as exc:
-            console_module.console.exception(
-                "Invalid response structure from AI service"
-            )
+            if self.console:
+                self.console.debug(f"Extracted response text: {response_text}")
+        except (ValueError, TypeError, KeyError) as exc:
+            if self.console:
+                self.console.exception(
+                    "Invalid response structure from AI service", exc
+                )
             raise_parse_error(exc)
         # Parse the JSON response
         try:
@@ -139,9 +145,10 @@ class FileRenamer:
             for pair in ai_response.result:
                 name_pairs.append((pair.original_name, pair.new_name))
 
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, AttributeError) as exc:
             # Log the error and re-raise with a more specific error type
-            console_module.console.exception("Error parsing AI response")
+            if self.console:
+                self.console.exception("Error parsing AI response", exc)
             # This will always raise, so mypy knows we don't need an else clause
             raise_parse_error(exc)
         # Return the name pairs in the try block to satisfy ruff TRY300
@@ -169,23 +176,23 @@ class FileRenamer:
 
         # Check if we have files to process
         if not source_files:
-            console_module.console.info(f"No media files found in {self.source_path}")
-            if console_module.console.verbose:
-                console_module.console.debug(f"Searched path: {self.source_path}")
-                exts = self.VIDEO_EXTENSIONS | self.SUBTITLE_EXTENSIONS
-                console_module.console.debug(f"Looking for extensions: {exts}")
+            if self.console:
+                self.console.info(f"No media files found in {self.source_path}")
+                if self.console.verbose:
+                    self.console.debug(f"Searched path: {self.source_path}")
+                    exts = self.VIDEO_EXTENSIONS | self.SUBTITLE_EXTENSIONS
+                    self.console.debug(f"Looking for extensions: {exts}")
             return []
 
         # Check if we have target directories
         if not target_dirs:
-            console_module.console.info(
-                f"No target directories found in {self.target_path}"
-            )
-            if console_module.console.verbose:
-                console_module.console.debug(f"Searched path: {self.target_path}")
-                console_module.console.debug(
-                    "Expected to find subdirectories for organizing files"
-                )
+            if self.console:
+                self.console.info(f"No target directories found in {self.target_path}")
+                if self.console.verbose:
+                    self.console.debug(f"Searched path: {self.target_path}")
+                    self.console.debug(
+                        "Expected to find subdirectories for organizing files"
+                    )
             return []
 
         # Get just the file/directory names
@@ -266,13 +273,11 @@ class FileRenamer:
         for directory in directories:
             try:
                 directory.mkdir(parents=True, exist_ok=True)
-                console_module.console.debug(
-                    f"Successfully created directory: {directory}"
-                )
-            except Exception:
-                console_module.console.exception(
-                    f"Error creating directory {directory}"
-                )
+                if self.console:
+                    self.console.debug(f"Successfully created directory: {directory}")
+            except OSError as e:
+                if self.console:
+                    self.console.exception(f"Error creating directory {directory}", e)
                 return False
         return True
 
@@ -291,17 +296,19 @@ class FileRenamer:
         errors = []
         for source_file, target_file in file_pairs:
             try:
-                if console_module.console.verbose:
-                    console_module.console.debug(f"Moving file: {source_file}")
-                    console_module.console.debug(f"Target location: {target_file}")
-                console_module.console.print_file_operation(
-                    "Moving", str(source_file), str(target_file), "processing"
-                )
+                if self.console:
+                    if self.console.verbose:
+                        self.console.debug(f"Moving file: {source_file}")
+                        self.console.debug(f"Target location: {target_file}")
+                    self.console.print_file_operation(
+                        "Moving", str(source_file), str(target_file), "processing"
+                    )
                 shutil.move(str(source_file), str(target_file))
-            except Exception as e:
+            except (OSError, shutil.Error) as e:
                 error_msg = str(e)
                 # Don't include the exception object in the log message
                 # This satisfies TRY401 (verbose-log-message)
-                console_module.console.exception(f"Error moving {source_file}")
+                if self.console:
+                    self.console.exception(f"Error moving {source_file}", e)
                 errors.append((source_file, target_file, error_msg))
         return errors

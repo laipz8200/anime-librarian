@@ -51,6 +51,7 @@ def file_renamer(mock_source_path, mock_target_path, mock_http_client):
         source_path=mock_source_path,
         target_path=mock_target_path,
         http_client=mock_http_client,
+        console=None,  # No console for tests
     )
 
 
@@ -94,6 +95,7 @@ def test_user_name_in_api_request(mock_source_path, mock_target_path, mock_http_
             source_path=mock_source_path,
             target_path=mock_target_path,
             http_client=mock_http_client,
+            console=None,  # No console for tests
         )
 
         # Configure the mock client to return a valid response

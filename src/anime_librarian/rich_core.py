@@ -13,6 +13,7 @@ from .types import (
     ArgumentParser,
     CommandLineArgs,
     ConfigProvider,
+    Console,
     HttpClient,
 )
 
@@ -24,7 +25,9 @@ class RichAnimeLibrarian:
         self,
         arg_parser: ArgumentParser,
         config_provider: ConfigProvider,
-        file_renamer_factory: Callable[[Path, Path, HttpClient | None], FileRenamer],
+        file_renamer_factory: Callable[
+            [Path, Path, HttpClient | None, Console | None], FileRenamer
+        ],
         set_verbose_mode_fn: Callable[[bool], None] = set_verbose_mode,
     ):
         """
@@ -73,8 +76,10 @@ class RichAnimeLibrarian:
             console_module.console.debug(f"  Dry run: {args.dry_run}")
             console_module.console.debug(f"  Auto-confirm: {args.yes}")
 
-        # Create the FileRenamer instance
-        renamer = self.file_renamer_factory(source_path, target_path, None)
+        # Create the FileRenamer instance with console
+        renamer = self.file_renamer_factory(
+            source_path, target_path, None, console_module.console
+        )
 
         return writer, reader, source_path, target_path, renamer
 
@@ -115,7 +120,7 @@ class RichAnimeLibrarian:
                         console_module.console.debug(
                             f"  ... and {len(file_pairs) - 3} more"
                         )
-            except Exception as e:
+            except (OSError, ValueError, TypeError) as e:
                 console_module.console.exception("Error getting file pairs", e)
                 writer.error(f"Error: {e}")
                 return None, 1
@@ -338,7 +343,7 @@ class RichAnimeLibrarian:
                             f"  ✅ Successfully moved to: {target_file}"
                         )
                     progress.advance(task)
-                except Exception as e:
+                except (OSError, shutil.Error) as e:
                     error_msg = str(e)
                     if console_module.console.verbose:
                         console_module.console.debug(f"  ❌ Failed: {error_msg}")

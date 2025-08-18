@@ -24,6 +24,7 @@ def test_get_name_pairs_from_ai_error_handling():
         source_path=source_path,
         target_path=target_path,
         http_client=mock_http_client,
+        console=None,  # No console for tests
     )
 
     # Call the method and verify it raises an exception
@@ -49,6 +50,7 @@ def test_get_name_pairs_from_ai_parse_error():
         source_path=source_path,
         target_path=target_path,
         http_client=mock_http_client,
+        console=None,  # No console for tests
     )
 
     # Call the method and verify it raises an AIParseError
@@ -69,6 +71,7 @@ def test_create_directories_error():
     renamer = FileRenamer(
         source_path=source_path,
         target_path=target_path,
+        console=None,  # No console for tests
     )
 
     # Mock the Path.mkdir method to raise an exception

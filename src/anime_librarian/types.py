@@ -125,3 +125,60 @@ class ConfigProvider(Protocol):
             The target path
         """
         ...
+
+
+@runtime_checkable
+class Console(Protocol):
+    """Protocol for console operations."""
+
+    @property
+    def verbose(self) -> bool:
+        """Get the verbose mode setting."""
+        ...
+
+    def success(self, message: str, title: str | None = None) -> None:
+        """Display a success message."""
+        ...
+
+    def info(self, message: str, title: str | None = None) -> None:
+        """Display an informational message."""
+        ...
+
+    def warning(self, message: str, title: str | None = None) -> None:
+        """Display a warning message."""
+        ...
+
+    def error(self, message: str, title: str | None = None) -> None:
+        """Display an error message."""
+        ...
+
+    def debug(self, message: str) -> None:
+        """Display a debug message (only if verbose mode is enabled)."""
+        ...
+
+    def exception(self, message: str, exc_info: Exception | None = None) -> None:
+        """Display an exception message with optional exception details."""
+        ...
+
+    def print_header(self, title: str, subtitle: str | None = None) -> None:
+        """Print a beautiful header for the application."""
+        ...
+
+    def print_file_operation(
+        self,
+        operation: str,
+        source: str,
+        target: str | None = None,
+        status: str = "pending",
+        show_full_path: bool = False,
+    ) -> None:
+        """Print a beautiful file operation message."""
+        ...
+
+    def create_progress(self, description: str = "Processing...") -> Any:
+        """Create a progress bar for long operations."""
+        ...
+
+    def ask_confirmation(self, question: str, default: bool = False) -> bool:
+        """Ask user for confirmation with beautiful formatting."""
+        ...
