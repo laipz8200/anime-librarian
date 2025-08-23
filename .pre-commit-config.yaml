@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8  # Match the version in pyproject.toml
+    rev: v0.11.8
     hooks:
       - id: ruff
         name: ruff check
@@ -9,7 +9,7 @@ repos:
         name: ruff format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0  # Match the version in pyproject.toml
+    rev: v1.15.0
     hooks:
       - id: mypy
         additional_dependencies:

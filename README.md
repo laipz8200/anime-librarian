@@ -179,8 +179,8 @@ cd anime-librarian
 # Install dependencies with uv
 uv sync
 
-# Install pre-commit hooks
-pre-commit install
+# Install prek hooks (pre-commit alternative)
+prek install
 ```
 
 ### Development Workflow
