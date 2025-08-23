@@ -32,5 +32,5 @@ Fixes # (issue)
 
 - [x] Linting with ruff passes
 - [x] Formatting with ruff passes
-- [x] Type checking with mypy passes
+- [x] Type checking with ty passes
 - [x] Unit tests with pytest pass
