@@ -14,7 +14,7 @@
 
 </div>
 
----
+______________________________________________________________________
 
 ## ✨ Key Features
 
@@ -51,6 +51,29 @@ anime-librarian --source ~/Downloads --target ~/Media
 
 ## 🛠️ Installation
 
+### Using pip (for users)
+
+```bash
+# Install directly from GitHub
+pip install git+https://github.com/laipz8200/anime-librarian.git
+```
+
+### Using uv (recommended for development)
+
+```bash
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone the repository
+git clone https://github.com/laipz8200/anime-librarian.git
+cd anime-librarian
+
+# Install dependencies with uv
+uv sync
+```
+
+### Traditional pip setup
+
 ```bash
 # Clone the repository
 git clone https://github.com/laipz8200/anime-librarian.git
@@ -69,12 +92,12 @@ pip install .
 ### Dify Workflow Setup
 
 1. Sign up at [Dify](https://cloud.dify.ai)
-2. Configure your language model
-3. Import the workflow:
+1. Configure your language model
+1. Import the workflow:
    - Use DSL import
    - Import `Anime Librarian.yml` from `Dify DSL File`
-4. Create an API key
-5. Copy API key and endpoint URL
+1. Create an API key
+1. Copy API key and endpoint URL
 
 > [!TIP]
 > Add a TMDB API key to enhance media identification accuracy!
@@ -87,7 +110,7 @@ pip install .
    cp .env.example .env
    ```
 
-2. Update `.env` values per the comments
+1. Update `.env` values per the comments
 
 ⚠️ **Important**: Create media category subdirectories in your `ANIMELIBRARIAN_TARGET_PATH` for optimal AI organization.
 
@@ -110,25 +133,27 @@ anime-librarian --help
 ## 🔄 How It Works
 
 1. 📂 Scans source directory for videos
-2. 🗂️ Identifies existing media categories
-3. 🤖 AI analyzes filenames via Dify (with progress indicator)
-4. ✨ Generates standardized names
-5. 📝 Shows proposed changes in a formatted table
-6. ✅ Moves and renames with real-time progress bar
+1. 🗂️ Identifies existing media categories
+1. 🤖 AI analyzes filenames via Dify (with progress indicator)
+1. ✨ Generates standardized names
+1. 📝 Shows proposed changes in a formatted table
+1. ✅ Moves and renames with real-time progress bar
 
 ## 🎨 Enhanced User Experience
 
 AnimeLibrarian now features a beautiful Rich-powered terminal interface:
 
-- **Color-coded Messages**: 
+- **Color-coded Messages**:
+
   - 🟢 Success messages in green
-  - 🔴 Errors in red  
+  - 🔴 Errors in red
   - 🟡 Warnings in yellow
   - 🔵 Info messages in blue
 
 - **Interactive Tables**: File moves displayed in formatted tables with clear source → target mapping
 
-- **Progress Indicators**: 
+- **Progress Indicators**:
+
   - Spinning indicators for AI analysis
   - Progress bars for file operations
   - Real-time status updates
@@ -141,30 +166,79 @@ AnimeLibrarian now features a beautiful Rich-powered terminal interface:
 
 ## 👩‍💻 Development
 
-```bash
-# Setup development environment
-pip install -e ".[dev]"
-pre-commit install
+### Setup Development Environment
 
-# Quality checks
-pytest                    # Run tests
-pytest --cov             # Test coverage
-ruff check .             # Linting
-ruff format .            # Formatting
-mypy .                   # Type checking
+```bash
+# Install uv package manager (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone and setup
+git clone https://github.com/laipz8200/anime-librarian.git
+cd anime-librarian
+
+# Install dependencies with uv
+uv sync
+
+# Install pre-commit hooks
+pre-commit install
 ```
+
+### Development Workflow
+
+```bash
+# Run linting and formatting
+make lint                 # Format code and fix issues
+make format              # Just format code
+make check               # Check code without fixes
+
+# Run tests
+make test                # Run all tests
+make test-mock           # Run mock server tests only
+pytest --cov             # Run with coverage report
+
+# Clean up
+make clean               # Remove generated files
+```
+
+### Testing with Mock Server
+
+The project includes a comprehensive mock Dify server for testing without API access:
+
+```bash
+# Run integration tests with mock server
+uv run pytest tests/test_integration_with_mock_server.py -v
+
+# Use mock server in your tests
+from tests.fixtures.mock_server_fixtures import run_mock_server
+
+with run_mock_server() as server_url:
+    # Your test code here
+    pass
+```
+
+See `tests/README_MOCK_SERVER.md` for detailed mock server documentation.
 
 ### Quality Assurance
 
 - **Pre-commit Hooks**: Automatic code quality checks
+
   - Linting (ruff)
   - Formatting (ruff)
   - Type checking (mypy)
 
 - **CI/CD**: GitHub Actions workflow
+
   - Code quality checks
-  - Test suite execution
+  - Test suite execution (98+ tests)
   - Automated PR validation
+
+- **Make Commands**: Quick development tasks
+
+  ```bash
+  make help     # Show all available commands
+  make lint     # Run full linting
+  make test     # Run all tests
+  ```
 
 ## 🔍 Troubleshooting
 
