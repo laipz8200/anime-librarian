@@ -1,0 +1,18 @@
+# MDFormat configuration
+# https://mdformat.readthedocs.io/
+
+[plugin.frontmatter]
+# Preserve YAML frontmatter
+preserve = true
+
+[plugin.tables]
+# Enable GitHub Flavored Markdown tables
+
+[plugin.gfm]
+# Enable GitHub Flavored Markdown features
+
+# Wrap text at 88 characters (matching ruff's line length)
+wrap = 88
+
+# Number of spaces for indentation
+indent = 2
