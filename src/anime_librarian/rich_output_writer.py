@@ -14,16 +14,18 @@ from .types import OutputWriter
 class RichOutputWriter(OutputWriter):
     """Rich-enhanced implementation of OutputWriter for better UX."""
 
-    def __init__(self, verbose: bool = False) -> None:
+    def __init__(self, verbose: bool = False, *, no_color: bool = False) -> None:
         """
         Initialize with verbosity setting.
 
         Args:
             verbose: If True, show verbose output
+            no_color: If True, disable colored output
         """
         self.verbose = verbose
-        # Force color output even when not detected as terminal
-        self.console = Console(force_terminal=True, color_system="auto")
+        # Force terminal for consistent formatting; allow disabling color
+        color_system = None if no_color else "auto"
+        self.console = Console(force_terminal=True, color_system=color_system)
 
     def message(self, message: str) -> None:
         """
@@ -74,20 +76,49 @@ class RichOutputWriter(OutputWriter):
         for item in items:
             self.console.print(f"  • {item}", style="dim")
 
-    def display_file_moves_table(self, file_pairs: Sequence[tuple[str, str]]) -> None:
+    def display_file_moves_table(
+        self, file_pairs: Sequence[tuple[str, str]], output_format: str | None = None
+    ) -> None:
         """
-        Display planned file moves in a rich table format.
+        Display planned file moves in the requested format.
 
         Args:
             file_pairs: List of (source, target) file name pairs
+            output_format: One of {table, plain, json, ndjson}. Defaults to table.
         """
+        fmt = (output_format or "table").lower()
+
+        # Plain format: minimal, machine-friendly-ish text with no styling
+        if fmt == "plain":
+            for source, target in file_pairs:
+                self.console.print(f"{source} -> {target}", markup=False)
+            return
+
+        if fmt in {"json", "ndjson"}:
+            try:
+                import json
+            except Exception:  # pragma: no cover - if json import fails, fallback
+                fmt = "table"
+            else:
+                records = [
+                    {"source": source, "target": target}
+                    for source, target in file_pairs
+                ]
+                if fmt == "json":
+                    self.console.print(
+                        json.dumps(records, ensure_ascii=False, indent=2)
+                    )
+                else:  # ndjson
+                    for rec in records:
+                        self.console.print(json.dumps(rec, ensure_ascii=False))
+                return
+
         # Check terminal width to decide on table layout
         term_width = self.console.width
 
         # For very narrow terminals, use a list format instead of table
         if term_width < 100:
-            self.console.print()
-            self.console.print("[bold cyan]Planned File Moves[/bold cyan]")
+            # Minimal output: no title banner
             self.console.print()
             for source, target in file_pairs:
                 self.console.print(f"  [yellow]{source}[/yellow]")
@@ -97,7 +128,7 @@ class RichOutputWriter(OutputWriter):
         else:
             # Use table for wider terminals
             table = Table(
-                title="Planned File Moves",
+                title=None,
                 show_header=True,
                 header_style="bold cyan",
                 expand=True,  # Use full terminal width
@@ -147,6 +178,7 @@ class RichOutputWriter(OutputWriter):
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=self.console,
+            transient=True,
         )
         progress.add_task(description, total=None)
         return progress
@@ -204,10 +236,11 @@ class RichOutputWriter(OutputWriter):
 class RichInputReader:
     """Rich-enhanced input reader for interactive prompts."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, no_color: bool = False) -> None:
         """Initialize the Rich input reader."""
-        # Force color output even when not detected as terminal
-        self.console = Console(force_terminal=True, color_system="auto")
+        # Force terminal; allow disabling color
+        color_system = None if no_color else "auto"
+        self.console = Console(force_terminal=True, color_system=color_system)
 
     def confirm(self, prompt: str, default: bool = False) -> bool:
         """

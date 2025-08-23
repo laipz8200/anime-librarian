@@ -106,26 +106,45 @@ class FileRenamer:
         }
 
         # Send POST request to the AI service
-        if self.console:
-            self.console.debug("Sending request to AI service")
-            self.console.debug(f"Payload: {payload}")
+        if self.console and self.console.verbose:
+            # Redact sensitive headers for logging
+            redacted_headers = dict(headers)
+            if "Authorization" in redacted_headers:
+                redacted_headers["Authorization"] = "Bearer ********"
+            self.console.debug("=== Sending API Request ===")
+            self.console.debug(f"  🌐 Endpoint: {self.api_endpoint}")
+            self.console.debug(f"  ⏱️  Timeout: {self.api_timeout}s")
+            self.console.debug(f"  🔑 Headers: {redacted_headers}")
+            self.console.debug(f"  📋 Files sent: {len(source_files_list)}")
+            self.console.debug(f"  📂 Directories: {len(target_files_list)}")
         resp = self.http_client.post(
             self.api_endpoint, headers=headers, json=payload, timeout=self.api_timeout
         )
 
         # Log raw response for debugging
-        if self.console:
-            self.console.debug("Received response from AI service")
-            status = resp.status_code if hasattr(resp, "status_code") else "OK"
-            self.console.debug(f"Status: {status}")
-            self.console.debug(f"Response data: {resp}")
+        if self.console and self.console.verbose:
+            self.console.debug("=== API Response Received ===")
+            status = getattr(self.http_client, "last_status_code", None)
+            if status is not None:
+                self.console.debug(f"  ✅ Status Code: {status}")
+            else:
+                self.console.debug("  ✅ Status: OK")
+
+            # Show response size info
+            if isinstance(resp, dict):
+                import json
+
+                resp_size = len(json.dumps(resp))
+                self.console.debug(f"  📦 Response size: {resp_size} bytes")
 
         # Validate response structure using Pydantic model
         try:
             api_response = ApiResponse.model_validate(resp)
             response_text = api_response.response_text
-            if self.console:
-                self.console.debug(f"Extracted response text: {response_text}")
+            if self.console and self.console.verbose:
+                self.console.debug(
+                    f"  📄 AI suggested {len(response_text.splitlines())} mappings"
+                )
         except (ValueError, TypeError, KeyError) as exc:
             if self.console:
                 self.console.exception(

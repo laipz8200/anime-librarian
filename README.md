@@ -43,6 +43,19 @@ anime-librarian
 anime-librarian --source ~/Downloads --target ~/Media
 ```
 
+### UNIX-Friendly Modes
+
+```bash
+# Quiet + non-interactive (for automation)
+anime-librarian --yes --quiet --non-interactive
+
+# Preview only
+anime-librarian --dry-run --format table
+
+# Machine-readable output (format parsed, rendering incremental)
+anime-librarian --dry-run --format json --no-color
+```
+
 ## 📋 Prerequisites
 
 - [Dify](https://cloud.dify.ai) account
@@ -123,8 +136,14 @@ anime-librarian --dry-run
 # Auto-confirm all prompts
 anime-librarian --yes
 
+# Quiet (CI/CD)
+anime-librarian --quiet --yes
+
 # Enable detailed logging
 anime-librarian --verbose
+
+# Disable colors
+anime-librarian --no-color
 
 # View all options
 anime-librarian --help
