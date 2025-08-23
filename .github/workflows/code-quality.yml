@@ -34,8 +34,8 @@ jobs:
     - name: Format check with ruff
       run: uv run ruff format --check .
 
-    - name: Type check with mypy
-      run: uv run mypy .
+    - name: Type check with ty
+      run: uv run ty check
 
   test:
     runs-on: ubuntu-latest

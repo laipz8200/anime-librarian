@@ -224,7 +224,7 @@ See `tests/README_MOCK_SERVER.md` for detailed mock server documentation.
 
   - Linting (ruff)
   - Formatting (ruff)
-  - Type checking (mypy)
+  - Type checking (ty)
 
 - **CI/CD**: GitHub Actions workflow
 
