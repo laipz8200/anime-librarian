@@ -6,7 +6,16 @@ import httpx
 
 
 class HttpxClient:
-    """Implementation of HttpClient using httpx library."""
+    """Implementation of HttpClient using httpx library.
+
+    Exposes last request/response metadata for verbose logging without
+    changing the public return type (still returns parsed JSON dict).
+    """
+
+    def __init__(self) -> None:
+        self.last_method: str | None = None
+        self.last_url: str | None = None
+        self.last_status_code: int | None = None
 
     def post(
         self, url: str, *, headers: dict[str, str], json: dict[str, Any], timeout: float
@@ -27,6 +36,9 @@ class HttpxClient:
             httpx.HTTPStatusError: If the HTTP request returns an error status code
             httpx.RequestError: If the request fails
         """
+        self.last_method = "POST"
+        self.last_url = url
         resp = httpx.post(url, headers=headers, json=json, timeout=timeout)
+        self.last_status_code = resp.status_code
         resp.raise_for_status()  # Raise an exception for HTTP errors
         return resp.json()

@@ -10,14 +10,7 @@ from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import (
-    BarColumn,
-    Progress,
-    SpinnerColumn,
-    TaskProgressColumn,
-    TextColumn,
-    TimeElapsedColumn,
-)
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
@@ -401,14 +394,12 @@ class BeautifulConsole:
             A configured Rich Progress object
         """
         self._last_was_progress = True
+        # Only show a lightweight spinner with description; disappear when done
         return Progress(
             SpinnerColumn(spinner_name="dots"),
             TextColumn("[progress.description]{task.description}"),
-            BarColumn(bar_width=40),
-            TaskProgressColumn(),
-            TimeElapsedColumn(),
             console=self.console,
-            transient=False,
+            transient=True,
         )
 
     def print_summary_table(self, title: str, data: list[tuple[str, str]]) -> None:
@@ -483,5 +474,4 @@ def set_verbose_mode(verbose: bool = False) -> None:
     """
     global console
     console = BeautifulConsole(verbose=verbose)
-    if verbose:
-        console.debug("Verbose mode enabled")
+    # Do not emit any extra log line when enabling verbose mode
