@@ -162,7 +162,7 @@ class FileRenamer:
         # Parse the JSON response
         try:
             # Repair the JSON response if needed
-            json_response = json_repair.repair_json(response_text, return_objects=True)
+            json_response = json_repair.repair_json(response_text, return_objects=True)  # type: ignore[reportUnknownMemberType]
 
             # Parse the response using Pydantic model
             ai_response = AIResponse.model_validate(json_response)
@@ -280,7 +280,7 @@ class FileRenamer:
         Returns:
             List of directories that need to be created
         """
-        missing_dirs = set()
+        missing_dirs: set[Path] = set()
         for _, target_file in file_pairs:
             target_dir = target_file.parent
             if not target_dir.exists():
@@ -320,7 +320,7 @@ class FileRenamer:
         Returns:
             List of (source, target, error) tuples for failed operations
         """
-        errors = []
+        errors: list[tuple[Path, Path, str]] = []
         for source_file, target_file in file_pairs:
             try:
                 if self.console:

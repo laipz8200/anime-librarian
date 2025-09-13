@@ -41,5 +41,5 @@ class HttpxClient:
         resp = httpx.post(url, headers=headers, json=json, timeout=timeout)
         self.last_status_code = resp.status_code
         _ = resp.raise_for_status()  # Raise an exception for HTTP errors
-        result: dict[str, Any] = resp.json()
+        result: dict[str, Any] = resp.json()  # type: ignore[reportAny]
         return result

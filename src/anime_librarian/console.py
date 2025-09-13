@@ -346,7 +346,7 @@ class BeautifulConsole:
         """Print file operation in verbose format with full paths."""
         self.console.print(
             f"  [{color}]{icon}[/{color}] [bold]{operation}[/bold]: "
-            f"[filename]{source_name}[/filename]"
+            + f"[filename]{source_name}[/filename]"
         )
         self.console.print(f"      [dim]From:[/dim] [path]{source}[/path]")
 
@@ -381,7 +381,7 @@ class BeautifulConsole:
             )
             self.console.print(
                 f"  [{color}]{icon}[/{color}] [filename]{source_name}[/filename] "
-                f"[dim]→[/dim] [path]{display_target}[/path]"
+                + f"[dim]→[/dim] [path]{display_target}[/path]"
             )
         else:
             # Not enough space - use multi-line format

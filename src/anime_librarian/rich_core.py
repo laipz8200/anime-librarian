@@ -316,7 +316,7 @@ class RichAnimeLibrarian:
         Returns:
             Exit code (0 for success, non-zero for error)
         """
-        errors = []
+        errors: list[tuple[Path, Path, str]] = []
 
         if self._console.verbose and self._args and not self._args.quiet:
             self._console.debug("=== Starting file operations ===")
@@ -336,7 +336,7 @@ class RichAnimeLibrarian:
                 error_msg = file_errors[0][2]
                 if self._console.verbose and self._args and not self._args.quiet:
                     self._console.debug(f"    ❌ Failed: {error_msg}")
-                errors.extend(file_errors)  # type: ignore[attr-defined]
+                errors.extend(file_errors)
             else:
                 if self._console.verbose and self._args and not self._args.quiet:
                     parent_name = target_file.parent.name
@@ -344,9 +344,9 @@ class RichAnimeLibrarian:
                     self._console.debug(f"    ✅ Moved to: {parent_name}/{file_name}")
 
         if errors:
-            writer.error(f"Completed with {len(errors)} errors:")  # type: ignore[arg-type]
+            writer.error(f"Completed with {len(errors)} errors:")
             if self._args and not self._args.quiet:
-                for source, target, error in errors:  # type: ignore[misc]
+                for source, target, error in errors:
                     writer.console.print(
                         f"  • {source.name} → {target.name}: {error}", style="red"
                     )
@@ -380,8 +380,8 @@ class RichAnimeLibrarian:
         if args.version:
             writer = RichOutputWriter(args.verbose, no_color=args.no_color)
             writer.console.print(
-                f"[bold cyan]anime-librarian[/bold cyan] "
-                f"version [yellow]{__version__}[/yellow]"
+                "[bold cyan]anime-librarian[/bold cyan] version "
+                + f"[yellow]{__version__}[/yellow]"
             )
             return 0
 

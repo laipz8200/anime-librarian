@@ -1,6 +1,6 @@
 # Makefile for AnimeLibrarian project
 
-.PHONY: help lint format check typecheck test test-mock install clean
+.PHONY: help lint format check type-check test test-mock install clean
 
 help:  ## Show this help message
 	@echo "AnimeLibrarian Development Commands"
@@ -28,7 +28,7 @@ check-md:  ## Check Markdown files (no fixes)
 	@echo "🔍 Checking Markdown files..."
 	@uv run python scripts/lint_markdown.py --check
 
-typecheck:  ## Run type checking with basedpyright
+type-check:  ## Run type checking with basedpyright
 	@echo "🔍 Running type checking with basedpyright..."
 	@uv run basedpyright
 
