@@ -185,7 +185,7 @@ class Console(Protocol):
         """Print a beautiful file operation message."""
         ...
 
-    def create_progress(self, description: str = "Processing...") -> Any:
+    def create_progress(self, description: str = "Processing...") -> object:
         """Create a progress bar for long operations."""
         ...
 

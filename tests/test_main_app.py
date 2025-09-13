@@ -78,4 +78,4 @@ def test_main_with_exception(mock_app_class):
 
     # Call main - should not raise but return an error code
     with pytest.raises(Exception, match="Test error"):
-        main()
+        _ = main()

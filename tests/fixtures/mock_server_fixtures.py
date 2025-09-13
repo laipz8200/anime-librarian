@@ -17,7 +17,7 @@ import pytest
 import uvicorn
 from httpx import Client
 
-# Add parent directory to path to import mock_dify_server
+# Add tests directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mock_dify_server import mock_server
@@ -197,11 +197,13 @@ def custom_response_multiple_files() -> dict[str, Any]:
     return {
         "data": {
             "outputs": {
-                "text": '{"result": ['
-                '{"original_name": "file1.mkv", "new_name": "Dir1/new1.mkv"},'
-                '{"original_name": "file2.mp4", "new_name": "Dir2/new2.mp4"},'
-                '{"original_name": "file3.avi", "new_name": "Dir3/new3.avi"}'
-                "]}"
+                "text": (
+                    '{"result": ['
+                    '{"original_name": "file1.mkv", "new_name": "Dir1/new1.mkv"},'
+                    '{"original_name": "file2.mp4", "new_name": "Dir2/new2.mp4"},'
+                    '{"original_name": "file3.avi", "new_name": "Dir3/new3.avi"}'
+                    "]}"
+                )
             }
         }
     }

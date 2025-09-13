@@ -221,7 +221,7 @@ def test_anime_librarian_verbose_mode(mock_file_renamer_factory, mock_set_verbos
     )
 
     # Run the application
-    app.run()
+    _ = app.run()
 
     # Verify set_verbose_mode was called with True
     mock_set_verbose_mode.assert_called_once_with(True)

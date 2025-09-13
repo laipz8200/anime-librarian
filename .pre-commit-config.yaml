@@ -10,9 +10,9 @@ repos:
 
   - repo: local
     hooks:
-      - id: ty
-        name: ty type check
-        entry: uv run ty check
+      - id: basedpyright
+        name: basedpyright type check
+        entry: uv run basedpyright
         language: system
         types: [python]
         pass_filenames: false

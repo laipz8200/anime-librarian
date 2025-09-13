@@ -37,7 +37,7 @@ def test_default_config_provider_error_handling():
     ):
         provider = DefaultConfigProvider()
         with pytest.raises(ValueError, match="Source path error"):
-            provider.get_source_path()
+            _ = provider.get_source_path()
 
     # Test error handling for get_target_path
     with patch(
@@ -46,4 +46,4 @@ def test_default_config_provider_error_handling():
     ):
         provider = DefaultConfigProvider()
         with pytest.raises(ValueError, match="Target path error"):
-            provider.get_target_path()
+            _ = provider.get_target_path()

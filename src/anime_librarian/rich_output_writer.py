@@ -1,6 +1,7 @@
 """Rich-enhanced output writer implementation for the AnimeLibrarian application."""
 
 from collections.abc import Sequence
+from typing import override
 
 from rich.console import Console
 from rich.panel import Panel
@@ -13,6 +14,9 @@ from .types import OutputWriter
 
 class RichOutputWriter(OutputWriter):
     """Rich-enhanced implementation of OutputWriter for better UX."""
+
+    verbose: bool
+    console: Console
 
     def __init__(self, verbose: bool = False, *, no_color: bool = False) -> None:
         """
@@ -27,6 +31,7 @@ class RichOutputWriter(OutputWriter):
         color_system = None if no_color else "auto"
         self.console = Console(force_terminal=True, color_system=color_system)
 
+    @override
     def message(self, message: str) -> None:
         """
         Print informational or success message only in verbose mode.
@@ -37,6 +42,7 @@ class RichOutputWriter(OutputWriter):
         if self.verbose:
             self.console.print(f"[dim]{message}[/dim]")
 
+    @override
     def notice(self, message: str) -> None:
         """
         Always print error or warning message.
@@ -54,6 +60,7 @@ class RichOutputWriter(OutputWriter):
 
         self.console.print(message, style=style)
 
+    @override
     def list_items(
         self, header: str, items: Sequence[str], always_show: bool = False
     ) -> None:
@@ -180,7 +187,7 @@ class RichOutputWriter(OutputWriter):
             console=self.console,
             transient=True,
         )
-        progress.add_task(description, total=None)
+        _ = progress.add_task(description, total=None)
         return progress
 
     def success(self, message: str) -> None:
@@ -235,6 +242,8 @@ class RichOutputWriter(OutputWriter):
 
 class RichInputReader:
     """Rich-enhanced input reader for interactive prompts."""
+
+    console: Console
 
     def __init__(self, *, no_color: bool = False) -> None:
         """Initialize the Rich input reader."""

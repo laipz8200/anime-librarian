@@ -104,7 +104,7 @@ def test_user_name_in_api_request(mock_source_path, mock_target_path, mock_http_
         }
 
         # Call the method
-        file_renamer._get_name_pairs_from_ai(
+        _ = file_renamer._get_name_pairs_from_ai(
             source_files_list=["test.mp4"],
             target_files_list=["videos"],
         )

@@ -6,9 +6,15 @@ including its API endpoints, error handling, and response generation.
 """
 
 import json
+import sys
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+
+# Add tests directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
 from mock_dify_server import MockDifyServer, app, mock_server
 
 
@@ -97,7 +103,7 @@ class TestMockDifyServerEndpoints:
         assert mock_server.request_count == 0
 
         # Make first request
-        client.post(
+        _ = client.post(
             "/v1/workflows/run",
             json={
                 "inputs": {"files": "test1.mkv", "directories": "Dir1"},
@@ -109,7 +115,7 @@ class TestMockDifyServerEndpoints:
         assert mock_server.request_count == 1
 
         # Make second request
-        client.post(
+        _ = client.post(
             "/v1/workflows/run",
             json={
                 "inputs": {"files": "test2.mkv", "directories": "Dir2"},
