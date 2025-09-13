@@ -13,18 +13,16 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from fixtures.mock_server_fixtures import (
-    run_mock_server,
-)
-from mock_dify_server import mock_server
-
 from anime_librarian.errors import AIParseError
 from anime_librarian.file_renamer import FileRenamer
 from anime_librarian.rich_core import RichAnimeLibrarian as AnimeLibrarian
 from anime_librarian.types import CommandLineArgs, Console
+
+# Add tests directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
+from fixtures.mock_server_fixtures import run_mock_server
+from mock_dify_server import mock_server
 
 
 class TestFileRenamerWithMockServer:
@@ -106,7 +104,7 @@ class TestFileRenamerWithMockServer:
 
                 # Should raise AIParseError for invalid JSON
                 with pytest.raises(AIParseError):
-                    renamer.get_file_pairs()
+                    _ = renamer.get_file_pairs()
 
     def test_error_handling_missing_field(self) -> None:
         """Test handling of response with missing required fields."""
@@ -133,7 +131,7 @@ class TestFileRenamerWithMockServer:
 
                 # Should raise AIParseError for missing fields
                 with pytest.raises(AIParseError):
-                    renamer.get_file_pairs()
+                    _ = renamer.get_file_pairs()
 
     def test_conflict_detection(self) -> None:
         """Test detection of file conflicts."""
@@ -258,7 +256,7 @@ class TestFileRenamerWithMockServer:
                 "anime_ep_02.mkv",
             ]
             for file_name in source_files:
-                (source_path / file_name).write_text(f"Content of {file_name}")
+                _ = (source_path / file_name).write_text(f"Content of {file_name}")
 
             # Create target directory
             (target_path / "Anime Series").mkdir()
@@ -347,7 +345,7 @@ class TestAnimeLibrarianWithMockServer:
             mock_reader = Mock()
             mock_reader.read_input.return_value = "y"
 
-            Mock()
+            _ = Mock()
             mock_config = Mock()
             mock_console = Mock(spec=Console)
             mock_console.verbose = True
@@ -399,7 +397,7 @@ class TestAnimeLibrarianWithMockServer:
 
             # Create test files
             test_file = source_path / "test.mkv"
-            test_file.write_text("Original content")
+            _ = test_file.write_text("Original content")
 
             # Create target directory
             (target_path / "Target").mkdir()
@@ -504,10 +502,10 @@ class TestMockServerBehavior:
                     api_key="test-key",
                 )
 
-                renamer.get_file_pairs()
+                _ = renamer.get_file_pairs()
                 assert mock_server.request_count == 1
 
-                renamer.get_file_pairs()
+                _ = renamer.get_file_pairs()
                 assert mock_server.request_count == 2
 
     def test_server_reset(self) -> None:
@@ -565,7 +563,7 @@ class TestMockServerBehavior:
             # The mock server should match files to directories based on
             # partial name matching
             for source, target in file_pairs:
-                source.name.lower()
+                _ = source.name.lower()
                 target_str = str(target).lower()
 
                 # Check that files are matched to related directories

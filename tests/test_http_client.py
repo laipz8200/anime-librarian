@@ -56,7 +56,7 @@ def test_http_client_post_http_error(mock_post):
 
     # Verify the error is propagated
     with pytest.raises(httpx.HTTPStatusError):
-        client.post(
+        _ = client.post(
             url="https://api.example.com/endpoint",
             headers={"Authorization": "Bearer token"},
             json={"key": "value"},
@@ -79,7 +79,7 @@ def test_http_client_post_request_error(mock_post):
 
     # Verify the error is propagated
     with pytest.raises(httpx.RequestError):
-        client.post(
+        _ = client.post(
             url="https://api.example.com/endpoint",
             headers={"Authorization": "Bearer token"},
             json={"key": "value"},

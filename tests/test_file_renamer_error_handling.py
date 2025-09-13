@@ -29,7 +29,7 @@ def test_get_name_pairs_from_ai_error_handling():
 
     # Call the method and verify it raises an exception
     with pytest.raises(Exception, match="API connection error"):
-        renamer._get_name_pairs_from_ai(
+        _ = renamer._get_name_pairs_from_ai(
             source_files_list=["file1.mp4", "file2.mkv"],
             target_files_list=["Anime1", "Anime2"],
         )
@@ -55,7 +55,7 @@ def test_get_name_pairs_from_ai_parse_error():
 
     # Call the method and verify it raises an AIParseError
     with pytest.raises(AIParseError):
-        renamer._get_name_pairs_from_ai(
+        _ = renamer._get_name_pairs_from_ai(
             source_files_list=["file1.mp4", "file2.mkv"],
             target_files_list=["Anime1", "Anime2"],
         )

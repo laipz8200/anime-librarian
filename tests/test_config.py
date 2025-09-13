@@ -23,7 +23,7 @@ def test_get_source_path_error():
     """Test get_source_path when the path is not set."""
     with patch("anime_librarian.config.DEFAULT_SOURCE_PATH", ""):
         with pytest.raises(ValueError, match="Source path not set") as excinfo:
-            get_source_path()
+            _ = get_source_path()
         assert "ANIMELIBRARIAN_SOURCE_PATH" in str(excinfo.value)
 
 
@@ -41,7 +41,7 @@ def test_get_target_path_error():
     """Test get_target_path when the path is not set."""
     with patch("anime_librarian.config.DEFAULT_TARGET_PATH", ""):
         with pytest.raises(ValueError, match="Target path not set") as excinfo:
-            get_target_path()
+            _ = get_target_path()
         assert "ANIMELIBRARIAN_TARGET_PATH" in str(excinfo.value)
 
 
@@ -53,7 +53,7 @@ def test_user_name_default():
 
         import anime_librarian.config
 
-        importlib.reload(anime_librarian.config)
+        _ = importlib.reload(anime_librarian.config)
 
         # Check the default value
         assert anime_librarian.config.USER_NAME == "Anime Librarian"
@@ -67,7 +67,7 @@ def test_user_name_from_env():
 
         import anime_librarian.config
 
-        importlib.reload(anime_librarian.config)
+        _ = importlib.reload(anime_librarian.config)
 
         # Check the value from environment
         assert anime_librarian.config.USER_NAME == "Custom User"

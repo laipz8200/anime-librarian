@@ -6,7 +6,6 @@ This module provides a Rich-based console interface with beautiful UI/UX.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -32,6 +31,11 @@ custom_theme = Theme(
 class BeautifulConsole:
     """Beautiful console output handler using Rich library for excellent UI/UX."""
 
+    console: Console
+    verbose: bool
+    _log_file: Path | None
+    _last_was_progress: bool
+
     def __init__(self, verbose: bool = False) -> None:
         """
         Initialize the beautiful console.
@@ -41,7 +45,7 @@ class BeautifulConsole:
         """
         self.console = Console(theme=custom_theme)
         self.verbose = verbose
-        self._log_file: Path | None = None
+        self._log_file = None
         self._setup_log_file()
         self._last_was_progress = False
 
@@ -57,7 +61,7 @@ class BeautifulConsole:
         if self._log_file:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             with open(self._log_file, "a", encoding="utf-8") as f:
-                f.write(f"[{timestamp}] [{level}] {message}\n")
+                _ = f.write(f"[{timestamp}] [{level}] {message}\n")
 
     def _get_terminal_width(self) -> int:
         """Get the current terminal width."""
@@ -241,7 +245,7 @@ class BeautifulConsole:
         self.console.print()
         header_text = Text(title, style="bold bright_cyan")
         if subtitle:
-            header_text.append(f"\n{subtitle}", style="dim white")
+            _ = header_text.append(f"\n{subtitle}", style="dim white")
 
         panel = Panel(
             header_text,
@@ -383,7 +387,7 @@ class BeautifulConsole:
             # Not enough space - use multi-line format
             self._print_narrow_format(icon, color, source_name, source, target)
 
-    def create_progress(self, description: str = "Processing...") -> Any:  # noqa: ARG002
+    def create_progress(self, description: str = "Processing...") -> Progress:  # noqa: ARG002
         """
         Create a beautiful progress bar for long operations.
 

@@ -42,6 +42,14 @@ class FileRenamer:
     SUBTITLE_EXTENSIONS: ClassVar[set[str]] = {".srt", ".ass", ".ssa", ".sub", ".vtt"}
     MEDIA_EXTENSIONS: ClassVar[set[str]] = VIDEO_EXTENSIONS.union(SUBTITLE_EXTENSIONS)
 
+    source_path: Path
+    target_path: Path
+    http_client: HttpClient
+    console: Console | None
+    api_endpoint: str
+    api_key: str
+    api_timeout: int
+
     def __init__(
         self,
         source_path: Path,
@@ -96,7 +104,7 @@ class FileRenamer:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
-        payload = {
+        payload: dict[str, dict[str, str] | str] = {
             "inputs": {
                 "files": "\n".join(str(f) for f in source_files_list),
                 "directories": "\n".join(str(f) for f in target_files_list),
@@ -160,7 +168,7 @@ class FileRenamer:
             ai_response = AIResponse.model_validate(json_response)
 
             # Convert the Pydantic model to a list of tuples
-            name_pairs = []
+            name_pairs: list[tuple[str, str]] = []
             for pair in ai_response.result:
                 name_pairs.append((pair.original_name, pair.new_name))
 
@@ -225,7 +233,7 @@ class FileRenamer:
         )
 
         # Convert string pairs to full Path objects
-        full_path_pairs = []
+        full_path_pairs: list[tuple[Path, Path]] = []
         for source_name, target_name in name_pairs:
             source_file = self.source_path / source_name
 
@@ -254,7 +262,7 @@ class FileRenamer:
         Returns:
             List of target paths that already exist
         """
-        conflicts = []
+        conflicts: list[Path] = []
         for _, target_path in file_pairs:
             if target_path.exists():
                 conflicts.append(target_path)
@@ -322,7 +330,7 @@ class FileRenamer:
                     self.console.print_file_operation(
                         "Moving", str(source_file), str(target_file), "processing"
                     )
-                shutil.move(str(source_file), str(target_file))
+                _ = shutil.move(str(source_file), str(target_file))
             except (OSError, shutil.Error) as e:
                 error_msg = str(e)
                 # Don't include the exception object in the log message

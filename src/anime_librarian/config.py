@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if it exists
-load_dotenv()
+_ = load_dotenv()
 
 # API configuration
 # NOTE: For security, set these values in your .env file instead of here
