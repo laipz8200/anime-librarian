@@ -12,9 +12,9 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai:0.0.30@1f5ecdef108418a467e54da2dcf5de2cf22b47632abc8633194ac9fb96317ede
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.5@373362a028986aae53a7baf73a7f11991ba3c22c69eaf97d6cde048cfd4a9f98
 kind: app
-version: 0.3.1
+version: 0.4.0
 workflow:
   conversation_variables: []
   environment_variables:
@@ -398,7 +398,7 @@ workflow:
       positionAbsolute:
         x: 30
         y: 176.5
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -447,7 +447,7 @@ workflow:
       positionAbsolute:
         x: 531.2135849892466
         y: 176.5
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -466,7 +466,7 @@ workflow:
         - output
         output_type: array[string]
         parallel_nums: 5
-        selected: false
+        selected: true
         start_node_id: 1747417424520start
         title: Iteration
         type: iteration
@@ -631,12 +631,12 @@ workflow:
       height: 90
       id: '17474207593550'
       position:
-        x: 4394.247547462364
+        x: 4201.453467372791
         y: 176.5
       positionAbsolute:
-        x: 4394.247547462364
+        x: 4201.453467372791
         y: 176.5
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -654,12 +654,12 @@ workflow:
       height: 90
       id: '1747420923459'
       position:
-        x: 4644.854339956986
+        x: 4452.060259867413
         y: 176.5
       positionAbsolute:
-        x: 4644.854339956986
+        x: 4452.060259867413
         y: 176.5
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -682,12 +682,12 @@ workflow:
       height: 54
       id: '1747421288829'
       position:
-        x: 4143.640754967741
+        x: 3950.8466748781675
         y: 176.5
       positionAbsolute:
-        x: 4143.640754967741
+        x: 3950.8466748781675
         y: 176.5
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -733,7 +733,7 @@ workflow:
       positionAbsolute:
         x: 1523.3210611531163
         y: 267.79025430034807
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -774,7 +774,7 @@ workflow:
       positionAbsolute:
         x: 1833.900333778261
         y: 268.1829094994199
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -809,7 +809,7 @@ workflow:
       positionAbsolute:
         x: 1835.2537930215894
         y: 416.7720699289739
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -838,7 +838,7 @@ workflow:
       positionAbsolute:
         x: 3171.1093689541276
         y: 333.9756357508702
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -883,7 +883,7 @@ workflow:
       positionAbsolute:
         x: 2511.715833041397
         y: 560.720869479612
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -940,7 +940,7 @@ workflow:
       positionAbsolute:
         x: 2182.714597065846
         y: 652.5135957310624
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -975,7 +975,7 @@ workflow:
       positionAbsolute:
         x: 2180.045283297489
         y: 537.6122887031327
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1013,7 +1013,7 @@ workflow:
       positionAbsolute:
         x: 2827.5585237666587
         y: 486.29396222700154
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1048,7 +1048,7 @@ workflow:
       positionAbsolute:
         x: 2827.596128484958
         y: 598.141596854467
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1108,7 +1108,7 @@ workflow:
       positionAbsolute:
         x: 2831.581296778345
         y: 699.8843586321066
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1142,7 +1142,7 @@ workflow:
       positionAbsolute:
         x: 3169.793514429098
         y: 598.141596854467
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1171,7 +1171,7 @@ workflow:
       positionAbsolute:
         x: 3581.4304145764713
         y: 461.27330590452505
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1230,7 +1230,7 @@ workflow:
       positionAbsolute:
         x: 1207.4783704278552
         y: 267.44879955063817
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1261,7 +1261,7 @@ workflow:
       positionAbsolute:
         x: 280.6067924946233
         y: 176.5
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1386,7 +1386,7 @@ workflow:
       positionAbsolute:
         x: 781.8203774838698
         y: 1116.768235997596
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1405,17 +1405,17 @@ workflow:
       height: 90
       id: '17477628577181'
       position:
-        x: 3893.0339624731164
+        x: 1093.033962473116
         y: 1116.768235997596
       positionAbsolute:
-        x: 3893.0339624731164
+        x: 1093.033962473116
         y: 1116.768235997596
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 244
     viewport:
-      x: -6337.962609784996
-      y: -104.07154820540666
-      zoom: 1.638073395719657
+      x: 78.90387047625393
+      y: 247.73399447074183
+      zoom: 0.25
