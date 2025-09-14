@@ -1,6 +1,6 @@
 # Makefile for AnimeLibrarian project
 
-.PHONY: help lint format check type-check test test-mock install clean
+.PHONY: help lint format check type-check test install clean
 
 help:  ## Show this help message
 	@echo "AnimeLibrarian Development Commands"
@@ -35,10 +35,6 @@ type-check:  ## Run type checking with basedpyright
 test:  ## Run all tests
 	@echo "🧪 Running tests..."
 	@uv run pytest -v
-
-test-mock:  ## Run mock server tests only
-	@echo "🧪 Running mock server tests..."
-	@uv run pytest tests/test_mock_server.py tests/test_integration_with_mock_server.py -v
 
 install:  ## Install dependencies
 	@echo "📦 Installing dependencies..."

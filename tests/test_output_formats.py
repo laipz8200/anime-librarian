@@ -2,10 +2,12 @@
 
 import json
 
+import pytest
+
 from anime_librarian.rich_output_writer import RichOutputWriter
 
 
-def test_display_file_moves_plain(capsys):
+def test_display_file_moves_plain(capsys: pytest.CaptureFixture[str]) -> None:
     """Plain format prints minimal 'source -> target' lines without styling."""
     writer = RichOutputWriter(no_color=True)
     pairs = [("a.mp4", "b.mp4"), ("x.mkv", "y.mkv")]
@@ -17,7 +19,7 @@ def test_display_file_moves_plain(capsys):
     assert "x.mkv -> y.mkv" in out
 
 
-def test_display_file_moves_json_indented(capsys):
+def test_display_file_moves_json_indented(capsys: pytest.CaptureFixture[str]) -> None:
     """JSON format prints an indented array with indent=2 and valid JSON."""
     writer = RichOutputWriter(no_color=True)
     pairs = [("a.mp4", "b.mp4"), ("x.mkv", "y.mkv")]
@@ -36,7 +38,7 @@ def test_display_file_moves_json_indented(capsys):
     assert "\n  {" in out  # two spaces before object
 
 
-def test_display_file_moves_ndjson(capsys):
+def test_display_file_moves_ndjson(capsys: pytest.CaptureFixture[str]) -> None:
     """NDJSON format prints one JSON object per line."""
     writer = RichOutputWriter(no_color=True)
     pairs = [("a.mp4", "b.mp4"), ("x.mkv", "y.mkv")]

@@ -46,7 +46,7 @@ class MockDifyServer:
         """Set up the API routes."""
 
         @self.app.post("/v1/workflows/run")
-        async def run_workflow(
+        async def _run_workflow(  # pyright: ignore[reportUnusedFunction]
             request: WorkflowRequest,
             authorization: str = Header(...),
         ) -> dict[str, Any]:
@@ -104,7 +104,7 @@ class MockDifyServer:
 
         This simulates the AI logic for matching files to appropriate directories.
         """
-        suggestions = []
+        suggestions: list[dict[str, str]] = []
 
         for file in files:
             if not file:
