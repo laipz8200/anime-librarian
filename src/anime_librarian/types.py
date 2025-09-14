@@ -26,9 +26,6 @@ class CommandLineArgs:
     """Whether to show the version information and exit."""
 
     # Optional/extended flags (defaulted to maintain compatibility on older Python)
-    quiet: bool = False
-    """Whether to minimize output and avoid prompts."""
-
     output_format: str | None = None
     """Preferred output format: table, plain, json, ndjson."""
 

@@ -81,20 +81,18 @@ class RichAnimeLibrarian:
         source_path = args.source or self.config_provider.get_source_path()
         target_path = args.target or self.config_provider.get_target_path()
 
-        if not args.quiet:
-            self._console.debug("=== Configuration loaded ===")
-            self._console.debug(f"  📁 Source path: {source_path}")
-            self._console.debug(f"  📂 Target path: {target_path}")
-            self._console.debug("--- Command Options ---")
-            self._console.debug(f"  🧪 Dry run: {args.dry_run}")
-            self._console.debug(f"  ✅ Auto-confirm: {args.yes}")
-            self._console.debug(f"  🤫 Quiet mode: {args.quiet}")
-            self._console.debug(
-                f"  📋 Output format: {args.output_format or 'table (default)'}"
-            )
-            self._console.debug(
-                f"  🎨 Color output: {'disabled' if args.no_color else 'enabled'}"
-            )
+        self._console.debug("=== Configuration loaded ===")
+        self._console.debug(f"  📁 Source path: {source_path}")
+        self._console.debug(f"  📂 Target path: {target_path}")
+        self._console.debug("--- Command Options ---")
+        self._console.debug(f"  🧪 Dry run: {args.dry_run}")
+        self._console.debug(f"  ✅ Auto-confirm: {args.yes}")
+        self._console.debug(
+            f"  📋 Output format: {args.output_format or 'table (default)'}"
+        )
+        self._console.debug(
+            f"  🎨 Color output: {'disabled' if args.no_color else 'enabled'}"
+        )
 
         # Create the FileRenamer instance with console
         renamer = self.file_renamer_factory(
@@ -117,10 +115,9 @@ class RichAnimeLibrarian:
             Tuple of (file_pairs, exit_code) where exit_code is None if successful
             or an integer if the operation should exit
         """
-        if not (self._args and self._args.quiet):
-            self._console.debug("=== Starting file analysis ===")
-            self._console.debug(f"  🔍 Scanning source: {renamer.source_path}")
-            self._console.debug(f"  🎯 Scanning target: {renamer.target_path}")
+        self._console.debug("=== Starting file analysis ===")
+        self._console.debug(f"  🔍 Scanning source: {renamer.source_path}")
+        self._console.debug(f"  🎯 Scanning target: {renamer.target_path}")
 
         try:
             file_pairs = renamer.get_file_pairs()
@@ -145,7 +142,7 @@ class RichAnimeLibrarian:
             )
             target_dirs = [d for d in target_path.glob("*") if d.is_dir()]
 
-            if self._args and not self._args.quiet:
+            if self._args:
                 if not source_files:
                     writer.info(f"No media files found in: {source_path}")
                 elif not target_dirs:
@@ -181,11 +178,7 @@ class RichAnimeLibrarian:
             (source.name, target.name) for source, target in sorted_file_pairs
         ]
 
-        if (
-            self._args
-            and (not self._args.yes or self._args.dry_run)
-            and not self._args.quiet
-        ):
+        if self._args and (not self._args.yes or self._args.dry_run):
             writer.display_file_moves_table(
                 file_move_pairs, output_format=self._args.output_format
             )
@@ -267,11 +260,11 @@ class RichAnimeLibrarian:
                     return 0
 
             # Create the directories with progress
-            if self._args and not self._args.quiet:
+            if self._args:
                 self._console.debug(f"📁 Creating {len(missing_dirs)} directories...")
 
             for dir_path in missing_dirs:
-                if self._args and not self._args.quiet:
+                if self._args:
                     self._console.debug(f"  📂 Creating: {dir_path}")
 
                 if not renamer.create_directories([dir_path]):
@@ -299,14 +292,14 @@ class RichAnimeLibrarian:
         """
         errors: list[tuple[Path, Path, str]] = []
 
-        if self._args and not self._args.quiet:
+        if self._args:
             self._console.debug("=== Starting file operations ===")
             self._console.debug(f"  📦 Total files to move: {len(file_pairs)}")
 
         for idx, (source_file, target_file) in enumerate(file_pairs, 1):
             filename = source_file.name
 
-            if self._args and not self._args.quiet:
+            if self._args:
                 total = len(file_pairs)
                 self._console.debug(f"[{idx}/{total}] Processing: {filename}")
 
@@ -315,18 +308,18 @@ class RichAnimeLibrarian:
 
             if file_errors:
                 error_msg = file_errors[0][2]
-                if self._args and not self._args.quiet:
+                if self._args:
                     self._console.debug(f"    ❌ Failed: {error_msg}")
                 errors.extend(file_errors)
             else:
-                if self._args and not self._args.quiet:
+                if self._args:
                     parent_name = target_file.parent.name
                     file_name = target_file.name
                     self._console.debug(f"    ✅ Moved to: {parent_name}/{file_name}")
 
         if errors:
             writer.error(f"Completed with {len(errors)} errors:")
-            if self._args and not self._args.quiet:
+            if self._args:
                 for source, target, error in errors:
                     writer.console.show_operation_result(
                         FileOperation.MOVE,
@@ -337,7 +330,7 @@ class RichAnimeLibrarian:
                     )
             return 1
         else:
-            if self._args and not self._args.quiet:
+            if self._args:
                 writer.success(f"Successfully moved {len(file_pairs)} file(s)")
 
                 # Summary removed (was verbose-only)
