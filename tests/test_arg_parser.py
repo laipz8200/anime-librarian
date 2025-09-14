@@ -20,7 +20,7 @@ def test_parse_args_default():
         assert args.target is None
         assert args.dry_run is False
         assert args.yes is False
-        assert args.verbose is False
+        # verbose option removed
         assert args.version is False
 
 
@@ -37,7 +37,6 @@ def test_parse_args_with_options():
             "/test/target",
             "--dry-run",
             "--yes",
-            "--verbose",
         ],
     ):
         parser = DefaultArgumentParser()
@@ -49,7 +48,7 @@ def test_parse_args_with_options():
         assert args.target == Path("/test/target")
         assert args.dry_run is True
         assert args.yes is True
-        assert args.verbose is True
+        # verbose option removed
         assert args.version is False
 
 
@@ -61,7 +60,6 @@ def test_parse_args_with_short_options():
         [
             "main.py",
             "-y",  # Short for --yes
-            "-v",  # Short for --verbose
         ],
     ):
         parser = DefaultArgumentParser()
@@ -73,7 +71,7 @@ def test_parse_args_with_short_options():
         assert args.target is None
         assert args.dry_run is False
         assert args.yes is True
-        assert args.verbose is True
+        # verbose option removed
         assert args.version is False
 
 
@@ -96,5 +94,5 @@ def test_parse_args_with_version_flag():
         assert args.target is None
         assert args.dry_run is False
         assert args.yes is False
-        assert args.verbose is False
+        # verbose option removed
         assert args.version is True

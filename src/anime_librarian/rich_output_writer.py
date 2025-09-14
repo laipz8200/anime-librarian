@@ -15,33 +15,30 @@ from .types import OutputWriter
 class RichOutputWriter(OutputWriter):
     """Rich-enhanced implementation of OutputWriter for better UX."""
 
-    verbose: bool
     console: BeautifulConsole
 
-    def __init__(self, verbose: bool = False, *, no_color: bool = False) -> None:
+    def __init__(self, *, no_color: bool = False) -> None:
         """
-        Initialize with verbosity setting.
+        Initialize the output writer.
 
         Args:
-            verbose: If True, show verbose output
             no_color: If True, disable colored output
         """
-        self.verbose = verbose
         # Use BeautifulConsole for consistent formatting
         # no_color is handled by BeautifulConsole internally
         _ = no_color  # Mark as intentionally unused
-        self.console = BeautifulConsole(verbose=verbose)
+        self.console = BeautifulConsole()
 
     @override
     def message(self, message: str) -> None:
         """
-        Print informational or success message only in verbose mode.
+        Print informational or success message.
 
         Args:
             message: The message to print
         """
-        if self.verbose:
-            self.console.debug(message)
+        # Messages are now only logged, not displayed
+        self.console.debug(message)
 
     @override
     def notice(self, message: str) -> None:
@@ -69,9 +66,9 @@ class RichOutputWriter(OutputWriter):
         Args:
             header: The header to display
             items: The items to list
-            always_show: If True, show even in non-verbose mode
+            always_show: If True, always show the list
         """
-        if not self.verbose and not always_show:
+        if not always_show:
             return
 
         # Use BeautifulConsole's show_file_list method
@@ -221,8 +218,8 @@ class RichOutputWriter(OutputWriter):
         Args:
             message: The message to print
         """
-        if self.verbose:
-            self.console.info(message)
+        # Info messages are now only logged, not displayed
+        self.console.debug(message)
 
     def display_summary_panel(self, title: str, content: str) -> None:
         """
@@ -246,7 +243,7 @@ class RichInputReader:
         """Initialize the Rich input reader."""
         # Use BeautifulConsole for consistency
         _ = no_color  # Mark as intentionally unused
-        self.console = BeautifulConsole(verbose=False)
+        self.console = BeautifulConsole()
 
     def confirm(self, prompt: str, default: bool = False) -> bool:
         """

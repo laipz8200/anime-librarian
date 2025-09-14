@@ -22,7 +22,6 @@ def mock_dependencies():
         target=None,
         dry_run=False,
         yes=False,
-        verbose=False,
         version=False,
     )
 
@@ -36,14 +35,11 @@ def mock_dependencies():
     mock_file_renamer.target_path = target_path
     mock_file_renamer_factory = MagicMock(return_value=mock_file_renamer)
 
-    mock_set_verbose_mode = MagicMock()
-
     return {
         "arg_parser": mock_arg_parser,
         "config_provider": mock_config_provider,
         "file_renamer": mock_file_renamer,
         "file_renamer_factory": mock_file_renamer_factory,
-        "set_verbose_mode_fn": mock_set_verbose_mode,
         "source_path": source_path,
         "target_path": target_path,
     }
@@ -61,7 +57,6 @@ def test_get_file_pairs_error_handling(mock_dependencies):
         arg_parser=mock_dependencies["arg_parser"],
         config_provider=mock_dependencies["config_provider"],
         file_renamer_factory=mock_dependencies["file_renamer_factory"],
-        set_verbose_mode_fn=mock_dependencies["set_verbose_mode_fn"],
     )
 
     # Run the application
@@ -80,7 +75,6 @@ def test_conflicts_with_user_cancellation(mock_confirm, mock_dependencies):
         target=None,
         dry_run=False,
         yes=False,
-        verbose=False,
         version=False,
     )
 
@@ -105,7 +99,6 @@ def test_conflicts_with_user_cancellation(mock_confirm, mock_dependencies):
         arg_parser=mock_dependencies["arg_parser"],
         config_provider=mock_dependencies["config_provider"],
         file_renamer_factory=mock_dependencies["file_renamer_factory"],
-        set_verbose_mode_fn=mock_dependencies["set_verbose_mode_fn"],
     )
 
     # Run the application
@@ -124,7 +117,6 @@ def test_missing_directories_with_user_cancellation(mock_confirm, mock_dependenc
         target=None,
         dry_run=False,
         yes=False,
-        verbose=False,
         version=False,
     )
 
@@ -149,7 +141,6 @@ def test_missing_directories_with_user_cancellation(mock_confirm, mock_dependenc
         arg_parser=mock_dependencies["arg_parser"],
         config_provider=mock_dependencies["config_provider"],
         file_renamer_factory=mock_dependencies["file_renamer_factory"],
-        set_verbose_mode_fn=mock_dependencies["set_verbose_mode_fn"],
     )
 
     # Run the application
@@ -182,7 +173,6 @@ def test_directory_creation_failure(mock_dependencies):
         target=None,
         dry_run=False,
         yes=True,
-        verbose=False,
         version=False,
     )
 
@@ -191,7 +181,6 @@ def test_directory_creation_failure(mock_dependencies):
         arg_parser=mock_dependencies["arg_parser"],
         config_provider=mock_dependencies["config_provider"],
         file_renamer_factory=mock_dependencies["file_renamer_factory"],
-        set_verbose_mode_fn=mock_dependencies["set_verbose_mode_fn"],
     )
 
     # Run the application
@@ -230,7 +219,6 @@ def test_file_rename_errors(mock_dependencies):
         target=None,
         dry_run=False,
         yes=True,
-        verbose=False,
         version=False,
     )
 
@@ -239,7 +227,6 @@ def test_file_rename_errors(mock_dependencies):
         arg_parser=mock_dependencies["arg_parser"],
         config_provider=mock_dependencies["config_provider"],
         file_renamer_factory=mock_dependencies["file_renamer_factory"],
-        set_verbose_mode_fn=mock_dependencies["set_verbose_mode_fn"],
     )
 
     # Run the application

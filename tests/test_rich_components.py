@@ -17,7 +17,6 @@ class MockArgumentParser:
         target=None,
         dry_run=False,
         yes=False,
-        verbose=False,
         version=False,
     ):
         """Initialize with predefined arguments."""
@@ -26,7 +25,6 @@ class MockArgumentParser:
             target=target,
             dry_run=dry_run,
             yes=yes,
-            verbose=verbose,
             version=version,
         )
 
@@ -54,8 +52,8 @@ class MockConfigProvider:
 
 def test_rich_output_writer_initialization():
     """Test RichOutputWriter initialization."""
-    writer = RichOutputWriter(verbose=True)
-    assert writer.verbose is True
+    writer = RichOutputWriter()
+    # Verbose mode removed
     assert writer.console is not None
     # BeautifulConsole has an internal Rich Console
     assert hasattr(writer.console, "console")
@@ -64,7 +62,7 @@ def test_rich_output_writer_initialization():
 
 def test_rich_output_writer_message_methods():
     """Test RichOutputWriter message methods."""
-    writer = RichOutputWriter(verbose=True)
+    writer = RichOutputWriter()
 
     # These should not raise exceptions
     writer.message("Test message")
@@ -77,7 +75,7 @@ def test_rich_output_writer_message_methods():
 
 def test_rich_output_writer_display_methods():
     """Test RichOutputWriter display methods."""
-    writer = RichOutputWriter(verbose=True)
+    writer = RichOutputWriter()
 
     # Test file moves table
     file_pairs = [("source1.mp4", "target1.mp4"), ("source2.mkv", "target2.mkv")]

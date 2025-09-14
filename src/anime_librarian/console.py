@@ -34,19 +34,12 @@ class BeautifulConsole:
     """Beautiful console output handler using Rich library for excellent UI/UX."""
 
     console: Console
-    verbose: bool
     _log_file: Path | None
     _last_was_progress: bool
 
-    def __init__(self, verbose: bool = False) -> None:
-        """
-        Initialize the beautiful console.
-
-        Args:
-            verbose: If True, show debug messages
-        """
+    def __init__(self) -> None:
+        """Initialize the beautiful console."""
         self.console = Console(theme=custom_theme, force_terminal=True)
-        self.verbose = verbose
         self._log_file = None
         self._setup_log_file()
         self._last_was_progress = False
@@ -212,14 +205,12 @@ class BeautifulConsole:
 
     def debug(self, message: str) -> None:
         """
-        Display a debug message (only if verbose mode is enabled).
+        Display a debug message.
 
         Args:
             message: The debug message to display
         """
-        if self.verbose:
-            # Don't add spacing for consecutive debug messages
-            self.console.print(f"[debug]  🔍 {message}[/debug]")
+        # Debug messages are now only logged to file, not displayed
         self._write_to_log(message, "DEBUG")
 
     def exception(self, message: str, exc_info: Exception | None = None) -> None:
@@ -231,7 +222,7 @@ class BeautifulConsole:
             exc_info: Optional exception object for detailed info
         """
         self.error(message)
-        if exc_info and self.verbose:
+        if exc_info:
             self.console.print_exception(show_locals=False)
         self._write_to_log(f"{message} - {exc_info}" if exc_info else message, "ERROR")
 
@@ -305,8 +296,8 @@ class BeautifulConsole:
         # For narrow terminals (< 80 chars), always use multi-line format
         if term_width < 80:
             self._print_narrow_format(icon, color, source_name, source, target)
-        elif self.verbose or show_full_path:
-            self._print_verbose_format(
+        elif show_full_path:
+            self._print_full_path_format(
                 icon, color, operation, source_name, source, target
             )
         else:
@@ -341,7 +332,7 @@ class BeautifulConsole:
             # Show target directory
             self.console.print(f"      [dim]in[/dim] [path]{target_dir}[/path]")
 
-    def _print_verbose_format(
+    def _print_full_path_format(
         self,
         icon: str,
         color: str,
@@ -350,7 +341,7 @@ class BeautifulConsole:
         source: str,
         target: str | None,
     ) -> None:
-        """Print file operation in verbose format with full paths."""
+        """Print file operation in full path format."""
         self.console.print(
             f"  [{color}]{icon}[/{color}] [bold]{operation}[/bold]: "
             + f"[filename]{source_name}[/filename]"
@@ -640,11 +631,9 @@ console = BeautifulConsole()
 
 def set_verbose_mode(verbose: bool = False) -> None:
     """
-    Set the console to verbose mode.
+    Legacy function for backward compatibility. No longer has any effect.
 
     Args:
-        verbose: If True, show debug messages
+        verbose: Ignored
     """
-    global console
-    console = BeautifulConsole(verbose=verbose)
-    # Do not emit any extra log line when enabling verbose mode
+    # This function is kept for backward compatibility but does nothing

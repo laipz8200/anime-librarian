@@ -2,30 +2,21 @@
 
 from unittest.mock import MagicMock, mock_open, patch
 
-from anime_librarian.console import BeautifulConsole, set_verbose_mode
+from anime_librarian.console import BeautifulConsole
 
 
 @patch("anime_librarian.console.Console")
 def test_console_initialization(mock_console_class):
     """Test that the console is initialized correctly."""
-    console = BeautifulConsole(verbose=False)
+    console = BeautifulConsole()
 
     # Verify Console was instantiated
     mock_console_class.assert_called_once()
-    assert console.verbose is False
+    # Verbose mode removed
     assert console._log_file is not None
 
 
-@patch("anime_librarian.console.Console")
-def test_console_verbose_mode(mock_console_class):
-    """Test that verbose mode affects debug output."""
-    # Test with verbose=True
-    console = BeautifulConsole(verbose=True)
-    assert console.verbose is True
-
-    # Test with verbose=False
-    console = BeautifulConsole(verbose=False)
-    assert console.verbose is False
+# Test for verbose mode removed (feature deleted)
 
 
 @patch("anime_librarian.console.Console")
@@ -63,32 +54,18 @@ def test_console_error_message(mock_file, mock_console_class):
 
 
 @patch("anime_librarian.console.Console")
-def test_console_debug_respects_verbose(mock_console_class):
-    """Test that debug messages respect verbose mode."""
+def test_console_debug(mock_console_class):
+    """Test that debug messages are only logged to file."""
     mock_console = MagicMock()
     mock_console_class.return_value = mock_console
 
-    # Test with verbose=False
-    console = BeautifulConsole(verbose=False)
+    console = BeautifulConsole()
     console.debug("Debug message")
+    # Debug messages no longer print to console
     mock_console.print.assert_not_called()
 
-    # Test with verbose=True
-    console = BeautifulConsole(verbose=True)
-    console.debug("Debug message")
-    mock_console.print.assert_called()
 
-
-@patch("anime_librarian.console.BeautifulConsole")
-def test_set_verbose_mode(mock_console_class):
-    """Test set_verbose_mode function."""
-    # Test with verbose=True
-    set_verbose_mode(True)
-    mock_console_class.assert_called_with(verbose=True)
-
-    # Test with verbose=False
-    set_verbose_mode(False)
-    mock_console_class.assert_called_with(verbose=False)
+# Test for set_verbose_mode removed (feature deleted)
 
 
 @patch("anime_librarian.console.Console")

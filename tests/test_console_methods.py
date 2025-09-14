@@ -11,7 +11,7 @@ from anime_librarian.enums import FileOperation, PreviewType, ProcessingStatus
 @pytest.fixture
 def console():
     """Create a BeautifulConsole instance for testing."""
-    return BeautifulConsole(verbose=True)
+    return BeautifulConsole()
 
 
 @pytest.fixture

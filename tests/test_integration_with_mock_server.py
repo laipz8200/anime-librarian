@@ -55,7 +55,7 @@ class TestFileRenamerWithMockServer:
 
             # Initialize FileRenamer with mock server
             console = MagicMock(spec=Console)
-            console.verbose = True
+            # Console setup
             renamer = FileRenamer(
                 source_path=source_path,
                 target_path=target_path,
@@ -338,7 +338,6 @@ class TestAnimeLibrarianWithMockServer:
                 target=target_path,
                 dry_run=False,
                 yes=True,  # Auto-confirm
-                verbose=True,
                 version=False,
             )
 
@@ -348,7 +347,7 @@ class TestAnimeLibrarianWithMockServer:
             _ = Mock()
             mock_config = Mock()
             mock_console = Mock(spec=Console)
-            mock_console.verbose = True
+            # Console setup
             mock_console.ask_confirmation.return_value = True
             # Make create_progress return a context manager
             mock_progress = MagicMock()
@@ -429,12 +428,11 @@ class TestAnimeLibrarianWithMockServer:
                 target=target_path,
                 dry_run=True,  # Enable dry run
                 yes=False,
-                verbose=True,
                 version=False,
             )
 
             mock_console = Mock(spec=Console)
-            mock_console.verbose = True
+            # Console setup
             # Make create_progress return a context manager
             mock_progress = MagicMock()
             mock_progress.__enter__ = Mock(return_value=mock_progress)

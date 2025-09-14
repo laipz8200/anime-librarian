@@ -4,7 +4,8 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from . import __version__
-from .console import set_verbose_mode
+
+# Removed verbose mode import
 from .enums import FileOperation
 from .errors import FilePairsNotFoundError
 from .file_renamer import FileRenamer
@@ -26,7 +27,6 @@ class RichAnimeLibrarian:
     file_renamer_factory: Callable[
         [Path, Path, HttpClient | None, Console | None], FileRenamer
     ]
-    set_verbose_mode_fn: Callable[[bool], None]
     _args: CommandLineArgs | None
     _console: Console
 
@@ -38,7 +38,6 @@ class RichAnimeLibrarian:
             [Path, Path, HttpClient | None, Console | None], FileRenamer
         ],
         console: Console | None = None,
-        set_verbose_mode_fn: Callable[[bool], None] = set_verbose_mode,
     ):
         """
         Initialize the RichAnimeLibrarian.
@@ -48,12 +47,10 @@ class RichAnimeLibrarian:
             config_provider: The configuration provider to use
             file_renamer_factory: Factory function to create FileRenamer instances
             console: Console instance to use (defaults to global console)
-            set_verbose_mode_fn: Function to set verbose mode
         """
         self.arg_parser = arg_parser
         self.config_provider = config_provider
         self.file_renamer_factory = file_renamer_factory
-        self.set_verbose_mode_fn = set_verbose_mode_fn
         # Initialize _args to None - will be set in run()
         self._args = None
         # Use injected console or import default
@@ -76,28 +73,19 @@ class RichAnimeLibrarian:
         Returns:
             Tuple of (writer, reader, source_path, target_path, renamer)
         """
-        # Configure logging level
-        if args.verbose:
-            self.set_verbose_mode_fn(True)
-            # Refresh self._console to the newly configured global console
-            from .console import console as current_console
-
-            self._console = current_console
-
         # Create Rich output and input handlers
-        writer = RichOutputWriter(args.verbose, no_color=args.no_color)
+        writer = RichOutputWriter(no_color=args.no_color)
         reader = RichInputReader(no_color=args.no_color)
 
         # Get source and target paths
         source_path = args.source or self.config_provider.get_source_path()
         target_path = args.target or self.config_provider.get_target_path()
 
-        if self._console.verbose and not args.quiet:
+        if not args.quiet:
             self._console.debug("=== Configuration loaded ===")
             self._console.debug(f"  📁 Source path: {source_path}")
             self._console.debug(f"  📂 Target path: {target_path}")
             self._console.debug("--- Command Options ---")
-            self._console.debug(f"  🔍 Verbose mode: {args.verbose}")
             self._console.debug(f"  🧪 Dry run: {args.dry_run}")
             self._console.debug(f"  ✅ Auto-confirm: {args.yes}")
             self._console.debug(f"  🤫 Quiet mode: {args.quiet}")
@@ -129,7 +117,7 @@ class RichAnimeLibrarian:
             Tuple of (file_pairs, exit_code) where exit_code is None if successful
             or an integer if the operation should exit
         """
-        if self._console.verbose and not (self._args and self._args.quiet):
+        if not (self._args and self._args.quiet):
             self._console.debug("=== Starting file analysis ===")
             self._console.debug(f"  🔍 Scanning source: {renamer.source_path}")
             self._console.debug(f"  🎯 Scanning target: {renamer.target_path}")
@@ -137,17 +125,7 @@ class RichAnimeLibrarian:
         try:
             file_pairs = renamer.get_file_pairs()
 
-            if (
-                self._console.verbose
-                and file_pairs
-                and not (self._args and self._args.quiet)
-            ):
-                self._console.debug(f"✨ Found {len(file_pairs)} file(s) to process:")
-                for src, tgt in file_pairs[:3]:  # Show first 3 as examples
-                    self._console.debug(f"  📄 {src.name}")
-                    self._console.debug(f"      ➜ {tgt.name}")
-                if len(file_pairs) > 3:
-                    self._console.debug(f"  ... and {len(file_pairs) - 3} more file(s)")
+            # Debug output removed (was verbose-only)
         except (OSError, ValueError, TypeError) as e:
             self._console.exception("Error getting file pairs", e)
             writer.error(f"Error: {e}")
@@ -289,11 +267,11 @@ class RichAnimeLibrarian:
                     return 0
 
             # Create the directories with progress
-            if self._console.verbose and self._args and not self._args.quiet:
+            if self._args and not self._args.quiet:
                 self._console.debug(f"📁 Creating {len(missing_dirs)} directories...")
 
             for dir_path in missing_dirs:
-                if self._console.verbose and self._args and not self._args.quiet:
+                if self._args and not self._args.quiet:
                     self._console.debug(f"  📂 Creating: {dir_path}")
 
                 if not renamer.create_directories([dir_path]):
@@ -321,14 +299,14 @@ class RichAnimeLibrarian:
         """
         errors: list[tuple[Path, Path, str]] = []
 
-        if self._console.verbose and self._args and not self._args.quiet:
+        if self._args and not self._args.quiet:
             self._console.debug("=== Starting file operations ===")
             self._console.debug(f"  📦 Total files to move: {len(file_pairs)}")
 
         for idx, (source_file, target_file) in enumerate(file_pairs, 1):
             filename = source_file.name
 
-            if self._console.verbose and self._args and not self._args.quiet:
+            if self._args and not self._args.quiet:
                 total = len(file_pairs)
                 self._console.debug(f"[{idx}/{total}] Processing: {filename}")
 
@@ -337,11 +315,11 @@ class RichAnimeLibrarian:
 
             if file_errors:
                 error_msg = file_errors[0][2]
-                if self._console.verbose and self._args and not self._args.quiet:
+                if self._args and not self._args.quiet:
                     self._console.debug(f"    ❌ Failed: {error_msg}")
                 errors.extend(file_errors)
             else:
-                if self._console.verbose and self._args and not self._args.quiet:
+                if self._args and not self._args.quiet:
                     parent_name = target_file.parent.name
                     file_name = target_file.name
                     self._console.debug(f"    ✅ Moved to: {parent_name}/{file_name}")
@@ -362,8 +340,8 @@ class RichAnimeLibrarian:
             if self._args and not self._args.quiet:
                 writer.success(f"Successfully moved {len(file_pairs)} file(s)")
 
-                # Add verbose summary
-                if self._console.verbose:
+                # Summary removed (was verbose-only)
+                if False:  # verbose mode removed
                     self._console.debug("=== Operation Summary ===")
                     self._console.debug(f"  ✅ Files moved: {len(file_pairs)}")
                     self._console.debug("  ❌ Errors: 0")
@@ -385,7 +363,7 @@ class RichAnimeLibrarian:
 
         # Check if version flag is set
         if args.version:
-            writer = RichOutputWriter(args.verbose, no_color=args.no_color)
+            writer = RichOutputWriter(no_color=args.no_color)
             writer.console.info(
                 f"anime-librarian version {__version__}", title="Version"
             )
