@@ -34,102 +34,60 @@ def mock_target_path(tmp_path):
     return target_dir
 
 
-def test_output_class_verbose_mode():
-    """Test the ConsoleOutputWriter class with verbose mode enabled and disabled."""
-    # Test with verbose mode off
-    output_non_verbose = ConsoleOutputWriter(verbose=False)
+def test_output_class_basic():
+    """Test the ConsoleOutputWriter class basic functionality."""
+    output = ConsoleOutputWriter()
 
     # Mock the inner Rich console
     mock_inner_console = MagicMock()
-    output_non_verbose.console.console = mock_inner_console
+    output.console.console = mock_inner_console
 
-    # Message (info/success) should not be printed in non-verbose mode
-    output_non_verbose.message("This is a message")
-    # message() only prints in verbose mode
-    assert output_non_verbose.verbose is False
+    # Message and info are now only logged
+    output.message("This is a message")
+    output.info("This is an info message")
 
-    # Legacy methods should behave the same
-    output_non_verbose.info("This is an info message")
-    # info() only prints in verbose mode
-
-    output_non_verbose.success("This is a success message")
-    # Success always prints
+    # Success message
+    output.success("This is a success message")
     assert mock_inner_console.print.called
 
     # Reset mock
     mock_inner_console.reset_mock()
 
     # Notice (error/warning) messages should always be printed
-    output_non_verbose.notice("This is a notice")
+    output.notice("This is a notice")
     assert mock_inner_console.print.called
 
-    # Test with verbose mode on
-    output_verbose = ConsoleOutputWriter(verbose=True)
-    mock_inner_console_verbose = MagicMock()
-    output_verbose.console.console = mock_inner_console_verbose
+    # Test error and warning methods
+    mock_inner_console.reset_mock()
+    output.error("This is an error message")
+    assert mock_inner_console.print.called
 
-    # All messages should trigger console print in verbose mode
-    output_verbose.message("This is a message")
-    # In verbose mode, message is shown
-
-    output_verbose.notice("This is a notice")
-    assert mock_inner_console_verbose.print.called
-
-    # Test legacy methods
-    output_verbose.info("This is an info message")
-    # info() prints in verbose mode
-
-    output_verbose.success("This is a success message")
-    assert mock_inner_console_verbose.print.called
-
-    mock_inner_console_verbose.reset_mock()
-    output_verbose.error("This is an error message")
-    assert mock_inner_console_verbose.print.called
-
-    mock_inner_console_verbose.reset_mock()
-    output_verbose.warning("This is a warning message")
-    assert mock_inner_console_verbose.print.called
+    mock_inner_console.reset_mock()
+    output.warning("This is a warning message")
+    assert mock_inner_console.print.called
 
 
 def test_list_items_visibility():
-    """Test list_items method respects verbose mode and always_show flag."""
-    # Non-verbose mode
-    output_non_verbose = ConsoleOutputWriter(verbose=False)
+    """Test list_items method respects always_show flag."""
+    output = ConsoleOutputWriter()
     mock_inner_console = MagicMock()
-    output_non_verbose.console.console = mock_inner_console
+    output.console.console = mock_inner_console
 
-    # Should not print when verbose=False and always_show=False
-    output_non_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
-    # show_file_list is called but checks verbose internally
+    # Should not print when always_show=False (default behavior)
+    output.list_items("Items:", ["item1", "item2"], always_show=False)
+    # Does not show when always_show=False
 
     # Reset mock
     mock_inner_console.reset_mock()
 
-    # Should print when always_show=True even in non-verbose mode
-    output_non_verbose.list_items(
-        "Always show items:", ["item3", "item4"], always_show=True
-    )
+    # Should print when always_show=True
+    output.list_items("Always show items:", ["item3", "item4"], always_show=True)
     assert mock_inner_console.print.called
-
-    # Verbose mode
-    output_verbose = ConsoleOutputWriter(verbose=True)
-    mock_inner_console_verbose = MagicMock()
-    output_verbose.console.console = mock_inner_console_verbose
-
-    # Should always print in verbose mode
-    output_verbose.list_items("Items:", ["item1", "item2"], always_show=False)
-    assert mock_inner_console_verbose.print.called
-
-    mock_inner_console_verbose.reset_mock()
-    output_verbose.list_items(
-        "Always show items:", ["item3", "item4"], always_show=True
-    )
-    assert mock_inner_console_verbose.print.called
 
 
 def test_display_methods():
     """Test Rich-specific display methods."""
-    writer = ConsoleOutputWriter(verbose=True)
+    writer = ConsoleOutputWriter()
 
     # Mock the inner console width for table logic
     writer.console.console = MagicMock()
@@ -149,7 +107,7 @@ def test_display_methods():
 
 def test_console_force_terminal():
     """Test that console is created with proper configuration."""
-    writer = ConsoleOutputWriter(verbose=True)
+    writer = ConsoleOutputWriter()
     # Check that the console exists and is properly configured
     assert writer.console is not None
     # BeautifulConsole has an internal Rich Console

@@ -114,44 +114,16 @@ class FileRenamer:
         }
 
         # Send POST request to the AI service
-        if self.console and self.console.verbose:
-            # Redact sensitive headers for logging
-            redacted_headers = dict(headers)
-            if "Authorization" in redacted_headers:
-                redacted_headers["Authorization"] = "Bearer ********"
-            self.console.debug("=== Sending API Request ===")
-            self.console.debug(f"  🌐 Endpoint: {self.api_endpoint}")
-            self.console.debug(f"  ⏱️  Timeout: {self.api_timeout}s")
-            self.console.debug(f"  🔑 Headers: {redacted_headers}")
-            self.console.debug(f"  📋 Files sent: {len(source_files_list)}")
-            self.console.debug(f"  📂 Directories: {len(target_files_list)}")
         resp = self.http_client.post(
             self.api_endpoint, headers=headers, json=payload, timeout=self.api_timeout
         )
 
-        # Log raw response for debugging
-        if self.console and self.console.verbose:
-            self.console.debug("=== API Response Received ===")
-            status = getattr(self.http_client, "last_status_code", None)
-            if status is not None:
-                self.console.debug(f"  ✅ Status Code: {status}")
-            else:
-                self.console.debug("  ✅ Status: OK")
-
-            # Show response size info
-            import json
-
-            resp_size = len(json.dumps(resp))
-            self.console.debug(f"  📦 Response size: {resp_size} bytes")
+        # Response received from API
 
         # Validate response structure using Pydantic model
         try:
             api_response = ApiResponse.model_validate(resp)
             response_text = api_response.response_text
-            if self.console and self.console.verbose:
-                self.console.debug(
-                    f"  📄 AI suggested {len(response_text.splitlines())} mappings"
-                )
         except (ValueError, TypeError, KeyError) as exc:
             if self.console:
                 self.console.exception(
@@ -204,21 +176,14 @@ class FileRenamer:
         if not source_files:
             if self.console:
                 self.console.info(f"No media files found in {self.source_path}")
-                if self.console.verbose:
-                    self.console.debug(f"Searched path: {self.source_path}")
-                    exts = self.VIDEO_EXTENSIONS | self.SUBTITLE_EXTENSIONS
-                    self.console.debug(f"Looking for extensions: {exts}")
+                # Debug info removed (was verbose-only)
             return []
 
         # Check if we have target directories
         if not target_dirs:
             if self.console:
                 self.console.info(f"No target directories found in {self.target_path}")
-                if self.console.verbose:
-                    self.console.debug(f"Searched path: {self.target_path}")
-                    self.console.debug(
-                        "Expected to find subdirectories for organizing files"
-                    )
+                # Debug info removed (was verbose-only)
             return []
 
         # Get just the file/directory names
@@ -323,9 +288,7 @@ class FileRenamer:
         for source_file, target_file in file_pairs:
             try:
                 if self.console:
-                    if self.console.verbose:
-                        self.console.debug(f"Moving file: {source_file}")
-                        self.console.debug(f"Target location: {target_file}")
+                    # Debug info removed (was verbose-only)
                     self.console.print_file_operation(
                         "Moving", str(source_file), str(target_file), "processing"
                     )
@@ -333,7 +296,7 @@ class FileRenamer:
             except (OSError, shutil.Error) as e:
                 error_msg = str(e)
                 # Don't include the exception object in the log message
-                # This satisfies TRY401 (verbose-log-message)
+                # Log exception details
                 if self.console:
                     self.console.exception(f"Error moving {source_file}", e)
                 errors.append((source_file, target_file, error_msg))

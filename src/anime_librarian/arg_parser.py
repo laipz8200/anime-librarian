@@ -59,12 +59,6 @@ class DefaultArgumentParser(ArgumentParser):
             help="Quiet mode: minimize output and skip interactive prompts",
         )
         _ = parser.add_argument(
-            "--verbose",
-            "-v",
-            action="store_true",
-            help="Enable verbose logging",
-        )
-        _ = parser.add_argument(
             "--format",
             choices=["table", "plain", "json", "ndjson"],
             help="Output format for listings: table (default), plain, json, ndjson",
@@ -88,7 +82,6 @@ class DefaultArgumentParser(ArgumentParser):
             dry_run=args.dry_run,  # type: ignore[attr-defined]
             yes=args.yes,  # type: ignore[attr-defined]
             quiet=args.quiet,  # type: ignore[attr-defined]
-            verbose=args.verbose,  # type: ignore[attr-defined]
             output_format=args.format,  # type: ignore[attr-defined]
             no_color=args.no_color,  # type: ignore[attr-defined]
             version=args.version,  # type: ignore[attr-defined]

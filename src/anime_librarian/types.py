@@ -22,9 +22,6 @@ class CommandLineArgs:
     yes: bool
     """Whether to automatically answer yes to all prompts."""
 
-    verbose: bool
-    """Whether to enable verbose logging."""
-
     version: bool
     """Whether to show the version information and exit."""
 
@@ -100,7 +97,7 @@ class OutputWriter(Protocol):
     """Protocol for writing output."""
 
     def message(self, message: str) -> None:
-        """Print informational or success message (only in verbose mode)."""
+        """Print informational or success message."""
         ...
 
     def notice(self, message: str) -> None:
@@ -141,11 +138,6 @@ class ConfigProvider(Protocol):
 class Console(Protocol):
     """Protocol for console operations."""
 
-    @property
-    def verbose(self) -> bool:
-        """Get the verbose mode setting."""
-        ...
-
     def success(self, message: str, title: str | None = None) -> None:
         """Display a success message."""
         ...
@@ -163,7 +155,7 @@ class Console(Protocol):
         ...
 
     def debug(self, message: str) -> None:
-        """Display a debug message (only if verbose mode is enabled)."""
+        """Display a debug message."""
         ...
 
     def exception(self, message: str, exc_info: Exception | None = None) -> None:

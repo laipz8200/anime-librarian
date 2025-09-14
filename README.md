@@ -139,9 +139,6 @@ anime-librarian --yes
 # Quiet (CI/CD)
 anime-librarian --quiet --yes
 
-# Enable detailed logging
-anime-librarian --verbose
-
 # Disable colors
 anime-librarian --no-color
 
@@ -268,7 +265,7 @@ Common solutions for:
 - 🤖 **AI Problems**: Validate Dify workflow setup
 - 📂 **Organization**: Ensure target directories exist
 - 🔍 **Testing**: Use `--dry-run` to preview changes
-- 📝 **Debugging**: Enable `--verbose` logging
+- 📝 **Logging**: Check logs in the `logs/` directory
 
 ## 🤝 Contributing
 

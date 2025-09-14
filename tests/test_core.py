@@ -19,7 +19,6 @@ class MockArgumentParser:
         target=None,
         dry_run=False,
         yes=False,
-        verbose=False,
         version=False,
     ):
         """Initialize with predefined arguments."""
@@ -27,7 +26,6 @@ class MockArgumentParser:
         self.target = target
         self.dry_run = dry_run
         self.yes = yes
-        self.verbose = verbose
         self.version = version
 
     def parse_args(self) -> CommandLineArgs:
@@ -37,7 +35,6 @@ class MockArgumentParser:
             target=self.target,
             dry_run=self.dry_run,
             yes=self.yes,
-            verbose=self.verbose,
             version=self.version,
         )
 
@@ -100,15 +97,10 @@ def mock_file_renamer_factory():
     return mock_factory, mock_renamer
 
 
-@pytest.fixture
-def mock_set_verbose_mode():
-    """Create a mock function for set_verbose_mode."""
-    return MagicMock()
+# Removed mock_set_verbose_mode fixture (verbose feature removed)
 
 
-def test_anime_librarian_basic_functionality(
-    mock_file_renamer_factory, mock_set_verbose_mode
-):
+def test_anime_librarian_basic_functionality(mock_file_renamer_factory):
     """Test basic functionality of the AnimeLibrarian."""
     # Setup
     mock_factory, mock_renamer = mock_file_renamer_factory
@@ -136,7 +128,6 @@ def test_anime_librarian_basic_functionality(
             source_path=source_path, target_path=target_path
         ),
         file_renamer_factory=mock_factory,
-        set_verbose_mode_fn=mock_set_verbose_mode,
     )
 
     # Run the application
@@ -163,7 +154,7 @@ def test_anime_librarian_basic_functionality(
     assert mock_renamer.rename_files.call_count == 2
 
 
-def test_anime_librarian_dry_run(mock_file_renamer_factory, mock_set_verbose_mode):
+def test_anime_librarian_dry_run(mock_file_renamer_factory):
     """Test the application with dry run flag."""
     # Setup
     mock_factory, mock_renamer = mock_file_renamer_factory
@@ -184,7 +175,6 @@ def test_anime_librarian_dry_run(mock_file_renamer_factory, mock_set_verbose_mod
         arg_parser=MockArgumentParser(dry_run=True),
         config_provider=MockConfigProvider(),
         file_renamer_factory=mock_factory,
-        set_verbose_mode_fn=mock_set_verbose_mode,
     )
 
     # Run the application
@@ -201,33 +191,10 @@ def test_anime_librarian_dry_run(mock_file_renamer_factory, mock_set_verbose_mod
     mock_renamer.find_missing_directories.assert_not_called()
 
 
-def test_anime_librarian_verbose_mode(mock_file_renamer_factory, mock_set_verbose_mode):
-    """Test the application with verbose flag."""
-    # Setup
-    mock_factory, mock_renamer = mock_file_renamer_factory
-
-    # Create mock file pairs
-    mock_renamer.get_file_pairs.return_value = []
-    # Add source_path and target_path attributes for the no-files check
-    mock_renamer.source_path = Path("/mock/source")
-    mock_renamer.target_path = Path("/mock/target")
-
-    # Create the application with verbose flag
-    app = AnimeLibrarian(
-        arg_parser=MockArgumentParser(verbose=True),
-        config_provider=MockConfigProvider(),
-        file_renamer_factory=mock_factory,
-        set_verbose_mode_fn=mock_set_verbose_mode,
-    )
-
-    # Run the application
-    _ = app.run()
-
-    # Verify set_verbose_mode was called with True
-    mock_set_verbose_mode.assert_called_once_with(True)
+# Test for verbose mode removed (feature deleted)
 
 
-def test_anime_librarian_version_flag(mock_file_renamer_factory, mock_set_verbose_mode):
+def test_anime_librarian_version_flag(mock_file_renamer_factory):
     """Test the application with version flag."""
     # Setup
     mock_factory, mock_renamer = mock_file_renamer_factory
@@ -237,7 +204,6 @@ def test_anime_librarian_version_flag(mock_file_renamer_factory, mock_set_verbos
         arg_parser=MockArgumentParser(version=True),
         config_provider=MockConfigProvider(),
         file_renamer_factory=mock_factory,
-        set_verbose_mode_fn=mock_set_verbose_mode,
     )
 
     # Run the application
@@ -282,9 +248,7 @@ def test_anime_librarian_no_files():
     mock_renamer.find_missing_directories.assert_not_called()
 
 
-def test_anime_librarian_with_conflicts_yes_mode(
-    mock_file_renamer_factory, mock_set_verbose_mode
-):
+def test_anime_librarian_with_conflicts_yes_mode(mock_file_renamer_factory):
     """Test handling of conflicts in yes mode (auto-confirm)."""
     # Setup
     mock_factory, mock_renamer = mock_file_renamer_factory
@@ -313,7 +277,6 @@ def test_anime_librarian_with_conflicts_yes_mode(
             source_path=source_path, target_path=target_path
         ),
         file_renamer_factory=mock_factory,
-        set_verbose_mode_fn=mock_set_verbose_mode,
     )
 
     # Run the application
@@ -326,9 +289,7 @@ def test_anime_librarian_with_conflicts_yes_mode(
     assert mock_renamer.rename_files.call_count == 1
 
 
-def test_anime_librarian_with_missing_directories(
-    mock_file_renamer_factory, mock_set_verbose_mode
-):
+def test_anime_librarian_with_missing_directories(mock_file_renamer_factory):
     """Test handling of missing directories."""
     # Setup
     mock_factory, mock_renamer = mock_file_renamer_factory
@@ -358,7 +319,6 @@ def test_anime_librarian_with_missing_directories(
             source_path=source_path, target_path=target_path
         ),
         file_renamer_factory=mock_factory,
-        set_verbose_mode_fn=mock_set_verbose_mode,
     )
 
     # Run the application
