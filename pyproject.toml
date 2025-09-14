@@ -82,46 +82,18 @@ anime_librarian = ["py.typed"]
 # Type checking configuration
 pythonVersion = "3.13"
 pythonPlatform = "All"
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 reportMissingTypeStubs = false
 
 # Ignore libraries without type hints
 ignore = [
     "**/node_modules",
     "**/__pycache__",
-    "**/.*",
+    "**/.venv",
+    "**/tests",
     "build",
     "dist",
 ]
-
-# Report settings to reduce noise from external libraries
-reportUnknownMemberType = "warning"
-reportUnknownArgumentType = "warning"
-reportUnknownVariableType = "warning"
-reportUnknownParameterType = "warning"
-reportMissingParameterType = "warning"
-reportUnnecessaryTypeIgnoreComment = "warning"
-reportImplicitOverride = "warning"
-
-# Strict settings for our own code
-reportMissingImports = true
-reportUndefinedVariable = true
-reportAssertAlwaysTrue = "warning"
-reportInvalidStringEscapeSequence = "error"
-reportInvalidTypeVarUse = "error"
-reportMissingTypeArgument = "warning"
-reportUnnecessaryIsInstance = "warning"
-reportUnnecessaryCast = "warning"
-reportUnnecessaryComparison = "warning"
-reportImplicitStringConcatenation = "warning"
-reportUnusedCallResult = "warning"
-reportUnusedImport = "warning"
-reportUnusedClass = "warning"
-reportUnusedFunction = "warning"
-reportUnusedVariable = "warning"
-reportDuplicateImport = "warning"
-
-# Reduce noise from test files - removed due to TOML syntax limitations
 
 [dependency-groups]
 dev = [

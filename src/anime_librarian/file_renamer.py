@@ -139,11 +139,10 @@ class FileRenamer:
                 self.console.debug("  ✅ Status: OK")
 
             # Show response size info
-            if isinstance(resp, dict):
-                import json
+            import json
 
-                resp_size = len(json.dumps(resp))
-                self.console.debug(f"  📦 Response size: {resp_size} bytes")
+            resp_size = len(json.dumps(resp))
+            self.console.debug(f"  📦 Response size: {resp_size} bytes")
 
         # Validate response structure using Pydantic model
         try:

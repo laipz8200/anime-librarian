@@ -28,7 +28,7 @@ def find_markdown_files(project_root: Path) -> list[str]:
         "__pycache__",
         ".pytest_cache",
     }
-    markdown_files = []
+    markdown_files: list[str] = []
 
     for ext in ["*.md", "**/*.md"]:
         for f in project_root.glob(ext):

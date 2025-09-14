@@ -57,7 +57,9 @@ def test_rich_output_writer_initialization():
     writer = RichOutputWriter(verbose=True)
     assert writer.verbose is True
     assert writer.console is not None
-    assert writer.console._force_terminal is True
+    # BeautifulConsole has an internal Rich Console
+    assert hasattr(writer.console, "console")
+    assert writer.console.console._force_terminal is True
 
 
 def test_rich_output_writer_message_methods():
@@ -92,7 +94,9 @@ def test_rich_input_reader():
     """Test RichInputReader methods."""
     reader = RichInputReader()
     assert reader.console is not None
-    assert reader.console._force_terminal is True
+    # BeautifulConsole has an internal Rich Console
+    assert hasattr(reader.console, "console")
+    assert reader.console.console._force_terminal is True
 
     # Test confirm method with mock
     with patch("rich.prompt.Confirm.ask", return_value=True):
@@ -100,7 +104,7 @@ def test_rich_input_reader():
         assert result is True
 
     # Test read_input method with mock
-    with patch.object(reader.console, "input", return_value="test input"):
+    with patch.object(reader.console.console, "input", return_value="test input"):
         result = reader.read_input("Test prompt: ")
         assert result == "test input"
 
