@@ -3,12 +3,12 @@
 from collections.abc import Sequence
 from typing import override
 
-from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm
 from rich.table import Table
 
+from .console import BeautifulConsole
 from .types import OutputWriter
 
 
@@ -16,7 +16,7 @@ class RichOutputWriter(OutputWriter):
     """Rich-enhanced implementation of OutputWriter for better UX."""
 
     verbose: bool
-    console: Console
+    console: BeautifulConsole
 
     def __init__(self, verbose: bool = False, *, no_color: bool = False) -> None:
         """
@@ -27,9 +27,10 @@ class RichOutputWriter(OutputWriter):
             no_color: If True, disable colored output
         """
         self.verbose = verbose
-        # Force terminal for consistent formatting; allow disabling color
-        color_system = None if no_color else "auto"
-        self.console = Console(force_terminal=True, color_system=color_system)
+        # Use BeautifulConsole for consistent formatting
+        # no_color is handled by BeautifulConsole internally
+        _ = no_color  # Mark as intentionally unused
+        self.console = BeautifulConsole(verbose=verbose)
 
     @override
     def message(self, message: str) -> None:
@@ -40,7 +41,7 @@ class RichOutputWriter(OutputWriter):
             message: The message to print
         """
         if self.verbose:
-            self.console.print(f"[dim]{message}[/dim]")
+            self.console.debug(message)
 
     @override
     def notice(self, message: str) -> None:
@@ -50,15 +51,13 @@ class RichOutputWriter(OutputWriter):
         Args:
             message: The message to print
         """
-        # Determine the style based on message content
+        # Use BeautifulConsole methods for appropriate message types
         if "error" in message.lower():
-            style = "bold red"
+            self.console.error(message)
         elif "warning" in message.lower():
-            style = "bold yellow"
+            self.console.warning(message)
         else:
-            style = "bold cyan"
-
-        self.console.print(message, style=style)
+            self.console.info(message)
 
     @override
     def list_items(
@@ -75,13 +74,8 @@ class RichOutputWriter(OutputWriter):
         if not self.verbose and not always_show:
             return
 
-        # Create a styled header
-        self.console.print()
-        self.console.print(header, style="bold cyan")
-
-        # Display items with bullet points and indentation
-        for item in items:
-            self.console.print(f"  • {item}", style="dim")
+        # Use BeautifulConsole's show_file_list method
+        self.console.show_file_list(header, list(items), style="cyan")
 
     def display_file_moves_table(
         self, file_pairs: Sequence[tuple[str, str]], output_format: str | None = None
@@ -98,7 +92,7 @@ class RichOutputWriter(OutputWriter):
         # Plain format: minimal, machine-friendly-ish text with no styling
         if fmt == "plain":
             for source, target in file_pairs:
-                self.console.print(f"{source} -> {target}", markup=False)
+                self.console.print_raw(f"{source} -> {target}", markup=False)
             return
 
         if fmt in {"json", "ndjson"}:
@@ -112,12 +106,14 @@ class RichOutputWriter(OutputWriter):
                     for source, target in file_pairs
                 ]
                 if fmt == "json":
-                    self.console.print(
-                        json.dumps(records, ensure_ascii=False, indent=2)
+                    self.console.print_raw(
+                        json.dumps(records, ensure_ascii=False, indent=2), markup=False
                     )
                 else:  # ndjson
                     for rec in records:
-                        self.console.print(json.dumps(rec, ensure_ascii=False))
+                        self.console.print_raw(
+                            json.dumps(rec, ensure_ascii=False), markup=False
+                        )
                 return
 
         # Check terminal width to decide on table layout
@@ -125,13 +121,13 @@ class RichOutputWriter(OutputWriter):
 
         # For very narrow terminals, use a list format instead of table
         if term_width < 100:
-            # Minimal output: no title banner
-            self.console.print()
+            # Use show_change_preview for each pair
+            from .enums import PreviewType
+
             for source, target in file_pairs:
-                self.console.print(f"  [yellow]{source}[/yellow]")
-                if target != source:
-                    self.console.print(f"    [dim]→[/dim] [green]{target}[/green]")
-                self.console.print()
+                self.console.show_change_preview(
+                    source, target, PreviewType.RENAME_PREVIEW
+                )
         else:
             # Use table for wider terminals
             table = Table(
@@ -168,8 +164,9 @@ class RichOutputWriter(OutputWriter):
             for source, target in file_pairs:
                 table.add_row(source, "→", target)
 
-            self.console.print()
-            self.console.print(table)
+            # Print the table using raw output
+            self.console.print_raw("")
+            self.console.console.print(table)
 
     def display_progress(self, description: str) -> Progress:
         """
@@ -184,7 +181,7 @@ class RichOutputWriter(OutputWriter):
         progress = Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=self.console,
+            console=self.console.console,
             transient=True,
         )
         _ = progress.add_task(description, total=None)
@@ -197,7 +194,7 @@ class RichOutputWriter(OutputWriter):
         Args:
             message: The message to print
         """
-        self.console.print(f"✅ {message}", style="bold green")
+        self.console.success(message)
 
     def error(self, message: str) -> None:
         """
@@ -206,7 +203,7 @@ class RichOutputWriter(OutputWriter):
         Args:
             message: The message to print
         """
-        self.console.print(f"❌ {message}", style="bold red")
+        self.console.error(message)
 
     def warning(self, message: str) -> None:
         """
@@ -215,7 +212,7 @@ class RichOutputWriter(OutputWriter):
         Args:
             message: The message to print
         """
-        self.console.print(f"⚠️  {message}", style="bold yellow")
+        self.console.warning(message)
 
     def info(self, message: str) -> None:
         """
@@ -225,7 +222,7 @@ class RichOutputWriter(OutputWriter):
             message: The message to print
         """
         if self.verbose:
-            self.console.print(f"[INFO] {message}", style="blue")
+            self.console.info(message)
 
     def display_summary_panel(self, title: str, content: str) -> None:
         """
@@ -236,20 +233,20 @@ class RichOutputWriter(OutputWriter):
             content: Panel content
         """
         panel = Panel(content, title=title, border_style="cyan", padding=(1, 2))
-        self.console.print()
-        self.console.print(panel)
+        self.console.print_raw("")
+        self.console.console.print(panel)
 
 
 class RichInputReader:
     """Rich-enhanced input reader for interactive prompts."""
 
-    console: Console
+    console: BeautifulConsole
 
     def __init__(self, *, no_color: bool = False) -> None:
         """Initialize the Rich input reader."""
-        # Force terminal; allow disabling color
-        color_system = None if no_color else "auto"
-        self.console = Console(force_terminal=True, color_system=color_system)
+        # Use BeautifulConsole for consistency
+        _ = no_color  # Mark as intentionally unused
+        self.console = BeautifulConsole(verbose=False)
 
     def confirm(self, prompt: str, default: bool = False) -> bool:
         """
@@ -262,7 +259,7 @@ class RichInputReader:
         Returns:
             True if confirmed, False otherwise
         """
-        return Confirm.ask(prompt, default=default, console=self.console)
+        return Confirm.ask(prompt, default=default, console=self.console.console)
 
     def read_input(self, prompt: str) -> str:
         """
@@ -274,4 +271,4 @@ class RichInputReader:
         Returns:
             User input as a string
         """
-        return self.console.input(f"[bold cyan]{prompt}[/bold cyan]")
+        return self.console.console.input(f"[bold cyan]{prompt}[/bold cyan]")

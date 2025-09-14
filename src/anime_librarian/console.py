@@ -14,6 +14,8 @@ from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
 
+from anime_librarian.enums import FileOperation, PreviewType, ProcessingStatus
+
 # Custom theme for better colors
 custom_theme = Theme(
     {
@@ -43,7 +45,7 @@ class BeautifulConsole:
         Args:
             verbose: If True, show debug messages
         """
-        self.console = Console(theme=custom_theme)
+        self.console = Console(theme=custom_theme, force_terminal=True)
         self.verbose = verbose
         self._log_file = None
         self._setup_log_file()
@@ -64,6 +66,11 @@ class BeautifulConsole:
                 _ = f.write(f"[{timestamp}] [{level}] {message}\n")
 
     def _get_terminal_width(self) -> int:
+        """Get the current terminal width."""
+        return self.console.width
+
+    @property
+    def width(self) -> int:
         """Get the current terminal width."""
         return self.console.width
 
@@ -463,6 +470,168 @@ class BeautifulConsole:
             return default
 
         return response in ["y", "yes"]
+
+    def show_progress(self, status: ProcessingStatus, content: str) -> None:
+        """
+        Show progress with specific status.
+
+        Args:
+            status: The processing status
+            content: The content message to display
+        """
+        status_configs = {
+            ProcessingStatus.SCANNING: ("🔍", "cyan", "Scanning"),
+            ProcessingStatus.ANALYZING: ("🧠", "blue", "Analyzing"),
+            ProcessingStatus.RENAMING: ("✏️", "yellow", "Renaming"),
+            ProcessingStatus.MOVING: ("📦", "magenta", "Moving"),
+            ProcessingStatus.ORGANIZING: ("📁", "cyan", "Organizing"),
+            ProcessingStatus.VALIDATING: ("✔️", "green", "Validating"),
+            ProcessingStatus.COMPLETED: ("✅", "green", "Completed"),
+            ProcessingStatus.FAILED: ("❌", "red", "Failed"),
+            ProcessingStatus.SKIPPED: ("⏭️", "dim", "Skipped"),
+        }
+
+        icon, color, label = status_configs.get(
+            status,
+            ("ℹ️", "white", status.name.title()),  # noqa: RUF001
+        )
+
+        self._ensure_spacing()
+        self.console.print(
+            f"[{color}]{icon}[/{color}] [{color}]{label}:[/{color}] {content}"
+        )
+        self._write_to_log(f"{label}: {content}", "INFO")
+
+    def show_change_preview(
+        self,
+        before: str,
+        after: str,
+        preview_type: PreviewType = PreviewType.RENAME_PREVIEW,
+    ) -> None:
+        """
+        Show a preview of changes before and after.
+
+        Args:
+            before: The original state
+            after: The new state
+            preview_type: Type of preview to display
+        """
+        self._ensure_spacing()
+
+        # Create a table for better visual comparison
+        table = Table(show_header=True, header_style="bold cyan", box=None)
+
+        if preview_type == PreviewType.RENAME_PREVIEW:
+            table.add_column("Original Name", style="dim")
+            table.add_column("→", justify="center", style="yellow")
+            table.add_column("New Name", style="bright_cyan")
+            table.add_row(before, "→", after)
+        elif preview_type == PreviewType.MOVE_PREVIEW:
+            table.add_column("From", style="dim")
+            table.add_column("→", justify="center", style="yellow")
+            table.add_column("To", style="bright_blue")
+            table.add_row(before, "→", after)
+        else:  # CONFLICT_PREVIEW
+            table.add_column("Existing", style="red")
+            table.add_column("⚠", justify="center", style="yellow")
+            table.add_column("Conflicting", style="yellow")
+            table.add_row(before, "⚠", after)
+
+        self.console.print(table)
+        self._write_to_log(f"Preview: {before} -> {after}", "INFO")
+
+    def show_file_list(self, title: str, files: list[str], style: str = "cyan") -> None:
+        """
+        Show a list of files with consistent formatting.
+
+        Args:
+            title: Title for the file list
+            files: List of file paths or names
+            style: Style color for the list items
+        """
+        if not files:
+            return
+
+        self._ensure_spacing()
+        self.console.print(f"[bold {style}]{title}[/bold {style}]")
+        for file in files:
+            self.console.print(f"  • [{style}]{file}[/{style}]")
+        self._write_to_log(f"{title}: {', '.join(str(f) for f in files)}", "INFO")
+
+    def show_operation_result(
+        self,
+        operation: FileOperation,
+        source: str,
+        target: str | None = None,
+        success: bool = True,
+        message: str | None = None,
+    ) -> None:
+        """
+        Show the result of a file operation.
+
+        Args:
+            operation: The type of file operation
+            source: Source file or directory
+            target: Target file or directory (optional)
+            success: Whether the operation was successful
+            message: Optional additional message
+        """
+        operation_configs = {
+            FileOperation.RENAME: ("✏️", "Renamed"),
+            FileOperation.MOVE: ("📦", "Moved"),
+            FileOperation.COPY: ("📄", "Copied"),
+            FileOperation.DELETE: ("🗑️", "Deleted"),
+            FileOperation.CREATE_DIR: ("📁", "Created"),
+        }
+
+        _, verb = operation_configs.get(operation, ("📄", operation.value.title()))
+        color = "green" if success else "red"
+        status_icon = "✅" if success else "❌"
+
+        self._ensure_spacing()
+
+        if target:
+            display_msg = f"{status_icon} {verb}: {source} → {target}"
+        else:
+            display_msg = f"{status_icon} {verb}: {source}"
+
+        if message:
+            display_msg += f" [{message}]"
+
+        self.console.print(f"[{color}]{display_msg}[/{color}]")
+        self._write_to_log(display_msg, "SUCCESS" if success else "ERROR")
+
+    def show_statistics(self, stats: dict[str, int | str]) -> None:
+        """
+        Show statistics in a formatted table.
+
+        Args:
+            stats: Dictionary of statistics to display
+        """
+        self._ensure_spacing()
+
+        table = Table(title="📊 Statistics", show_header=False, box=None)
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="yellow")
+
+        for key, value in stats.items():
+            table.add_row(key, str(value))
+
+        self.console.print(table)
+        self._write_to_log(f"Statistics: {stats}", "INFO")
+
+    def print_raw(self, content: str, markup: bool = True) -> None:
+        """
+        Print raw content without formatting (for JSON, plain text, etc).
+
+        Args:
+            content: The raw content to print
+            markup: Whether to process Rich markup
+        """
+        if markup:
+            self.console.print(content)
+        else:
+            self.console.print(content, markup=False, highlight=False)
 
 
 # Global console instance

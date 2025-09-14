@@ -58,7 +58,7 @@ def main():
     ]
 
     # Find all markdown files (excluding .venv and other common directories)
-    markdown_files = []
+    markdown_files: list[str] = []
     exclude_dirs = {
         ".venv",
         "venv",

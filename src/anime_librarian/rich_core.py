@@ -5,6 +5,7 @@ from pathlib import Path
 
 from . import __version__
 from .console import set_verbose_mode
+from .enums import FileOperation
 from .errors import FilePairsNotFoundError
 from .file_renamer import FileRenamer
 from .rich_output_writer import RichInputReader, RichOutputWriter
@@ -243,8 +244,9 @@ class RichAnimeLibrarian:
 
         if conflicts and not args.yes:
             writer.warning("The following files will be overwritten:")
-            for conflict in conflicts:
-                writer.console.print(f"  • {conflict}", style="yellow")
+            writer.console.show_file_list(
+                "Conflicts", [str(c) for c in conflicts], style="yellow"
+            )
 
             if not reader.confirm("Do you want to continue?", default=False):
                 writer.info("Operation cancelled by user.")
@@ -278,8 +280,9 @@ class RichAnimeLibrarian:
         if missing_dirs:
             if not args.yes:
                 writer.info("The following directories need to be created:")
-                for dir_path in missing_dirs:
-                    writer.console.print(f"  • {dir_path}", style="cyan")
+                writer.console.show_file_list(
+                    "Directories", [str(d) for d in missing_dirs], style="cyan"
+                )
 
                 if not reader.confirm("Create these directories?", default=True):
                     writer.info("Operation cancelled by user.")
@@ -347,8 +350,12 @@ class RichAnimeLibrarian:
             writer.error(f"Completed with {len(errors)} errors:")
             if self._args and not self._args.quiet:
                 for source, target, error in errors:
-                    writer.console.print(
-                        f"  • {source.name} → {target.name}: {error}", style="red"
+                    writer.console.show_operation_result(
+                        FileOperation.MOVE,
+                        source.name,
+                        target.name,
+                        success=False,
+                        message=error,
                     )
             return 1
         else:
@@ -379,9 +386,8 @@ class RichAnimeLibrarian:
         # Check if version flag is set
         if args.version:
             writer = RichOutputWriter(args.verbose, no_color=args.no_color)
-            writer.console.print(
-                "[bold cyan]anime-librarian[/bold cyan] version "
-                + f"[yellow]{__version__}[/yellow]"
+            writer.console.info(
+                f"anime-librarian version {__version__}", title="Version"
             )
             return 0
 
