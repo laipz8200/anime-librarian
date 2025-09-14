@@ -46,8 +46,8 @@ anime-librarian --source ~/Downloads --target ~/Media
 ### UNIX-Friendly Modes
 
 ```bash
-# Quiet + non-interactive (for automation)
-anime-librarian --yes --quiet --non-interactive
+# Non-interactive (for automation)
+anime-librarian --yes
 
 # Preview only
 anime-librarian --dry-run --format table
@@ -135,9 +135,6 @@ anime-librarian --dry-run
 
 # Auto-confirm all prompts
 anime-librarian --yes
-
-# Quiet (CI/CD)
-anime-librarian --quiet --yes
 
 # Disable colors
 anime-librarian --no-color

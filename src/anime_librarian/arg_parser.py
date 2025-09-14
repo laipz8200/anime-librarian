@@ -20,10 +20,7 @@ class DefaultArgumentParser(ArgumentParser):
             CommandLineArgs containing the parsed arguments
         """
         parser = argparse.ArgumentParser(
-            description=(
-                "Rename and organize video files using AI suggestions.\n"
-                "\nUNIX-friendly flags: --quiet, --format, --no-color, -y."
-            )
+            description="Rename and organize video files using AI suggestions."
         )
         _ = parser.add_argument(
             "--source",
@@ -53,12 +50,6 @@ class DefaultArgumentParser(ArgumentParser):
             help="Automatically answer yes to all prompts",
         )
         _ = parser.add_argument(
-            "--quiet",
-            "-q",
-            action="store_true",
-            help="Quiet mode: minimize output and skip interactive prompts",
-        )
-        _ = parser.add_argument(
             "--format",
             choices=["table", "plain", "json", "ndjson"],
             help="Output format for listings: table (default), plain, json, ndjson",
@@ -81,7 +72,6 @@ class DefaultArgumentParser(ArgumentParser):
             target=args.target,  # type: ignore[attr-defined]
             dry_run=args.dry_run,  # type: ignore[attr-defined]
             yes=args.yes,  # type: ignore[attr-defined]
-            quiet=args.quiet,  # type: ignore[attr-defined]
             output_format=args.format,  # type: ignore[attr-defined]
             no_color=args.no_color,  # type: ignore[attr-defined]
             version=args.version,  # type: ignore[attr-defined]
