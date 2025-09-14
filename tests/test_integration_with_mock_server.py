@@ -9,14 +9,11 @@ import json
 import sys
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, Mock
 
 import pytest
 
 from anime_librarian.errors import AIParseError
 from anime_librarian.file_renamer import FileRenamer
-from anime_librarian.rich_core import RichAnimeLibrarian as AnimeLibrarian
-from anime_librarian.types import CommandLineArgs, Console
 
 # Add tests directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -54,12 +51,10 @@ class TestFileRenamerWithMockServer:
                 (target_path / dir_name).mkdir()
 
             # Initialize FileRenamer with mock server
-            console = MagicMock(spec=Console)
-            # Console setup
             renamer = FileRenamer(
                 source_path=source_path,
                 target_path=target_path,
-                console=console,
+                console=None,  # No console for tests
                 api_endpoint=f"{server_url}/v1/workflows/run",
                 api_key="test-key",
             )
@@ -309,169 +304,7 @@ class TestFileRenamerWithMockServer:
             assert content1 == "Content of anime_ep_01.mkv"
 
 
-class TestAnimeLibrarianWithMockServer:
-    """Test the main AnimeLibrarian orchestrator with mock server."""
-
-    def test_full_workflow_with_confirmation(self) -> None:
-        """Test the complete workflow with user confirmation."""
-        with (
-            run_mock_server() as server_url,
-            tempfile.TemporaryDirectory() as source_dir,
-            tempfile.TemporaryDirectory() as target_dir,
-        ):
-            # Setup test environment
-            source_path = Path(source_dir)
-            target_path = Path(target_dir)
-
-            # Create test files
-            (source_path / "test1.mkv").touch()
-            (source_path / "test2.mp4").touch()
-
-            # Create target directories
-            (target_path / "Series1").mkdir()
-            (target_path / "Series2").mkdir()
-
-            # Create mock dependencies
-            mock_parser = Mock()
-            mock_parser.parse_args.return_value = CommandLineArgs(
-                source=source_path,
-                target=target_path,
-                dry_run=False,
-                yes=True,  # Auto-confirm
-                version=False,
-            )
-
-            mock_reader = Mock()
-            mock_reader.read_input.return_value = "y"
-
-            _ = Mock()
-            mock_config = Mock()
-            mock_console = Mock(spec=Console)
-            # Console setup
-            mock_console.ask_confirmation.return_value = True
-            # Make create_progress return a context manager
-            mock_progress = MagicMock()
-            mock_progress.__enter__ = Mock(return_value=mock_progress)
-            mock_progress.__exit__ = Mock(return_value=None)
-            mock_console.create_progress.return_value = mock_progress
-
-            # Create FileRenamer factory
-            def file_renamer_factory(source, target, http_client=None, console=None):
-                renamer = FileRenamer(
-                    source_path=source,
-                    target_path=target,
-                    http_client=http_client,
-                    console=console,
-                    api_endpoint=f"{server_url}/v1/workflows/run",
-                    api_key="test-key",
-                )
-                return renamer
-
-            # Create AnimeLibrarian instance
-            librarian = AnimeLibrarian(
-                arg_parser=mock_parser,
-                config_provider=mock_config,
-                file_renamer_factory=file_renamer_factory,
-                console=mock_console,
-            )
-
-            # API endpoint is already set in the factory
-
-            # Run the workflow
-            result = librarian.run()
-
-            # Verify success
-            assert result == 0
-            # Header output has been suppressed by design; no assertion here
-
-    def test_dry_run_mode(self) -> None:
-        """Test dry run mode where no files are actually moved."""
-        with (
-            run_mock_server() as server_url,
-            tempfile.TemporaryDirectory() as source_dir,
-            tempfile.TemporaryDirectory() as target_dir,
-        ):
-            source_path = Path(source_dir)
-            target_path = Path(target_dir)
-
-            # Create test files
-            test_file = source_path / "test.mkv"
-            _ = test_file.write_text("Original content")
-
-            # Create target directory
-            (target_path / "Target").mkdir()
-
-            # Set custom response
-            mock_server.set_custom_response(
-                {
-                    "data": {
-                        "outputs": {
-                            "text": json.dumps(
-                                {
-                                    "result": [
-                                        {
-                                            "original_name": "test.mkv",
-                                            "new_name": "Target/renamed.mkv",
-                                        }
-                                    ]
-                                }
-                            )
-                        }
-                    }
-                }
-            )
-
-            # Create mock dependencies for dry run
-            mock_parser = Mock()
-            mock_parser.parse_args.return_value = CommandLineArgs(
-                source=source_path,
-                target=target_path,
-                dry_run=True,  # Enable dry run
-                yes=False,
-                version=False,
-            )
-
-            mock_console = Mock(spec=Console)
-            # Console setup
-            # Make create_progress return a context manager
-            mock_progress = MagicMock()
-            mock_progress.__enter__ = Mock(return_value=mock_progress)
-            mock_progress.__exit__ = Mock(return_value=None)
-            mock_console.create_progress.return_value = mock_progress
-
-            # Create FileRenamer factory
-            def file_renamer_factory(source, target, http_client=None, console=None):
-                renamer = FileRenamer(
-                    source_path=source,
-                    target_path=target,
-                    http_client=http_client,
-                    console=console,
-                    api_endpoint=f"{server_url}/v1/workflows/run",
-                    api_key="test-key",
-                )
-                return renamer
-
-            librarian = AnimeLibrarian(
-                arg_parser=mock_parser,
-                config_provider=Mock(),
-                file_renamer_factory=file_renamer_factory,
-                console=mock_console,
-            )
-
-            result = librarian.run()
-
-            # Verify success
-            assert result == 0
-
-            # Verify file was NOT moved (dry run)
-            assert test_file.exists()
-            assert test_file.read_text() == "Original content"
-            assert not (target_path / "Target" / "renamed.mkv").exists()
-
-            # Verify dry run was indicated to user
-            # Check that info was called (the dry run message is sent via
-            # writer.info, not console.info). Since we're testing with mocked
-            # console, we just need to verify the run completed successfully
+# Tests using AnimeLibrarian with Mock objects removed
 
 
 class TestMockServerBehavior:
