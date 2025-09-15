@@ -44,12 +44,6 @@ class DefaultArgumentParser(ArgumentParser):
             help="Show what would be done without actually renaming files",
         )
         _ = parser.add_argument(
-            "--yes",
-            "-y",
-            action="store_true",
-            help="Automatically answer yes to all prompts",
-        )
-        _ = parser.add_argument(
             "--format",
             choices=["table", "plain", "json", "ndjson"],
             help="Output format for listings: table (default), plain, json, ndjson",
@@ -71,7 +65,6 @@ class DefaultArgumentParser(ArgumentParser):
             source=args.source,  # type: ignore[attr-defined]
             target=args.target,  # type: ignore[attr-defined]
             dry_run=args.dry_run,  # type: ignore[attr-defined]
-            yes=args.yes,  # type: ignore[attr-defined]
             output_format=args.format,  # type: ignore[attr-defined]
             no_color=args.no_color,  # type: ignore[attr-defined]
             version=args.version,  # type: ignore[attr-defined]
