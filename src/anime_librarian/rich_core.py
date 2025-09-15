@@ -86,7 +86,6 @@ class RichAnimeLibrarian:
         self._console.debug(f"  📂 Target path: {target_path}")
         self._console.debug("--- Command Options ---")
         self._console.debug(f"  🧪 Dry run: {args.dry_run}")
-        self._console.debug(f"  ✅ Auto-confirm: {args.yes}")
         self._console.debug(
             f"  📋 Output format: {args.output_format or 'table (default)'}"
         )
@@ -178,7 +177,7 @@ class RichAnimeLibrarian:
             (source.name, target.name) for source, target in sorted_file_pairs
         ]
 
-        if self._args and (not self._args.yes or self._args.dry_run):
+        if self._args:
             writer.display_file_moves_table(
                 file_move_pairs, output_format=self._args.output_format
             )
@@ -196,7 +195,6 @@ class RichAnimeLibrarian:
         file_pairs: Sequence[tuple[Path, Path]],
         writer: RichOutputWriter,
         reader: RichInputReader,
-        args: CommandLineArgs,
     ) -> int | None:
         """
         Handle file conflicts with Rich formatting.
@@ -206,14 +204,13 @@ class RichAnimeLibrarian:
             file_pairs: List of (source, target) file path pairs
             writer: The RichOutputWriter instance
             reader: The RichInputReader instance
-            args: Parsed command line arguments
 
         Returns:
             Exit code if the operation should exit, None otherwise
         """
         conflicts = renamer.check_for_conflicts(file_pairs)
 
-        if conflicts and not args.yes:
+        if conflicts:
             writer.warning("The following files will be overwritten:")
             writer.console.show_file_list(
                 "Conflicts", [str(c) for c in conflicts], style="yellow"
@@ -231,7 +228,6 @@ class RichAnimeLibrarian:
         file_pairs: Sequence[tuple[Path, Path]],
         writer: RichOutputWriter,
         reader: RichInputReader,
-        args: CommandLineArgs,
     ) -> int | None:
         """
         Handle directory creation with Rich formatting.
@@ -241,7 +237,6 @@ class RichAnimeLibrarian:
             file_pairs: List of (source, target) file path pairs
             writer: The RichOutputWriter instance
             reader: The RichInputReader instance
-            args: Parsed command line arguments
 
         Returns:
             Exit code if the operation should exit, None otherwise
@@ -249,7 +244,7 @@ class RichAnimeLibrarian:
         missing_dirs = renamer.find_missing_directories(file_pairs)
 
         if missing_dirs:
-            if not args.yes:
+            if True:
                 writer.info("The following directories need to be created:")
                 writer.console.show_file_list(
                     "Directories", [str(d) for d in missing_dirs], style="cyan"
@@ -386,19 +381,17 @@ class RichAnimeLibrarian:
             return exit_code
 
         # Confirm operation with user
-        if not args.yes and not reader.confirm(
-            "Continue with the file moves?", default=True
-        ):
+        if not reader.confirm("Continue with the file moves?", default=True):
             writer.info("Operation cancelled by user.")
             return 0
 
         # Handle conflicts
-        exit_code = self._handle_conflicts(renamer, file_pairs, writer, reader, args)
+        exit_code = self._handle_conflicts(renamer, file_pairs, writer, reader)
         if exit_code is not None:
             return exit_code
 
         # Handle directory creation
-        exit_code = self._handle_directories(renamer, file_pairs, writer, reader, args)
+        exit_code = self._handle_directories(renamer, file_pairs, writer, reader)
         if exit_code is not None:
             return exit_code
 

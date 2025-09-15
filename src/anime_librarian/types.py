@@ -19,9 +19,6 @@ class CommandLineArgs:
     dry_run: bool
     """Whether to show what would be done without actually renaming files."""
 
-    yes: bool
-    """Whether to automatically answer yes to all prompts."""
-
     version: bool
     """Whether to show the version information and exit."""
 

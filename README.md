@@ -46,9 +46,6 @@ anime-librarian --source ~/Downloads --target ~/Media
 ### UNIX-Friendly Modes
 
 ```bash
-# Non-interactive (for automation)
-anime-librarian --yes
-
 # Preview only
 anime-librarian --dry-run --format table
 
@@ -132,9 +129,6 @@ pip install .
 ```bash
 # Preview changes (dry run)
 anime-librarian --dry-run
-
-# Auto-confirm all prompts
-anime-librarian --yes
 
 # Disable colors
 anime-librarian --no-color

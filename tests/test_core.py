@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
 
 from anime_librarian.rich_core import RichAnimeLibrarian as AnimeLibrarian
 from anime_librarian.types import CommandLineArgs
@@ -18,14 +19,12 @@ class MockArgumentParser:
         source: Path | None = None,
         target: Path | None = None,
         dry_run: bool = False,
-        yes: bool = False,
         version: bool = False,
     ) -> None:
         """Initialize with predefined arguments."""
         self.source = source
         self.target = target
         self.dry_run = dry_run
-        self.yes = yes
         self.version = version
 
     def parse_args(self) -> CommandLineArgs:
@@ -34,7 +33,6 @@ class MockArgumentParser:
             source=self.source,
             target=self.target,
             dry_run=self.dry_run,
-            yes=self.yes,
             version=self.version,
         )
 
@@ -128,7 +126,7 @@ def test_anime_librarian_no_files():
         return mock_renamer
 
     app = AnimeLibrarian(
-        arg_parser=MockArgumentParser(yes=True),
+        arg_parser=MockArgumentParser(),
         config_provider=MockConfigProvider(),
         file_renamer_factory=mock_factory,  # type: ignore[arg-type]
     )
@@ -140,8 +138,12 @@ def test_anime_librarian_no_files():
     assert result == 0
 
 
-def test_anime_librarian_with_conflicts_yes_mode():
-    """Test handling of conflicts in yes mode (auto-confirm)."""
+@patch("anime_librarian.rich_output_writer.RichInputReader.confirm")
+def test_anime_librarian_with_conflicts(mock_confirm: MagicMock) -> None:
+    """Test handling of conflicts."""
+    # Mock the confirm to always return True
+    mock_confirm.return_value = True
+
     # Create mock file pairs with conflicts
     source_path = Path("/mock/source")
     target_path = Path("/mock/target")
@@ -164,9 +166,9 @@ def test_anime_librarian_with_conflicts_yes_mode():
     ) -> MockFileRenamer:
         return mock_renamer
 
-    # Create the application with yes flag
+    # Create the application
     app = AnimeLibrarian(
-        arg_parser=MockArgumentParser(yes=True),
+        arg_parser=MockArgumentParser(),
         config_provider=MockConfigProvider(
             source_path=source_path, target_path=target_path
         ),
@@ -180,8 +182,12 @@ def test_anime_librarian_with_conflicts_yes_mode():
     assert result == 0
 
 
-def test_anime_librarian_with_missing_directories():
+@patch("anime_librarian.rich_output_writer.RichInputReader.confirm")
+def test_anime_librarian_with_missing_directories(mock_confirm: MagicMock) -> None:
     """Test handling of missing directories."""
+    # Mock the confirm to always return True
+    mock_confirm.return_value = True
+
     # Create mock file pairs with missing directories
     source_path = Path("/mock/source")
     target_path = Path("/mock/target")
@@ -202,9 +208,9 @@ def test_anime_librarian_with_missing_directories():
     ) -> MockFileRenamer:
         return mock_renamer
 
-    # Create the application with yes flag
+    # Create the application
     app = AnimeLibrarian(
-        arg_parser=MockArgumentParser(yes=True),
+        arg_parser=MockArgumentParser(),
         config_provider=MockConfigProvider(
             source_path=source_path, target_path=target_path
         ),
