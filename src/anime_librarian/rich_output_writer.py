@@ -256,7 +256,16 @@ class RichInputReader:
         Returns:
             True if confirmed, False otherwise
         """
-        return Confirm.ask(prompt, default=default, console=self.console.console)
+        # Format prompt with standard [Y/n] or [y/N] notation
+        choices = "[Y/n]" if default else "[y/N]"
+        formatted_prompt = f"{prompt} {choices}"
+        return Confirm.ask(
+            formatted_prompt,
+            default=default,
+            console=self.console.console,
+            show_choices=False,
+            show_default=False,
+        )
 
     def read_input(self, prompt: str) -> str:
         """
