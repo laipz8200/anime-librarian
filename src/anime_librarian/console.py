@@ -214,7 +214,7 @@ class BeautifulConsole:
         if not sanitized:
             sanitized = "Are you sure"
         choice_hint = "[Y/n]" if default else "[y/N]"
-        prompt = f"{sanitized} {choice_hint}: "
+        prompt = f"{sanitized}? {choice_hint}: "
         response = self.input(prompt).strip().lower()
         if not response:
             return default

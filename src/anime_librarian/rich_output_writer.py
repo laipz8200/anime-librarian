@@ -63,19 +63,10 @@ class RichOutputWriter(OutputWriter):
             self.console.print_raw("No planned file moves.")
             return
 
-        sources = [source for source, _ in file_pairs]
-        targets = [target for _, target in file_pairs]
-        source_width = max(len("Source"), *(len(s) for s in sources))
-        target_width = max(len("Target"), *(len(t) for t in targets))
-
-        self.console.print_raw("")
-        header = f"{'Source'.ljust(source_width)} -> {'Target'.ljust(target_width)}"
-        separator = f"{'-' * source_width}----{'-' * target_width}"
-        self.console.print_raw(header)
-        self.console.print_raw(separator)
+        self.console.print_raw("Planned file moves:")
         for source, target in file_pairs:
-            line = f"{source.ljust(source_width)} -> {target}"
-            self.console.print_raw(line)
+            self.console.print_raw(f"  - {source}")
+            self.console.print_raw(f"    -> {target}")
 
     def display_progress(self, description: str):
         """Return a minimal progress helper."""

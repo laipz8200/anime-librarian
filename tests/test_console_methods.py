@@ -44,4 +44,4 @@ def test_rich_input_reader_confirm_formats_prompt(
     monkeypatch.setattr(builtins, "input", fake_input)
 
     assert reader.confirm("Do you want to continue? :", default=False) is False
-    assert captured["prompt"] == "Do you want to continue [y/N]: "
+    assert captured["prompt"] == "Do you want to continue? [y/N]: "
