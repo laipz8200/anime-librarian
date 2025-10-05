@@ -50,7 +50,7 @@ anime-librarian --source ~/Downloads --target ~/Media
 anime-librarian --dry-run --format table
 
 # Machine-readable output (format parsed, rendering incremental)
-anime-librarian --dry-run --format json --no-color
+anime-librarian --dry-run --format json
 ```
 
 ## 📋 Prerequisites
@@ -129,9 +129,6 @@ pip install .
 ```bash
 # Preview changes (dry run)
 anime-librarian --dry-run
-
-# Disable colors
-anime-librarian --no-color
 
 # View all options
 anime-librarian --help

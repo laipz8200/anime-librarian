@@ -74,8 +74,8 @@ class RichAnimeLibrarian:
             Tuple of (writer, reader, source_path, target_path, renamer)
         """
         # Create Rich output and input handlers
-        writer = RichOutputWriter(no_color=args.no_color)
-        reader = RichInputReader(no_color=args.no_color)
+        writer = RichOutputWriter()
+        reader = RichInputReader()
 
         # Get source and target paths
         source_path = args.source or self.config_provider.get_source_path()
@@ -89,9 +89,7 @@ class RichAnimeLibrarian:
         self._console.debug(
             f"  📋 Output format: {args.output_format or 'table (default)'}"
         )
-        self._console.debug(
-            f"  🎨 Color output: {'disabled' if args.no_color else 'enabled'}"
-        )
+        self._console.debug("  🎨 Color output: enabled")
 
         # Create the FileRenamer instance with console
         renamer = self.file_renamer_factory(
@@ -351,7 +349,7 @@ class RichAnimeLibrarian:
 
         # Check if version flag is set
         if args.version:
-            writer = RichOutputWriter(no_color=args.no_color)
+            writer = RichOutputWriter()
             writer.console.info(
                 f"anime-librarian version {__version__}", title="Version"
             )

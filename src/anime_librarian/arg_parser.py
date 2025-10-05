@@ -49,11 +49,6 @@ class DefaultArgumentParser(ArgumentParser):
             help="Output format for listings: table (default), plain, json, ndjson",
         )
         _ = parser.add_argument(
-            "--no-color",
-            action="store_true",
-            help="Disable colored/styled output (respects NO_COLOR env as well)",
-        )
-        _ = parser.add_argument(
             "--version",
             action="store_true",
             help="Show version information and exit",
@@ -65,7 +60,6 @@ class DefaultArgumentParser(ArgumentParser):
             source=args.source,  # type: ignore[attr-defined]
             target=args.target,  # type: ignore[attr-defined]
             dry_run=args.dry_run,  # type: ignore[attr-defined]
-            output_format=args.format,  # type: ignore[attr-defined]
-            no_color=args.no_color,  # type: ignore[attr-defined]
             version=args.version,  # type: ignore[attr-defined]
+            output_format=args.format,  # type: ignore[attr-defined]
         )

@@ -17,16 +17,9 @@ class RichOutputWriter(OutputWriter):
 
     console: BeautifulConsole
 
-    def __init__(self, *, no_color: bool = False) -> None:
-        """
-        Initialize the output writer.
-
-        Args:
-            no_color: If True, disable colored output
-        """
+    def __init__(self) -> None:
+        """Initialize the output writer."""
         # Use BeautifulConsole for consistent formatting
-        # no_color is handled by BeautifulConsole internally
-        _ = no_color  # Mark as intentionally unused
         self.console = BeautifulConsole()
 
     @override
@@ -239,10 +232,9 @@ class RichInputReader:
 
     console: BeautifulConsole
 
-    def __init__(self, *, no_color: bool = False) -> None:
+    def __init__(self) -> None:
         """Initialize the Rich input reader."""
         # Use BeautifulConsole for consistency
-        _ = no_color  # Mark as intentionally unused
         self.console = BeautifulConsole()
 
     def confirm(self, prompt: str, default: bool = False) -> bool:

@@ -26,9 +26,6 @@ class CommandLineArgs:
     output_format: str | None = None
     """Preferred output format: table, plain, json, ndjson."""
 
-    no_color: bool = False
-    """Whether to disable colored output explicitly."""
-
 
 @runtime_checkable
 class HttpClient(Protocol):
