@@ -2,6 +2,7 @@
 
 from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 from . import __version__
 
@@ -9,6 +10,7 @@ from . import __version__
 from .enums import FileOperation
 from .errors import FilePairsNotFoundError
 from .file_renamer import FileRenamer
+from .logging_config import get_logger
 from .rich_output_writer import RichInputReader, RichOutputWriter
 from .types import (
     ArgumentParser,
@@ -17,6 +19,11 @@ from .types import (
     Console,
     HttpClient,
 )
+
+if TYPE_CHECKING:
+    from structlog.stdlib import BoundLogger
+else:  # pragma: no cover
+    BoundLogger = Any  # type: ignore[assignment]
 
 
 class RichAnimeLibrarian:
@@ -29,6 +36,7 @@ class RichAnimeLibrarian:
     ]
     _args: CommandLineArgs | None
     _console: Console
+    logger: BoundLogger
 
     def __init__(
         self,
@@ -61,6 +69,8 @@ class RichAnimeLibrarian:
         else:
             self._console = console
 
+        self.logger = get_logger(__name__, component="rich_core")
+
     def _initialize_application(
         self, args: CommandLineArgs
     ) -> tuple[RichOutputWriter, RichInputReader, Path, Path, FileRenamer]:
@@ -80,6 +90,14 @@ class RichAnimeLibrarian:
         # Get source and target paths
         source_path = args.source or self.config_provider.get_source_path()
         target_path = args.target or self.config_provider.get_target_path()
+
+        self.logger.info(
+            "application_context_prepared",
+            source_path=str(source_path),
+            target_path=str(target_path),
+            dry_run=args.dry_run,
+            output_format=args.output_format or "table",
+        )
 
         self._console.debug("=== Configuration loaded ===")
         self._console.debug(f"  📁 Source path: {source_path}")
@@ -122,6 +140,7 @@ class RichAnimeLibrarian:
             # Debug output removed (was verbose-only)
         except (OSError, ValueError, TypeError) as e:
             self._console.exception("Error getting file pairs", e)
+            self.logger.exception("file_pair_fetch_failed")
             writer.error(f"Error: {e}")
             return None, 1
 
@@ -146,6 +165,7 @@ class RichAnimeLibrarian:
                     writer.info(f"No target directories found in: {target_path}")
                 else:
                     writer.info("No files matched for renaming")
+            self.logger.info("file_pairs_empty")
             return None, 0
 
         return file_pairs, None
@@ -183,6 +203,7 @@ class RichAnimeLibrarian:
         # If dry run, exit here
         if args.dry_run:
             writer.info("Dry run completed. No files were renamed.")
+            self.logger.info("dry_run_completed", pair_count=len(file_pairs))
             return 0
 
         return None
@@ -209,6 +230,7 @@ class RichAnimeLibrarian:
         conflicts = renamer.check_for_conflicts(file_pairs)
 
         if conflicts:
+            self.logger.warning("conflicts_detected", count=len(conflicts))
             writer.warning("The following files will be overwritten:")
             writer.console.show_file_list(
                 "Conflicts", [str(c) for c in conflicts], style="yellow"
@@ -216,7 +238,9 @@ class RichAnimeLibrarian:
 
             if not reader.confirm("Do you want to continue?", default=False):
                 writer.info("Operation cancelled by user.")
+                self.logger.info("conflict_resolution_rejected")
                 return 0
+            self.logger.info("conflict_resolution_confirmed")
 
         return None
 
@@ -242,6 +266,7 @@ class RichAnimeLibrarian:
         missing_dirs = renamer.find_missing_directories(file_pairs)
 
         if missing_dirs:
+            self.logger.info("directory_creation_required", count=len(missing_dirs))
             if True:
                 writer.info("The following directories need to be created:")
                 writer.console.show_file_list(
@@ -250,6 +275,7 @@ class RichAnimeLibrarian:
 
                 if not reader.confirm("Create these directories?", default=True):
                     writer.info("Operation cancelled by user.")
+                    self.logger.info("directory_creation_declined")
                     return 0
 
             # Create the directories with progress
@@ -262,7 +288,10 @@ class RichAnimeLibrarian:
 
                 if not renamer.create_directories([dir_path]):
                     writer.error("Failed to create directories. Operation cancelled.")
+                    self.logger.warning("directory_creation_failed")
                     return 1
+
+            self.logger.info("directory_creation_completed", count=len(missing_dirs))
 
         return None
 
@@ -283,6 +312,7 @@ class RichAnimeLibrarian:
         Returns:
             Exit code (0 for success, non-zero for error)
         """
+        self.logger.info("file_move_execution_started", total=len(file_pairs))
         errors: list[tuple[Path, Path, str]] = []
 
         if self._args:
@@ -321,6 +351,7 @@ class RichAnimeLibrarian:
                         success=False,
                         message=error,
                     )
+            self.logger.warning("file_move_execution_failed", error_count=len(errors))
             return 1
         else:
             if self._args:
@@ -333,6 +364,7 @@ class RichAnimeLibrarian:
                     self._console.debug("  ❌ Errors: 0")
                     self._console.debug(f"  📁 Source: {renamer.source_path}")
                     self._console.debug(f"  📂 Target: {renamer.target_path}")
+            self.logger.info("file_move_execution_completed", moved=len(file_pairs))
             return 0
 
     def run(self) -> int:
@@ -353,6 +385,7 @@ class RichAnimeLibrarian:
             writer.console.info(
                 f"anime-librarian version {__version__}", title="Version"
             )
+            self.logger.info("version_requested")
             return 0
 
         # Initialize application components
@@ -366,6 +399,7 @@ class RichAnimeLibrarian:
             renamer, writer
         )
         if exit_code is not None:
+            self.logger.info("run_completed", exit_code=exit_code)
             return exit_code
 
         # At this point, file_pairs_result is guaranteed to be not None
@@ -376,22 +410,30 @@ class RichAnimeLibrarian:
         # Display move plan and handle dry run
         exit_code = self._display_move_plan(file_pairs, writer, args)
         if exit_code is not None:
+            self.logger.info("run_completed", exit_code=exit_code)
             return exit_code
 
         # Confirm operation with user
         if not reader.confirm("Continue with the file moves?", default=True):
             writer.info("Operation cancelled by user.")
+            self.logger.info(
+                "run_completed", exit_code=0, reason="user_cancelled_at_confirmation"
+            )
             return 0
 
         # Handle conflicts
         exit_code = self._handle_conflicts(renamer, file_pairs, writer, reader)
         if exit_code is not None:
+            self.logger.info("run_completed", exit_code=exit_code)
             return exit_code
 
         # Handle directory creation
         exit_code = self._handle_directories(renamer, file_pairs, writer, reader)
         if exit_code is not None:
+            self.logger.info("run_completed", exit_code=exit_code)
             return exit_code
 
         # Perform file renaming with progress and report results
-        return self._rename_files_with_progress(file_pairs, writer, renamer)
+        exit_code = self._rename_files_with_progress(file_pairs, writer, renamer)
+        self.logger.info("run_completed", exit_code=exit_code)
+        return exit_code
