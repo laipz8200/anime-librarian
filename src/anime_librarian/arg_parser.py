@@ -2,7 +2,6 @@
 
 import argparse
 from pathlib import Path
-from typing import override
 
 from . import config
 from .types import ArgumentParser, CommandLineArgs
@@ -11,7 +10,6 @@ from .types import ArgumentParser, CommandLineArgs
 class DefaultArgumentParser(ArgumentParser):
     """Default implementation of ArgumentParser using argparse."""
 
-    @override
     def parse_args(self) -> CommandLineArgs:
         """
         Parse command-line arguments.
@@ -45,13 +43,8 @@ class DefaultArgumentParser(ArgumentParser):
         )
         _ = parser.add_argument(
             "--format",
-            choices=["table", "plain", "json", "ndjson"],
-            help="Output format for listings: table (default), plain, json, ndjson",
-        )
-        _ = parser.add_argument(
-            "--no-color",
-            action="store_true",
-            help="Disable colored/styled output (respects NO_COLOR env as well)",
+            choices=["table", "plain", "json"],
+            help="Output format for listings: table (default), plain, json",
         )
         _ = parser.add_argument(
             "--version",
@@ -65,7 +58,6 @@ class DefaultArgumentParser(ArgumentParser):
             source=args.source,  # type: ignore[attr-defined]
             target=args.target,  # type: ignore[attr-defined]
             dry_run=args.dry_run,  # type: ignore[attr-defined]
-            output_format=args.format,  # type: ignore[attr-defined]
-            no_color=args.no_color,  # type: ignore[attr-defined]
             version=args.version,  # type: ignore[attr-defined]
+            output_format=args.format,  # type: ignore[attr-defined]
         )

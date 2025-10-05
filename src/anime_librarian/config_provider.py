@@ -1,7 +1,6 @@
 """Configuration provider implementation for the AnimeLibrarian application."""
 
 from pathlib import Path
-from typing import override
 
 from . import config
 from .types import ConfigProvider
@@ -10,7 +9,6 @@ from .types import ConfigProvider
 class DefaultConfigProvider(ConfigProvider):
     """Default implementation of ConfigProvider using the config module."""
 
-    @override
     def get_source_path(self) -> Path:
         """
         Get the source path from the config module.
@@ -20,7 +18,6 @@ class DefaultConfigProvider(ConfigProvider):
         """
         return config.get_source_path()
 
-    @override
     def get_target_path(self) -> Path:
         """
         Get the target path from the config module.

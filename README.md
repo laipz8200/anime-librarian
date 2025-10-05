@@ -22,9 +22,9 @@ ______________________________________________________________________
 - 📁 **Smart Organization**: Automatically moves files to appropriate directories
 - 🎯 **Media Player Compatible**: Ensures compatibility with Infuse, Plex, and more
 - 🔍 **Preview Changes**: Dry-run option to review changes before applying
-- 🚀 **Beautiful CLI**: Rich terminal interface with tables, progress bars, and styled output
+- 🚀 **Simple CLI**: Plain-text output with readable tables and progress updates
 - 📺 **Universal Support**: Works with anime, movies, TV shows, and more
-- 🎨 **Interactive UX**: Color-coded output, confirmation prompts, and clear progress indicators
+- 🎨 **Interactive UX**: Confirmation prompts and concise status updates that work in any terminal
 
 ## 🚀 Quick Start
 
@@ -49,8 +49,8 @@ anime-librarian --source ~/Downloads --target ~/Media
 # Preview only
 anime-librarian --dry-run --format table
 
-# Machine-readable output (format parsed, rendering incremental)
-anime-librarian --dry-run --format json --no-color
+# Machine-readable output (newline-delimited JSON for streaming)
+anime-librarian --dry-run --format json
 ```
 
 ## 📋 Prerequisites
@@ -130,9 +130,6 @@ pip install .
 # Preview changes (dry run)
 anime-librarian --dry-run
 
-# Disable colors
-anime-librarian --no-color
-
 # View all options
 anime-librarian --help
 ```
@@ -148,28 +145,14 @@ anime-librarian --help
 
 ## 🎨 Enhanced User Experience
 
-AnimeLibrarian now features a beautiful Rich-powered terminal interface:
+AnimeLibrarian now features a straightforward terminal interface:
 
-- **Color-coded Messages**:
-
-  - 🟢 Success messages in green
-  - 🔴 Errors in red
-  - 🟡 Warnings in yellow
-  - 🔵 Info messages in blue
-
-- **Interactive Tables**: File moves displayed in formatted tables with clear source → target mapping
-
-- **Progress Indicators**:
-
-  - Spinning indicators for AI analysis
-  - Progress bars for file operations
-  - Real-time status updates
-
+- **Clear Status Messages**: Highlights successes, warnings, and errors with simple text cues
+- **Readable Tables**: File moves displayed with plain ASCII tables and lists
+- **Progress Updates**: Lightweight textual progress notifications keep you informed
 - **Smart Prompts**: Interactive confirmation dialogs with sensible defaults
-
-- **Summary Panels**: Operation summaries in styled panels after completion
-
-- **Terminal Compatibility**: Colors and formatting are automatically enabled, even in non-standard terminal environments
+- **Summary Panels**: Operation summaries rendered in easy-to-scan text blocks
+- **Terminal Compatibility**: Looks the same in basic terminals, CI logs, and remote shells
 
 ## 👩‍💻 Development
 
@@ -256,7 +239,7 @@ Common solutions for:
 - 🤖 **AI Problems**: Validate Dify workflow setup
 - 📂 **Organization**: Ensure target directories exist
 - 🔍 **Testing**: Use `--dry-run` to preview changes
-- 📝 **Logging**: Check logs in the `logs/` directory
+- 📝 **Output**: The tool now runs without generating log files
 
 ## 🤝 Contributing
 

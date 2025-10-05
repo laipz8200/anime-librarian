@@ -24,10 +24,7 @@ class CommandLineArgs:
 
     # Optional/extended flags (defaulted to maintain compatibility on older Python)
     output_format: str | None = None
-    """Preferred output format: table, plain, json, ndjson."""
-
-    no_color: bool = False
-    """Whether to disable colored output explicitly."""
+    """Preferred output format: table, plain, json."""
 
 
 @runtime_checkable
