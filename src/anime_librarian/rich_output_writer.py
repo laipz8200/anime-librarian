@@ -75,7 +75,7 @@ class RichOutputWriter(OutputWriter):
 
         Args:
             file_pairs: List of (source, target) file name pairs
-            output_format: One of {table, plain, json, ndjson}. Defaults to table.
+            output_format: One of {table, plain, json}. Defaults to table.
         """
         fmt = (output_format or "table").lower()
 
@@ -85,7 +85,7 @@ class RichOutputWriter(OutputWriter):
                 self.console.print_raw(f"{source} -> {target}", markup=False)
             return
 
-        if fmt in {"json", "ndjson"}:
+        if fmt == "json":
             try:
                 import json
             except Exception:  # pragma: no cover - if json import fails, fallback
@@ -95,15 +95,10 @@ class RichOutputWriter(OutputWriter):
                     {"source": source, "target": target}
                     for source, target in file_pairs
                 ]
-                if fmt == "json":
+                for rec in records:
                     self.console.print_raw(
-                        json.dumps(records, ensure_ascii=False, indent=2), markup=False
+                        json.dumps(rec, ensure_ascii=False), markup=False
                     )
-                else:  # ndjson
-                    for rec in records:
-                        self.console.print_raw(
-                            json.dumps(rec, ensure_ascii=False), markup=False
-                        )
                 return
 
         # Check terminal width to decide on table layout

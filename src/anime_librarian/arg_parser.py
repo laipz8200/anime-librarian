@@ -45,8 +45,8 @@ class DefaultArgumentParser(ArgumentParser):
         )
         _ = parser.add_argument(
             "--format",
-            choices=["table", "plain", "json", "ndjson"],
-            help="Output format for listings: table (default), plain, json, ndjson",
+            choices=["table", "plain", "json"],
+            help="Output format for listings: table (default), plain, json",
         )
         _ = parser.add_argument(
             "--version",

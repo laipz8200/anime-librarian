@@ -24,7 +24,7 @@ class CommandLineArgs:
 
     # Optional/extended flags (defaulted to maintain compatibility on older Python)
     output_format: str | None = None
-    """Preferred output format: table, plain, json, ndjson."""
+    """Preferred output format: table, plain, json."""
 
 
 @runtime_checkable

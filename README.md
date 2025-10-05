@@ -49,7 +49,7 @@ anime-librarian --source ~/Downloads --target ~/Media
 # Preview only
 anime-librarian --dry-run --format table
 
-# Machine-readable output (format parsed, rendering incremental)
+# Machine-readable output (newline-delimited JSON for streaming)
 anime-librarian --dry-run --format json
 ```
 
