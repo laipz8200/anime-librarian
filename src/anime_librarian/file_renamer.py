@@ -295,8 +295,7 @@ class FileRenamer:
                 _ = shutil.move(str(source_file), str(target_file))
             except (OSError, shutil.Error) as e:
                 error_msg = str(e)
-                # Don't include the exception object in the log message
-                # Log exception details
+                # Avoid leaking raw exception repr in user-facing output
                 if self.console:
                     self.console.exception(f"Error moving {source_file}", e)
                 errors.append((source_file, target_file, error_msg))

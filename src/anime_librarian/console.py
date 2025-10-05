@@ -4,7 +4,6 @@ Beautiful console output for the AnimeLibrarian application.
 This module provides a Rich-based console interface with beautiful UI/UX.
 """
 
-from datetime import datetime
 from pathlib import Path
 
 from rich.console import Console
@@ -34,29 +33,12 @@ class BeautifulConsole:
     """Beautiful console output handler using Rich library for excellent UI/UX."""
 
     console: Console
-    _log_file: Path | None
     _last_was_progress: bool
 
     def __init__(self) -> None:
         """Initialize the beautiful console."""
         self.console = Console(theme=custom_theme, force_terminal=True)
-        self._log_file = None
-        self._setup_log_file()
         self._last_was_progress = False
-
-    def _setup_log_file(self) -> None:
-        """Setup log file for persistent logging."""
-        log_dir = Path("logs")
-        log_dir.mkdir(exist_ok=True)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self._log_file = log_dir / f"AnimeLibrarian_{timestamp}.log"
-
-    def _write_to_log(self, message: str, level: str = "INFO") -> None:
-        """Write message to log file."""
-        if self._log_file:
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            with open(self._log_file, "a", encoding="utf-8") as f:
-                _ = f.write(f"[{timestamp}] [{level}] {message}\n")
 
     def _get_terminal_width(self) -> int:
         """Get the current terminal width."""
@@ -138,7 +120,6 @@ class BeautifulConsole:
             self.console.print(panel)
         else:
             self.console.print(f"[success]✅[/success] {message}")
-        self._write_to_log(message, "SUCCESS")
 
     def info(self, message: str, title: str | None = None) -> None:
         """
@@ -159,7 +140,6 @@ class BeautifulConsole:
             self.console.print(panel)
         else:
             self.console.print(f"[info]💡[/info] {message}")
-        self._write_to_log(message, "INFO")
 
     def warning(self, message: str, title: str | None = None) -> None:
         """
@@ -180,7 +160,6 @@ class BeautifulConsole:
             self.console.print(panel)
         else:
             self.console.print(f"[warning]⚠️[/warning]  {message}")
-        self._write_to_log(message, "WARNING")
 
     def error(self, message: str, title: str | None = None) -> None:
         """
@@ -201,7 +180,6 @@ class BeautifulConsole:
             self.console.print(panel)
         else:
             self.console.print(f"[error]❌[/error] {message}")
-        self._write_to_log(message, "ERROR")
 
     def debug(self, message: str) -> None:
         """
@@ -210,8 +188,8 @@ class BeautifulConsole:
         Args:
             message: The debug message to display
         """
-        # Debug messages are now only logged to file, not displayed
-        self._write_to_log(message, "DEBUG")
+        # Debug messages are intentionally suppressed when logging is disabled.
+        _ = message
 
     def exception(self, message: str, exc_info: Exception | None = None) -> None:
         """
@@ -224,7 +202,6 @@ class BeautifulConsole:
         self.error(message)
         if exc_info:
             self.console.print_exception(show_locals=False)
-        self._write_to_log(f"{message} - {exc_info}" if exc_info else message, "ERROR")
 
     def _ensure_spacing(self) -> None:
         """Ensure proper spacing between messages and progress bars."""
@@ -491,7 +468,6 @@ class BeautifulConsole:
         self.console.print(
             f"[{color}]{icon}[/{color}] [{color}]{label}:[/{color}] {content}"
         )
-        self._write_to_log(f"{label}: {content}", "INFO")
 
     def show_change_preview(
         self,
@@ -529,7 +505,6 @@ class BeautifulConsole:
             table.add_row(before, "⚠", after)
 
         self.console.print(table)
-        self._write_to_log(f"Preview: {before} -> {after}", "INFO")
 
     def show_file_list(self, title: str, files: list[str], style: str = "cyan") -> None:
         """
@@ -547,7 +522,6 @@ class BeautifulConsole:
         self.console.print(f"[bold {style}]{title}[/bold {style}]")
         for file in files:
             self.console.print(f"  • [{style}]{file}[/{style}]")
-        self._write_to_log(f"{title}: {', '.join(str(f) for f in files)}", "INFO")
 
     def show_operation_result(
         self,
@@ -590,7 +564,6 @@ class BeautifulConsole:
             display_msg += f" [{message}]"
 
         self.console.print(f"[{color}]{display_msg}[/{color}]")
-        self._write_to_log(display_msg, "SUCCESS" if success else "ERROR")
 
     def show_statistics(self, stats: dict[str, int | str]) -> None:
         """
@@ -609,7 +582,6 @@ class BeautifulConsole:
             table.add_row(key, str(value))
 
         self.console.print(table)
-        self._write_to_log(f"Statistics: {stats}", "INFO")
 
     def print_raw(self, content: str, markup: bool = True) -> None:
         """

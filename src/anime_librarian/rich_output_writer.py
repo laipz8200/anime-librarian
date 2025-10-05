@@ -37,8 +37,8 @@ class RichOutputWriter(OutputWriter):
         Args:
             message: The message to print
         """
-        # Messages are now only logged, not displayed
-        self.console.debug(message)
+        # Logging is disabled; suppress informational chatter.
+        _ = message
 
     @override
     def notice(self, message: str) -> None:
@@ -218,8 +218,8 @@ class RichOutputWriter(OutputWriter):
         Args:
             message: The message to print
         """
-        # Info messages are now only logged, not displayed
-        self.console.debug(message)
+        # Logging is disabled; suppress informational chatter.
+        _ = message
 
     def display_summary_panel(self, title: str, content: str) -> None:
         """

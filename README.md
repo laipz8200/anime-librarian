@@ -256,7 +256,7 @@ Common solutions for:
 - 🤖 **AI Problems**: Validate Dify workflow setup
 - 📂 **Organization**: Ensure target directories exist
 - 🔍 **Testing**: Use `--dry-run` to preview changes
-- 📝 **Logging**: Check logs in the `logs/` directory
+- 📝 **Output**: The tool now runs without generating log files
 
 ## 🤝 Contributing
 

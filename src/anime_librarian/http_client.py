@@ -8,7 +8,7 @@ import httpx
 class HttpxClient:
     """Implementation of HttpClient using httpx library.
 
-    Exposes last request/response metadata for verbose logging without
+    Exposes last request/response metadata for verbose debugging without
     changing the public return type (still returns parsed JSON dict).
     """
 
