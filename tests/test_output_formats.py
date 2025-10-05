@@ -2,32 +2,42 @@
 
 import json
 
-import pytest
-
 from anime_librarian.rich_output_writer import RichOutputWriter
 
 
-def test_display_file_moves_plain(capsys: pytest.CaptureFixture[str]) -> None:
+def test_display_file_moves_plain() -> None:
     """Plain format prints minimal 'source -> target' lines without styling."""
     writer = RichOutputWriter()
     pairs = [("a.mp4", "b.mp4"), ("x.mkv", "y.mkv")]
 
+    outputs: list[str] = []
+
+    def capture(content: str, *_args: object, **_kwargs: object) -> None:
+        outputs.append(content)
+
+    writer.console.print_raw = capture  # type: ignore[assignment]
+
     writer.display_file_moves_table(pairs, output_format="plain")
-    out = capsys.readouterr().out
+    out = "\n".join(outputs)
 
     assert "a.mp4 -> b.mp4" in out
     assert "x.mkv -> y.mkv" in out
 
 
-def test_display_file_moves_json_outputs_ndjson(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
+def test_display_file_moves_json_outputs_ndjson() -> None:
     """JSON format now emits newline-delimited JSON records."""
     writer = RichOutputWriter()
     pairs = [("a.mp4", "b.mp4"), ("x.mkv", "y.mkv")]
 
+    outputs: list[str] = []
+
+    def capture(content: str, *_args: object, **_kwargs: object) -> None:
+        outputs.append(content)
+
+    writer.console.print_raw = capture  # type: ignore[assignment]
+
     writer.display_file_moves_table(pairs, output_format="json")
-    out = capsys.readouterr().out
+    out = "\n".join(outputs)
 
     lines = [line for line in out.splitlines() if line.strip()]
     assert len(lines) == 2

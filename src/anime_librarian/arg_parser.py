@@ -2,7 +2,6 @@
 
 import argparse
 from pathlib import Path
-from typing import override
 
 from . import config
 from .types import ArgumentParser, CommandLineArgs
@@ -11,7 +10,6 @@ from .types import ArgumentParser, CommandLineArgs
 class DefaultArgumentParser(ArgumentParser):
     """Default implementation of ArgumentParser using argparse."""
 
-    @override
     def parse_args(self) -> CommandLineArgs:
         """
         Parse command-line arguments.

@@ -1,267 +1,117 @@
-"""Rich-enhanced output writer implementation for the AnimeLibrarian application."""
+# ruff: noqa: D102
+"""Plain-text output utilities for the AnimeLibrarian application."""
 
-from collections.abc import Sequence
-from typing import override
+from __future__ import annotations
 
-from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.prompt import Confirm
-from rich.table import Table
+import json
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+else:  # pragma: no cover - runtime fallback for type hints
+    Sequence = tuple  # type: ignore[assignment]
 
 from .console import BeautifulConsole
 from .types import OutputWriter
 
 
 class RichOutputWriter(OutputWriter):
-    """Rich-enhanced implementation of OutputWriter for better UX."""
+    """Simple text implementation of the OutputWriter protocol."""
 
     console: BeautifulConsole
 
     def __init__(self) -> None:
-        """Initialize the output writer."""
-        # Use BeautifulConsole for consistent formatting
         self.console = BeautifulConsole()
 
-    @override
     def message(self, message: str) -> None:
-        """
-        Print informational or success message.
-
-        Args:
-            message: The message to print
-        """
-        # Logging is disabled; suppress informational chatter.
+        # Informational chatter remains muted by default.
         _ = message
 
-    @override
     def notice(self, message: str) -> None:
-        """
-        Always print error or warning message.
-
-        Args:
-            message: The message to print
-        """
-        # Use BeautifulConsole methods for appropriate message types
-        if "error" in message.lower():
+        lower = message.lower()
+        if "error" in lower:
             self.console.error(message)
-        elif "warning" in message.lower():
+        elif "warning" in lower:
             self.console.warning(message)
         else:
             self.console.info(message)
 
-    @override
     def list_items(
         self, header: str, items: Sequence[str], always_show: bool = False
     ) -> None:
-        """
-        Print a list of items with a header using Rich formatting.
-
-        Args:
-            header: The header to display
-            items: The items to list
-            always_show: If True, always show the list
-        """
         if not always_show:
             return
-
-        # Use BeautifulConsole's show_file_list method
-        self.console.show_file_list(header, list(items), style="cyan")
+        self.console.show_file_list(header, list(items))
 
     def display_file_moves_table(
         self, file_pairs: Sequence[tuple[str, str]], output_format: str | None = None
     ) -> None:
-        """
-        Display planned file moves in the requested format.
-
-        Args:
-            file_pairs: List of (source, target) file name pairs
-            output_format: One of {table, plain, json}. Defaults to table.
-        """
         fmt = (output_format or "table").lower()
 
-        # Plain format: minimal, machine-friendly-ish text with no styling
         if fmt == "plain":
             for source, target in file_pairs:
-                self.console.print_raw(f"{source} -> {target}", markup=False)
+                self.console.print_raw(f"{source} -> {target}")
             return
 
         if fmt == "json":
-            try:
-                import json
-            except Exception:  # pragma: no cover - if json import fails, fallback
-                fmt = "table"
-            else:
-                records = [
-                    {"source": source, "target": target}
-                    for source, target in file_pairs
-                ]
-                for rec in records:
-                    self.console.print_raw(
-                        json.dumps(rec, ensure_ascii=False), markup=False
-                    )
-                return
-
-        # Check terminal width to decide on table layout
-        term_width = self.console.width
-
-        # For very narrow terminals, use a list format instead of table
-        if term_width < 100:
-            # Use show_change_preview for each pair
-            from .enums import PreviewType
-
             for source, target in file_pairs:
-                self.console.show_change_preview(
-                    source, target, PreviewType.RENAME_PREVIEW
-                )
-        else:
-            # Use table for wider terminals
-            table = Table(
-                title=None,
-                show_header=True,
-                header_style="bold cyan",
-                expand=True,  # Use full terminal width
-                padding=(0, 1),  # Reduce padding to save space
-            )
+                record = {"source": source, "target": target}
+                self.console.print_raw(json.dumps(record, ensure_ascii=False))
+            return
 
-            # Calculate column widths dynamically
-            # Reserve 5 chars for arrow column, split rest between source and target
-            available = term_width - 7  # Account for borders and arrow
-            col_width = available // 2
+        if not file_pairs:
+            self.console.print_raw("No planned file moves.")
+            return
 
-            table.add_column(
-                "Source",
-                style="yellow",
-                no_wrap=False,
-                overflow="fold",  # Fold long text instead of truncating
-                min_width=20,
-                max_width=col_width,
-            )
-            table.add_column("→", justify="center", style="dim", width=3)
-            table.add_column(
-                "Target",
-                style="green",
-                no_wrap=False,
-                overflow="fold",  # Fold long text instead of truncating
-                min_width=20,
-                max_width=col_width,
-            )
+        sources = [source for source, _ in file_pairs]
+        targets = [target for _, target in file_pairs]
+        source_width = max(len("Source"), *(len(s) for s in sources))
+        target_width = max(len("Target"), *(len(t) for t in targets))
 
-            for source, target in file_pairs:
-                table.add_row(source, "→", target)
+        self.console.print_raw("")
+        header = f"{'Source'.ljust(source_width)} -> {'Target'.ljust(target_width)}"
+        separator = f"{'-' * source_width}----{'-' * target_width}"
+        self.console.print_raw(header)
+        self.console.print_raw(separator)
+        for source, target in file_pairs:
+            line = f"{source.ljust(source_width)} -> {target}"
+            self.console.print_raw(line)
 
-            # Print the table using raw output
-            self.console.print_raw("")
-            self.console.console.print(table)
-
-    def display_progress(self, description: str) -> Progress:
-        """
-        Create and return a progress indicator.
-
-        Args:
-            description: Description of the operation
-
-        Returns:
-            A Rich Progress instance
-        """
-        progress = Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=self.console.console,
-            transient=True,
-        )
-        _ = progress.add_task(description, total=None)
-        return progress
+    def display_progress(self, description: str):
+        """Return a minimal progress helper."""
+        return self.console.create_progress(description)
 
     def success(self, message: str) -> None:
-        """
-        Display a success message with green styling.
-
-        Args:
-            message: The message to print
-        """
         self.console.success(message)
 
     def error(self, message: str) -> None:
-        """
-        Display an error message with red styling.
-
-        Args:
-            message: The message to print
-        """
         self.console.error(message)
 
     def warning(self, message: str) -> None:
-        """
-        Display a warning message with yellow styling.
-
-        Args:
-            message: The message to print
-        """
         self.console.warning(message)
 
     def info(self, message: str) -> None:
-        """
-        Display an info message with blue styling.
-
-        Args:
-            message: The message to print
-        """
-        # Logging is disabled; suppress informational chatter.
-        _ = message
+        self.console.info(message)
 
     def display_summary_panel(self, title: str, content: str) -> None:
-        """
-        Display a summary panel with formatted content.
-
-        Args:
-            title: Panel title
-            content: Panel content
-        """
-        panel = Panel(content, title=title, border_style="cyan", padding=(1, 2))
         self.console.print_raw("")
-        self.console.console.print(panel)
+        self.console.print_raw(title)
+        self.console.print_raw("-" * len(title))
+        for line in content.splitlines():
+            self.console.print_raw(line)
+        self.console.print_raw("")
 
 
 class RichInputReader:
-    """Rich-enhanced input reader for interactive prompts."""
+    """Plain-text input reader for interactive prompts."""
 
     console: BeautifulConsole
 
     def __init__(self) -> None:
-        """Initialize the Rich input reader."""
-        # Use BeautifulConsole for consistency
         self.console = BeautifulConsole()
 
     def confirm(self, prompt: str, default: bool = False) -> bool:
-        """
-        Ask for user confirmation with a styled prompt.
-
-        Args:
-            prompt: The prompt to display
-            default: Default value if user just presses Enter
-
-        Returns:
-            True if confirmed, False otherwise
-        """
-        # Format prompt with standard [Y/n] or [y/N] notation
-        choices = "[Y/n]" if default else "[y/N]"
-        formatted_prompt = f"{prompt} {choices}"
-        return Confirm.ask(
-            formatted_prompt,
-            default=default,
-            console=self.console.console,
-            show_choices=False,
-            show_default=False,
-        )
+        return self.console.ask_confirmation(prompt, default)
 
     def read_input(self, prompt: str) -> str:
-        """
-        Read user input with a styled prompt.
-
-        Args:
-            prompt: The prompt to display
-
-        Returns:
-            User input as a string
-        """
-        return self.console.console.input(f"[bold cyan]{prompt}[/bold cyan]")
+        return self.console.input(f"{prompt}: ")

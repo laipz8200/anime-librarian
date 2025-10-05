@@ -1,4 +1,4 @@
-"""Core functionality for the AnimeLibrarian application with Rich UX enhancements."""
+"""Core functionality for the AnimeLibrarian application with text UX enhancements."""
 
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -20,7 +20,7 @@ from .types import (
 
 
 class RichAnimeLibrarian:
-    """Main application class for the AnimeLibrarian with Rich UX."""
+    """Main application class for AnimeLibrarian with text-based UX."""
 
     arg_parser: ArgumentParser
     config_provider: ConfigProvider
@@ -40,7 +40,7 @@ class RichAnimeLibrarian:
         console: Console | None = None,
     ):
         """
-        Initialize the RichAnimeLibrarian.
+        Initialize the application facade.
 
         Args:
             arg_parser: The argument parser to use
@@ -73,7 +73,7 @@ class RichAnimeLibrarian:
         Returns:
             Tuple of (writer, reader, source_path, target_path, renamer)
         """
-        # Create Rich output and input handlers
+        # Create output and input handlers
         writer = RichOutputWriter()
         reader = RichInputReader()
 
@@ -89,7 +89,7 @@ class RichAnimeLibrarian:
         self._console.debug(
             f"  📋 Output format: {args.output_format or 'table (default)'}"
         )
-        self._console.debug("  🎨 Color output: enabled")
+        self._console.debug("  🎨 Output mode: plain text")
 
         # Create the FileRenamer instance with console
         renamer = self.file_renamer_factory(
@@ -157,7 +157,7 @@ class RichAnimeLibrarian:
         args: CommandLineArgs,
     ) -> int | None:
         """
-        Display the planned file moves using Rich table.
+        Display the planned file moves using a plain table.
 
         Args:
             file_pairs: List of (source, target) file path pairs
@@ -195,7 +195,7 @@ class RichAnimeLibrarian:
         reader: RichInputReader,
     ) -> int | None:
         """
-        Handle file conflicts with Rich formatting.
+        Handle file conflicts with plain-text formatting.
 
         Args:
             renamer: The FileRenamer instance
@@ -228,7 +228,7 @@ class RichAnimeLibrarian:
         reader: RichInputReader,
     ) -> int | None:
         """
-        Handle directory creation with Rich formatting.
+        Handle directory creation with plain-text formatting.
 
         Args:
             renamer: The FileRenamer instance
@@ -337,7 +337,7 @@ class RichAnimeLibrarian:
 
     def run(self) -> int:
         """
-        Run the application with Rich UX enhancements.
+        Run the application with text-based UX enhancements.
 
         Returns:
             Exit code (0 for success, non-zero for error)
