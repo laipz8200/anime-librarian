@@ -9,9 +9,9 @@ import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from anime_librarian.enums import FileOperation, PreviewType, ProcessingStatus
+import structlog
 
-from .logging_config import get_logger
+from anime_librarian.enums import FileOperation, PreviewType, ProcessingStatus
 
 if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
@@ -53,7 +53,7 @@ class BeautifulConsole:
 
     def __init__(self, logger: BoundLogger | None = None) -> None:
         self._last_was_progress = False
-        base_logger = logger or get_logger(__name__, component="console")
+        base_logger = logger or structlog.get_logger(__name__).bind(component="console")
         self._logger = base_logger.bind(console_variant="plain")
 
     # ------------------------------------------------------------------

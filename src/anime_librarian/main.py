@@ -12,7 +12,6 @@ from pathlib import Path
 from .arg_parser import DefaultArgumentParser
 from .config_provider import DefaultConfigProvider
 from .file_renamer import FileRenamer
-from .logging_config import configure_logging
 from .rich_core import RichAnimeLibrarian
 from .types import Console, HttpClient
 
@@ -52,8 +51,6 @@ def main() -> int:
     Returns:
         Exit code (0 for success, non-zero for error)
     """
-    configure_logging()
-
     app = RichAnimeLibrarian(
         arg_parser=DefaultArgumentParser(),
         config_provider=DefaultConfigProvider(),

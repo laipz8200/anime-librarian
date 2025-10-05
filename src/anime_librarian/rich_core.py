@@ -4,13 +4,14 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import structlog
+
 from . import __version__
 
 # Removed verbose mode import
 from .enums import FileOperation
 from .errors import FilePairsNotFoundError
 from .file_renamer import FileRenamer
-from .logging_config import get_logger
 from .rich_output_writer import RichInputReader, RichOutputWriter
 from .types import (
     ArgumentParser,
@@ -69,7 +70,7 @@ class RichAnimeLibrarian:
         else:
             self._console = console
 
-        self.logger = get_logger(__name__, component="rich_core")
+        self.logger = structlog.get_logger(__name__).bind(component="rich_core")
 
     def _initialize_application(
         self, args: CommandLineArgs

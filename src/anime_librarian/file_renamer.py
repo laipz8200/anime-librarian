@@ -8,17 +8,21 @@ renaming and organizing video files using AI suggestions.
 import shutil
 from collections.abc import Sequence
 from pathlib import Path
-from typing import ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import json_repair
-from structlog.stdlib import BoundLogger
+import structlog
 
 from . import config
 from .errors import raise_parse_error
 from .http_client import HttpxClient
-from .logging_config import get_logger
 from .models import AIResponse, ApiResponse
 from .types import Console, HttpClient
+
+if TYPE_CHECKING:
+    from structlog.stdlib import BoundLogger
+else:  # pragma: no cover
+    BoundLogger = Any  # type: ignore[assignment]
 
 
 class FileRenamer:
@@ -85,7 +89,9 @@ class FileRenamer:
         self.api_key = api_key
         self.api_timeout = api_timeout
 
-        base_logger = logger or get_logger(__name__, component="file_renamer")
+        base_logger = logger or structlog.get_logger(__name__).bind(
+            component="file_renamer"
+        )
         self.logger = base_logger.bind(
             source_path=str(self.source_path),
             target_path=str(self.target_path),
