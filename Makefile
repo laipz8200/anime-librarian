@@ -9,24 +9,31 @@ help:  ## Show this help message
 	@echo "Available commands:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
 
-lint:  ## Run all linters (Python and Markdown) with fixes
-	@uv run python scripts/lint.py
+lint:  ## Run all linters with Python-only fixes
+	@echo "============================================================"
+	@echo "🚀 AnimeLibrarian Lint"
+	@echo "============================================================"
+	@echo ""
+	@echo "🔧 Formatting Python code"
+	@uv run ruff format src tests
+	@echo ""
+	@echo "🔧 Applying Ruff autofixes"
+	@uv run ruff check --fix src tests
+	@echo ""
+	@echo "🔍 Verifying Python code"
+	@uv run ruff check src tests
+	@echo ""
+	@echo "============================================================"
+	@echo "✨ Lint complete"
+	@echo "============================================================"
 
 format:  ## Format Python code with ruff format
 	@echo "🔧 Formatting Python code..."
 	@uv run ruff format src tests
 
-format-md:  ## Format Markdown files with mdformat
-	@echo "📝 Formatting Markdown files..."
-	@uv run python scripts/lint_markdown.py
-
 check:  ## Check Python code with ruff (no fixes)
 	@echo "🔍 Checking Python code..."
 	@uv run ruff check src tests
-
-check-md:  ## Check Markdown files (no fixes)
-	@echo "🔍 Checking Markdown files..."
-	@uv run python scripts/lint_markdown.py --check
 
 type-check:  ## Run type checking with basedpyright
 	@echo "🔍 Running type checking with basedpyright..."
