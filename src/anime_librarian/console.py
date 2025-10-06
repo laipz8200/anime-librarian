@@ -7,16 +7,9 @@ import shutil
 import sys
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-import structlog
+from typing import Any
 
 from anime_librarian.enums import FileOperation, PreviewType, ProcessingStatus
-
-if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
-else:  # pragma: no cover
-    BoundLogger = Any  # type: ignore[assignment]
 
 
 class _NullProgress:
@@ -49,12 +42,9 @@ class BeautifulConsole:
     """Plain console output handler (no color codes or rich dependencies)."""
 
     _last_was_progress: bool
-    _logger: BoundLogger
 
-    def __init__(self, logger: BoundLogger | None = None) -> None:
+    def __init__(self) -> None:
         self._last_was_progress = False
-        base_logger = logger or structlog.get_logger(__name__).bind(component="console")
-        self._logger = base_logger.bind(console_variant="plain")
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -118,7 +108,6 @@ class BeautifulConsole:
             self._print(f"SUCCESS [{title}]: {message}")
         else:
             self._print(f"SUCCESS: {message}")
-        self._logger.info("console_success", message=message, title=title)
 
     def info(self, message: str, title: str | None = None) -> None:
         self._ensure_spacing()
@@ -126,7 +115,6 @@ class BeautifulConsole:
             self._print(f"INFO [{title}]: {message}")
         else:
             self._print(f"INFO: {message}")
-        self._logger.info("console_info", message=message, title=title)
 
     def warning(self, message: str, title: str | None = None) -> None:
         self._ensure_spacing()
@@ -134,7 +122,6 @@ class BeautifulConsole:
             self._print(f"WARNING [{title}]: {message}", stream=sys.stderr)
         else:
             self._print(f"WARNING: {message}", stream=sys.stderr)
-        self._logger.warning("console_warning", message=message, title=title)
 
     def error(self, message: str, title: str | None = None) -> None:
         self._ensure_spacing()
@@ -142,19 +129,13 @@ class BeautifulConsole:
             self._print(f"ERROR [{title}]: {message}", stream=sys.stderr)
         else:
             self._print(f"ERROR: {message}", stream=sys.stderr)
-        self._logger.error("console_error", message=message, title=title)
 
     def debug(self, message: str) -> None:
-        """Ignore debug messages (logging removed)."""
+        """Ignore debug messages."""
         _ = message
 
     def exception(self, message: str, exc_info: Exception | None = None) -> None:
         self.error(message)
-        self._logger.exception(
-            "console_exception",
-            message=message,
-            exception_type=exc_info.__class__.__name__ if exc_info else None,
-        )
         if exc_info:
             traceback.print_exception(
                 exc_info.__class__, exc_info, exc_info.__traceback__

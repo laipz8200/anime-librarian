@@ -8,21 +8,15 @@ renaming and organizing video files using AI suggestions.
 import shutil
 from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import ClassVar
 
 import json_repair
-import structlog
 
 from . import config
 from .errors import raise_parse_error
 from .http_client import HttpxClient
 from .models import AIResponse, ApiResponse
 from .types import Console, HttpClient
-
-if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
-else:  # pragma: no cover
-    BoundLogger = Any  # type: ignore[assignment]
 
 
 class FileRenamer:
@@ -55,7 +49,6 @@ class FileRenamer:
     api_endpoint: str
     api_key: str
     api_timeout: int
-    logger: BoundLogger
 
     def __init__(
         self,
@@ -63,7 +56,6 @@ class FileRenamer:
         target_path: Path,
         http_client: HttpClient | None = None,
         console: Console | None = None,
-        logger: BoundLogger | None = None,
         api_endpoint: str = config.DIFY_WORKFLOW_RUN_ENDPOINT,
         api_key: str = config.DIFY_API_KEY,
         api_timeout: int = config.API_TIMEOUT,
@@ -76,7 +68,6 @@ class FileRenamer:
             target_path: Path to the directory containing target directories
             http_client: Optional HTTP client to use for AI requests
             console: Optional console for output (if None, no output)
-            logger: Optional structured logger to emit operational events
             api_endpoint: API endpoint for the AI service
             api_key: API key for the AI service
             api_timeout: Timeout for API requests in seconds
@@ -88,14 +79,6 @@ class FileRenamer:
         self.api_endpoint = api_endpoint
         self.api_key = api_key
         self.api_timeout = api_timeout
-
-        base_logger = logger or structlog.get_logger(__name__).bind(
-            component="file_renamer"
-        )
-        self.logger = base_logger.bind(
-            source_path=str(self.source_path),
-            target_path=str(self.target_path),
-        )
 
     def _get_name_pairs_from_ai(
         self, source_files_list: list[str], target_files_list: list[str]
@@ -130,12 +113,6 @@ class FileRenamer:
             "response_mode": "blocking",
         }
 
-        self.logger.info(
-            "ai_name_pair_request_started",
-            source_file_count=len(source_files_list),
-            target_directory_count=len(target_files_list),
-        )
-
         # Send POST request to the AI service
         resp = self.http_client.post(
             self.api_endpoint, headers=headers, json=payload, timeout=self.api_timeout
@@ -152,10 +129,6 @@ class FileRenamer:
                 self.console.exception(
                     "Invalid response structure from AI service", exc
                 )
-            self.logger.exception(
-                "ai_response_validation_failed",
-                raw_response=resp,
-            )
             raise_parse_error(exc)
         # Parse the JSON response
         try:
@@ -174,16 +147,11 @@ class FileRenamer:
             # Log the error and re-raise with a more specific error type
             if self.console:
                 self.console.exception("Error parsing AI response", exc)
-            self.logger.exception("ai_response_parsing_failed")
             # This will always raise, so mypy knows we don't need an else clause
             raise_parse_error(exc)
         # Return the name pairs in the try block to satisfy ruff TRY300
         # and use else to make it clear this is the success path
         else:
-            self.logger.info(
-                "ai_name_pair_request_completed",
-                pair_count=len(name_pairs),
-            )
             return name_pairs
 
     def get_file_pairs(self) -> Sequence[tuple[Path, Path]]:
@@ -209,7 +177,6 @@ class FileRenamer:
             if self.console:
                 self.console.info(f"No media files found in {self.source_path}")
                 # Debug info removed (was verbose-only)
-            self.logger.info("no_source_media_files_found")
             return []
 
         # Check if we have target directories
@@ -217,7 +184,6 @@ class FileRenamer:
             if self.console:
                 self.console.info(f"No target directories found in {self.target_path}")
                 # Debug info removed (was verbose-only)
-            self.logger.info("no_target_directories_found")
             return []
 
         # Get just the file/directory names
@@ -264,10 +230,6 @@ class FileRenamer:
         for _, target_path in file_pairs:
             if target_path.exists():
                 conflicts.append(target_path)
-        if conflicts:
-            self.logger.warning(
-                "file_conflicts_detected", conflict_count=len(conflicts)
-            )
         return conflicts
 
     def find_missing_directories(
@@ -287,10 +249,7 @@ class FileRenamer:
             target_dir = target_file.parent
             if not target_dir.exists():
                 missing_dirs.add(target_dir)
-        result = list(missing_dirs)
-        if result:
-            self.logger.info("missing_directories_detected", count=len(result))
-        return result
+        return list(missing_dirs)
 
     def create_directories(self, directories: list[Path]) -> bool:
         """
@@ -310,11 +269,7 @@ class FileRenamer:
             except OSError as e:
                 if self.console:
                     self.console.exception(f"Error creating directory {directory}", e)
-                self.logger.exception(
-                    "directory_creation_failed", directory=str(directory)
-                )
                 return False
-        self.logger.info("directories_created", count=len(directories))
         return True
 
     def rename_files(
@@ -337,32 +292,11 @@ class FileRenamer:
                     self.console.print_file_operation(
                         "Moving", str(source_file), str(target_file), "processing"
                     )
-                self.logger.info(
-                    "file_move_started",
-                    source=str(source_file),
-                    target=str(target_file),
-                )
                 _ = shutil.move(str(source_file), str(target_file))
-                self.logger.info(
-                    "file_move_completed",
-                    source=str(source_file),
-                    target=str(target_file),
-                )
             except (OSError, shutil.Error) as e:
                 error_msg = str(e)
                 # Avoid leaking raw exception repr in user-facing output
                 if self.console:
                     self.console.exception(f"Error moving {source_file}", e)
-                self.logger.exception(
-                    "file_move_failed",
-                    source=str(source_file),
-                    target=str(target_file),
-                )
                 errors.append((source_file, target_file, error_msg))
-        if errors:
-            self.logger.warning(
-                "file_move_completed_with_errors", error_count=len(errors)
-            )
-        else:
-            self.logger.info("file_move_batch_completed", moved=len(file_pairs))
         return errors
