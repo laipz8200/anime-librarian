@@ -394,4 +394,5 @@ class RichAnimeLibrarian:
             return exit_code
 
         # Perform file renaming with progress and report results
-        return self._rename_files_with_progress(file_pairs, writer, renamer)
+        exit_code = self._rename_files_with_progress(file_pairs, writer, renamer)
+        return exit_code

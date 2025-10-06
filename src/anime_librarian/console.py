@@ -131,7 +131,7 @@ class BeautifulConsole:
             self._print(f"ERROR: {message}", stream=sys.stderr)
 
     def debug(self, message: str) -> None:
-        """Ignore debug messages (logging removed)."""
+        """Ignore debug messages."""
         _ = message
 
     def exception(self, message: str, exc_info: Exception | None = None) -> None:
