@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
 AnimeLibrarian is an AI-powered CLI tool that automatically renames and organizes video files using LLM technology through Dify workflows. Follows DDD and Clean Architecture with comprehensive type safety.
