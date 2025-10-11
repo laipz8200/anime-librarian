@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed** for any bug fixes.
 - **Security** in case of vulnerabilities.
 
+## [Unreleased]
+
+### Removed
+
+- Remove structlog dependency and logging instrumentation to simplify the CLI output.
+
 ## [0.3.0] - 2025-05-27
 
 ### Changed
