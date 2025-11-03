@@ -174,16 +174,10 @@ class FileRenamer:
 
         # Check if we have files to process
         if not source_files:
-            if self.console:
-                self.console.info(f"No media files found in {self.source_path}")
-                # Debug info removed (was verbose-only)
             return []
 
         # Check if we have target directories
         if not target_dirs:
-            if self.console:
-                self.console.info(f"No target directories found in {self.target_path}")
-                # Debug info removed (was verbose-only)
             return []
 
         # Get just the file/directory names
