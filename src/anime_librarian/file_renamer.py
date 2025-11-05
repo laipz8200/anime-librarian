@@ -281,11 +281,6 @@ class FileRenamer:
         errors: list[tuple[Path, Path, str]] = []
         for source_file, target_file in file_pairs:
             try:
-                if self.console:
-                    # Debug info removed (was verbose-only)
-                    self.console.print_file_operation(
-                        "Moving", str(source_file), str(target_file), "processing"
-                    )
                 _ = shutil.move(str(source_file), str(target_file))
             except (OSError, shutil.Error) as e:
                 error_msg = str(e)
