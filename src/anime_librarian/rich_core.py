@@ -324,13 +324,6 @@ class RichAnimeLibrarian:
             return 1
         else:
             # UNIX philosophy: silence on success
-            # Summary removed (was verbose-only)
-            if False:  # verbose mode removed
-                self._console.debug("=== Operation Summary ===")
-                self._console.debug(f"  ✅ Files moved: {len(file_pairs)}")
-                self._console.debug("  ❌ Errors: 0")
-                self._console.debug(f"  📁 Source: {renamer.source_path}")
-                self._console.debug(f"  📂 Target: {renamer.target_path}")
             return 0
 
     def run(self) -> int:
