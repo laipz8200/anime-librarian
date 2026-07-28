@@ -5,6 +5,7 @@ app:
     A command-line tool that uses AI to rename and organize video files.'
   icon: 🤖
   icon_background: '#FFEAD5'
+  icon_type: emoji
   mode: workflow
   name: Anime Librarian
   use_icon_as_answer_icon: false
@@ -12,9 +13,10 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai:0.2.5@373362a028986aae53a7baf73a7f11991ba3c22c69eaf97d6cde048cfd4a9f98
+    marketplace_plugin_unique_identifier: langgenius/openai:1.0.1@b513bf843af4619450bdc15f32e995f90ebdeee143b1cccef442a867099b3397
+    version: null
 kind: app
-version: 0.4.0
+version: 0.6.0
 workflow:
   conversation_variables: []
   environment_variables:
@@ -42,10 +44,14 @@ workflow:
       - remote_url
       enabled: false
       fileUploadConfig:
+        attachment_image_file_size_limit: 2
         audio_file_size_limit: 50
         batch_count_limit: 5
         file_size_limit: 15
+        file_upload_limit: 50
+        image_file_batch_limit: 10
         image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
         video_file_size_limit: 100
         workflow_file_upload_limit: 10
       image:
@@ -71,19 +77,6 @@ workflow:
       voice: ''
   graph:
     edges:
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: end
-      id: 17474207593550-source-1747420923459-target
-      selected: false
-      source: '17474207593550'
-      sourceHandle: source
-      target: '1747420923459'
-      targetHandle: target
-      type: custom
-      zIndex: 0
     - data:
         isInIteration: false
         isInLoop: false
@@ -139,34 +132,6 @@ workflow:
         isInIteration: true
         isInLoop: false
         iteration_id: '1747417424520'
-        sourceType: code
-        targetType: if-else
-      id: 1747677918638-source-1747678146445-target
-      selected: false
-      source: '1747677918638'
-      sourceHandle: source
-      target: '1747678146445'
-      targetHandle: target
-      type: custom
-      zIndex: 1002
-    - data:
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
-        sourceType: if-else
-        targetType: template-transform
-      id: 1747678146445-true-1747678171263-target
-      selected: false
-      source: '1747678146445'
-      sourceHandle: 'true'
-      target: '1747678171263'
-      targetHandle: target
-      type: custom
-      zIndex: 1002
-    - data:
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
         sourceType: llm
         targetType: http-request
       id: 1747678507236-source-1747678347028-target
@@ -174,20 +139,6 @@ workflow:
       source: '1747678507236'
       sourceHandle: source
       target: '1747678347028'
-      targetHandle: target
-      type: custom
-      zIndex: 1002
-    - data:
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
-        sourceType: if-else
-        targetType: template-transform
-      id: 1747678146445-false-1747678651619-target
-      selected: false
-      source: '1747678146445'
-      sourceHandle: 'false'
-      target: '1747678651619'
       targetHandle: target
       type: custom
       zIndex: 1002
@@ -265,34 +216,6 @@ workflow:
         isInIteration: true
         isInLoop: false
         iteration_id: '1747417424520'
-        sourceType: template-transform
-        targetType: variable-aggregator
-      id: 1747678171263-source-1747679327091-target
-      selected: false
-      source: '1747678171263'
-      sourceHandle: source
-      target: '1747679327091'
-      targetHandle: target
-      type: custom
-      zIndex: 1002
-    - data:
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
-        sourceType: template-transform
-        targetType: variable-aggregator
-      id: 1747679233230-source-1747679327091-target
-      selected: false
-      source: '1747679233230'
-      sourceHandle: source
-      target: '1747679327091'
-      targetHandle: target
-      type: custom
-      zIndex: 1002
-    - data:
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
         sourceType: iteration-start
         targetType: llm
       id: 1747417424520start-source-1747679778024-target
@@ -355,17 +278,53 @@ workflow:
       type: custom
       zIndex: 0
     - data:
+        isInIteration: false
         isInLoop: false
         sourceType: llm
-        targetType: end
-      id: 17477628577180-source-17477628577181-target
-      selected: false
-      source: '17477628577180'
+        targetType: variable-aggregator
+      id: 17474207593550-source-1785206308978-target
+      source: '17474207593550'
       sourceHandle: source
-      target: '17477628577181'
+      target: '1785206308978'
       targetHandle: target
       type: custom
       zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: variable-aggregator
+      id: 17477628577180-source-1785206308978-target
+      source: '17477628577180'
+      sourceHandle: source
+      target: '1785206308978'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: variable-aggregator
+        targetType: end
+      id: 1785206308978-source-1785206342316-target
+      source: '1785206308978'
+      sourceHandle: source
+      target: '1785206342316'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1747417424520'
+        sourceType: code
+        targetType: template-transform
+      id: 1747677918638-source-1747678651619-target
+      source: '1747677918638'
+      sourceHandle: source
+      target: '1747678651619'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
     nodes:
     - data:
         desc: ''
@@ -390,19 +349,19 @@ workflow:
           required: true
           type: paragraph
           variable: directories
-      height: 116
+      height: 135
       id: '1746645878419'
       position:
-        x: 30
-        y: 176.5
+        x: 0
+        y: 422
       positionAbsolute:
-        x: 30
-        y: 176.5
+        x: 0
+        y: 422
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     - data:
         context:
           enabled: false
@@ -411,7 +370,7 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-4.1-2025-04-14
+          name: gpt-5.6-luna
           provider: langgenius/openai/openai
         prompt_template:
         - id: 356f09f5-70a1-4f97-a634-14da7e45370e
@@ -439,51 +398,51 @@ workflow:
         variables: []
         vision:
           enabled: false
-      height: 134
+      height: 132
       id: '1747415683590'
       position:
-        x: 531.2135849892466
-        y: 176.5
+        x: 704
+        y: 228
       positionAbsolute:
-        x: 531.2135849892466
-        y: 176.5
+        x: 704
+        y: 228
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     - data:
         desc: ''
         error_handle_mode: remove-abnormal-output
-        height: 698
+        height: 632
         is_parallel: true
         iterator_selector:
         - '1747415683590'
         - structured_output
         - series
         output_selector:
-        - '1747679327091'
+        - '1747679233230'
         - output
         output_type: array[string]
         parallel_nums: 5
-        selected: true
+        selected: false
         start_node_id: 1747417424520start
         title: Iteration
         type: iteration
-        width: 2854
-      height: 698
+        width: 3384
+      height: 632
       id: '1747417424520'
       position:
-        x: 1032.427169978493
-        y: 176.5
+        x: 1046
+        y: 0
       positionAbsolute:
-        x: 1032.427169978493
-        y: 176.5
-      selected: true
+        x: 1046
+        y: 0
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 2854
+      width: 3384
       zIndex: 1
     - data:
         desc: ''
@@ -497,10 +456,10 @@ workflow:
       parentId: '1747417424520'
       position:
         x: 60
-        y: 121
+        y: 110
       positionAbsolute:
-        x: 1092.427169978493
-        y: 297.5
+        x: 1106
+        y: 110
       selectable: false
       selected: false
       sourcePosition: right
@@ -514,10 +473,9 @@ workflow:
           variable_selector: []
         desc: ''
         model:
-          completion_params:
-            temperature: 0
+          completion_params: {}
           mode: chat
-          name: gpt-4o
+          name: gpt-5.6-luna
           provider: langgenius/openai/openai
         prompt_template:
         - id: e5ac37a9-7035-4912-a72c-816bafcb17d3
@@ -628,42 +586,19 @@ workflow:
         variables: []
         vision:
           enabled: false
-      height: 90
+      height: 88
       id: '17474207593550'
       position:
-        x: 4201.453467372791
-        y: 176.5
+        x: 4872
+        y: 385.99999999999994
       positionAbsolute:
-        x: 4201.453467372791
-        y: 176.5
+        x: 4872
+        y: 385.99999999999994
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-    - data:
-        desc: ''
-        outputs:
-        - value_selector:
-          - '17474207593550'
-          - text
-          variable: text
-        selected: false
-        title: End
-        type: end
-      height: 90
-      id: '1747420923459'
-      position:
-        x: 4452.060259867413
-        y: 176.5
-      positionAbsolute:
-        x: 4452.060259867413
-        y: 176.5
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 244
+      width: 242
     - data:
         desc: ''
         selected: false
@@ -679,19 +614,19 @@ workflow:
           - '1747417424520'
           - output
           variable: matches
-      height: 54
+      height: 52
       id: '1747421288829'
       position:
-        x: 3950.8466748781675
-        y: 176.5
+        x: 4530
+        y: 395.3333333333333
       positionAbsolute:
-        x: 3950.8466748781675
-        y: 176.5
+        x: 4530
+        y: 395.3333333333333
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     - data:
         authorization:
           config:
@@ -724,20 +659,20 @@ workflow:
         type: http-request
         url: https://api.themoviedb.org/3/search/tv
         variables: []
-      height: 139
+      height: 137
       id: '1747677772635'
       parentId: '1747417424520'
       position:
-        x: 490.89389117462304
-        y: 91.29025430034807
+        x: 506
+        y: 100.83333333333334
       positionAbsolute:
-        x: 1523.3210611531163
-        y: 267.79025430034807
+        x: 1552
+        y: 100.83333333333334
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         code: "\ndef main(resp_text: str) -> dict:\n    import json\n\n\n    data\
@@ -765,84 +700,20 @@ workflow:
           - '1747677772635'
           - body
           variable: resp_text
-      height: 54
+      height: 52
       id: '1747677918638'
       parentId: '1747417424520'
       position:
-        x: 801.473163799768
-        y: 91.6829094994199
+        x: 828
+        y: 166.16666666666669
       positionAbsolute:
-        x: 1833.900333778261
-        y: 268.1829094994199
+        x: 1874
+        y: 166.16666666666669
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-      zIndex: 1002
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: '='
-            id: f64c32e5-3aa2-49d8-9cd7-16cd97dae29f
-            value: '1'
-            varType: number
-            variable_selector:
-            - '1747677918638'
-            - total
-          id: 'true'
-          logical_operator: and
-        desc: If there is only one result, it indicates that season will only be 1.
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
-        selected: false
-        title: if only 1
-        type: if-else
-      height: 170
-      id: '1747678146445'
-      parentId: '1747417424520'
-      position:
-        x: 802.8266230430964
-        y: 240.2720699289739
-      positionAbsolute:
-        x: 1835.2537930215894
-        y: 416.7720699289739
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 244
-      zIndex: 1002
-    - data:
-        desc: ''
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
-        selected: false
-        template: '{{ name }} -> season 1'
-        title: season is 1
-        type: template-transform
-        variables:
-        - value_selector:
-          - '1747417424520'
-          - item
-          variable: name
-      height: 54
-      id: '1747678171263'
-      parentId: '1747417424520'
-      position:
-        x: 2138.6821989756345
-        y: 157.4756357508702
-      positionAbsolute:
-        x: 3171.1093689541276
-        y: 333.9756357508702
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         authorization:
@@ -874,20 +745,20 @@ workflow:
         type: http-request
         url: https://api.themoviedb.org/3/tv/{{#1747678507236.structured_output.result_id#}}
         variables: []
-      height: 158
+      height: 156
       id: '1747678347028'
       parentId: '1747417424520'
       position:
-        x: 1479.288663062904
-        y: 384.220869479612
+        x: 1794
+        y: 146.16666666666669
       positionAbsolute:
-        x: 2511.715833041397
-        y: 560.720869479612
+        x: 2840
+        y: 146.16666666666669
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         context:
@@ -900,7 +771,7 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-4o-mini
+          name: gpt-5.6-luna
           provider: langgenius/openai/openai
         prompt_template:
         - id: 6990757d-8269-4337-8c40-aa60f82f2eb6
@@ -931,20 +802,20 @@ workflow:
         variables: []
         vision:
           enabled: false
-      height: 90
+      height: 88
       id: '1747678507236'
       parentId: '1747417424520'
       position:
-        x: 1150.287427087353
-        y: 476.0135957310624
+        x: 1472
+        y: 165.5
       positionAbsolute:
-        x: 2182.714597065846
-        y: 652.5135957310624
+        x: 2518
+        y: 165.5
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         desc: ''
@@ -966,20 +837,20 @@ workflow:
           - '1747677918638'
           - results
           variable: results
-      height: 54
+      height: 52
       id: '1747678651619'
       parentId: '1747417424520'
       position:
-        x: 1147.6181133189957
-        y: 361.11228870313266
+        x: 1150
+        y: 174.83333333333334
       positionAbsolute:
-        x: 2180.045283297489
-        y: 537.6122887031327
+        x: 2196
+        y: 174.83333333333334
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         code: "\ndef main(resp_text: str) -> dict:\n    import json\n\n\n    data\
@@ -1004,20 +875,20 @@ workflow:
           - '1747678347028'
           - body
           variable: resp_text
-      height: 54
+      height: 52
       id: '1747678859297'
       parentId: '1747417424520'
       position:
-        x: 1795.1313537881656
-        y: 309.79396222700154
+        x: 2116
+        y: 224.16666666666669
       positionAbsolute:
-        x: 2827.5585237666587
-        y: 486.29396222700154
+        x: 3162
+        y: 224.16666666666669
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         desc: ''
@@ -1039,20 +910,20 @@ workflow:
           - '1747678859297'
           - result
           variable: seasons
-      height: 54
+      height: 52
       id: '1747678994707'
       parentId: '1747417424520'
       position:
-        x: 1795.168958506465
-        y: 421.641596854467
+        x: 2438
+        y: 232.83333333333334
       positionAbsolute:
-        x: 2827.596128484958
-        y: 598.141596854467
+        x: 3484
+        y: 232.83333333333334
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         context:
@@ -1065,7 +936,7 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-4o-mini
+          name: gpt-5.6-luna
           provider: langgenius/openai/openai
         prompt_template:
         - id: f4892db2-825a-4a8e-996e-a4593d6fbb25
@@ -1099,20 +970,20 @@ workflow:
         variables: []
         vision:
           enabled: false
-      height: 90
+      height: 88
       id: '1747679092910'
       parentId: '1747417424520'
       position:
-        x: 1799.1541267998518
-        y: 523.3843586321066
+        x: 2760
+        y: 223.5
       positionAbsolute:
-        x: 2831.581296778345
-        y: 699.8843586321066
+        x: 3806
+        y: 223.5
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         desc: ''
@@ -1133,49 +1004,20 @@ workflow:
           - structured_output
           - season_number
           variable: season
-      height: 54
+      height: 52
       id: '1747679233230'
       parentId: '1747417424520'
       position:
-        x: 2137.366344450605
-        y: 421.641596854467
+        x: 3082
+        y: 256.1666666666667
       positionAbsolute:
-        x: 3169.793514429098
-        y: 598.141596854467
-      selected: false
+        x: 4128
+        y: 256.1666666666667
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-      zIndex: 1002
-    - data:
-        desc: ''
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1747417424520'
-        output_type: string
-        selected: false
-        title: result aggregator
-        type: variable-aggregator
-        variables:
-        - - '1747678171263'
-          - output
-        - - '1747679233230'
-          - output
-      height: 137
-      id: '1747679327091'
-      parentId: '1747417424520'
-      position:
-        x: 2549.003244597978
-        y: 284.77330590452505
-      positionAbsolute:
-        x: 3581.4304145764713
-        y: 461.27330590452505
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         context:
@@ -1187,13 +1029,9 @@ workflow:
         isInLoop: false
         iteration_id: '1747417424520'
         model:
-          completion_params:
-            frequency_penalty: 0.5
-            presence_penalty: 0.5
-            temperature: 0.2
-            top_p: 0.75
+          completion_params: {}
           mode: chat
-          name: gpt-4o-mini
+          name: gpt-5.6-luna
           provider: langgenius/openai/openai
         prompt_template:
         - id: 1c5a816d-4a86-4bdf-a794-63b066d1a10e
@@ -1221,20 +1059,20 @@ workflow:
         variables: []
         vision:
           enabled: false
-      height: 166
+      height: 164
       id: '1747679778024'
       parentId: '1747417424520'
       position:
-        x: 175.051200449362
-        y: 90.94879955063817
+        x: 184
+        y: 60
       positionAbsolute:
-        x: 1207.4783704278552
-        y: 267.44879955063817
+        x: 1230
+        y: 60
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
       zIndex: 1002
     - data:
         cases:
@@ -1253,19 +1091,19 @@ workflow:
         selected: false
         title: if has tmdb token
         type: if-else
-      height: 126
+      height: 140
       id: '1747762835507'
       position:
-        x: 280.6067924946233
-        y: 176.5
+        x: 342
+        y: 442
       positionAbsolute:
-        x: 280.6067924946233
-        y: 176.5
+        x: 342
+        y: 442
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     - data:
         context:
           enabled: false
@@ -1273,10 +1111,9 @@ workflow:
         desc: If there is no TMDB API key, we will directly use the model's capabilities
           for identification.
         model:
-          completion_params:
-            temperature: 0
+          completion_params: {}
           mode: chat
-          name: gpt-4o
+          name: gpt-5.6-luna
           provider: langgenius/openai/openai
         prompt_template:
         - id: e5ac37a9-7035-4912-a72c-816bafcb17d3
@@ -1378,44 +1215,67 @@ workflow:
         variables: []
         vision:
           enabled: false
-      height: 150
+      height: 148
       id: '17477628577180'
       position:
-        x: 781.8203774838698
-        y: 1116.768235997596
+        x: 1046
+        y: 712
       positionAbsolute:
-        x: 781.8203774838698
-        y: 1116.768235997596
+        x: 1046
+        y: 712
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     - data:
-        desc: ''
+        output_type: string
+        selected: false
+        title: Variable Aggregator 2
+        type: variable-aggregator
+        variables:
+        - - '17474207593550'
+          - text
+        - - '17477628577180'
+          - text
+      height: 135
+      id: '1785206308978'
+      position:
+        x: 5234
+        y: 560.1666666666665
+      positionAbsolute:
+        x: 5234
+        y: 560.1666666666665
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
         outputs:
         - value_selector:
-          - '17477628577180'
-          - structured_output
-          - result
+          - '1785206308978'
+          - output
+          value_type: string
           variable: text
         selected: false
-        title: End
+        title: Output
         type: end
-      height: 90
-      id: '17477628577181'
+      height: 88
+      id: '1785206342316'
       position:
-        x: 1093.033962473116
-        y: 1116.768235997596
+        x: 5576
+        y: 606.1666666666665
       positionAbsolute:
-        x: 1093.033962473116
-        y: 1116.768235997596
+        x: 5576
+        y: 606.1666666666665
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     viewport:
-      x: 78.90387047625393
-      y: 247.73399447074183
-      zoom: 0.25
+      x: 477
+      y: 82
+      zoom: 0.7
+  rag_pipeline_variables: []
