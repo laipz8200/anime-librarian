@@ -16,9 +16,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-07-28
+
+### Added
+
+- Add installable CLI packaging and the `anime-librarian` console entry point.
+- Add `--format {table,plain,json}` output for move plans.
+
+### Changed
+
+- Simplify the CLI output, confirmation prompts, and application architecture.
+- Update the bundled Dify workflow and improve season matching and output
+  aggregation.
+- Improve error handling, dependency injection, type safety, and integration tests.
+
 ### Removed
 
-- Remove structlog dependency and logging instrumentation to simplify the CLI output.
+- Remove the `--verbose`, `--quiet`, and `--yes` options.
+- Remove log files and logging instrumentation.
+
+### Fixed
+
+- Prevent duplicate log output.
+- Standardize the confirmation prompt to `[Y/n]`.
 
 ## [0.3.0] - 2025-05-27
 

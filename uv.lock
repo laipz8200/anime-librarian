@@ -4,7 +4,7 @@ requires-python = ">=3.13"
 
 [[package]]
 name = "anime-librarian"
-version = "0.4.0"
+version = "0.3.1"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
