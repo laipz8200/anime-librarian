@@ -1,13 +1,15 @@
 [build-system]
-requires = ["setuptools>=75.0.0", "wheel"]
+requires = ["setuptools>=77.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "anime-librarian"
-version = "0.3.1"
+version = "0.4.0"
 description = "A command-line tool that uses AI to rename and organize video files"
 readme = "README.md"
 requires-python = ">=3.13"
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "httpx>=0.28.1",
     "json-repair>=0.44.1",
@@ -18,6 +20,10 @@ dependencies = [
 
 [project.scripts]
 anime-librarian = "anime_librarian.main:main"
+
+[project.urls]
+Repository = "https://github.com/laipz8200/anime-librarian"
+Issues = "https://github.com/laipz8200/anime-librarian/issues"
 
 [tool.ruff]
 line-length = 88
@@ -61,7 +67,7 @@ convention = "google"  # Use Google-style docstrings
 
 # Import sorting configuration
 [tool.ruff.lint.isort]
-known-first-party = ["anime-librarian"]
+known-first-party = ["anime_librarian"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 # Per-file rule ignores
@@ -96,10 +102,6 @@ ignore = [
 
 [dependency-groups]
 dev = [
-    "fastapi>=0.116.1",
-    "httpx>=0.28.1",
-    "pytest-asyncio>=1.1.0",
-    "uvicorn>=0.35.0",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
     "ruff>=0.11.8",

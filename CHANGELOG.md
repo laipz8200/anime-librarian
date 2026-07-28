@@ -16,6 +16,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-28
+
+### Added
+
+- Add Rich move-plan tables while retaining plain and JSON Lines output for
+  scripts.
+- Add strict validation for AI-proposed sources, destinations, extensions, and
+  target-root containment.
+- Add support for `.m4v`, `.mpg`, `.mpeg`, and `.idx` media files.
+
+### Changed
+
+- Replace the layered application stack with a linear CLI workflow, runtime
+  `Settings`, an `httpx` Dify adapter, `FileOrganizer`, and one Rich `Terminal`.
+- Send plans to stdout and all status, progress, warnings, errors, and
+  confirmation to stderr.
+- Use one move confirmation, defaulting to no when destination conflicts exist.
+- Limit source discovery to direct files and require an existing target catalog
+  with at least one direct child folder.
+- Ignore source symlinks so moves cannot silently relocate or break links instead
+  of their media payloads.
+- Replace the live mock server with deterministic, socket-free
+  `httpx.MockTransport` tests and consolidate duplicate CI workflows.
+
+### Removed
+
+- Remove legacy protocol, provider, output-writer, Rich-wrapper, and mock-server
+  layers plus their FastAPI, Uvicorn, and pytest-asyncio dependencies.
+
+### Fixed
+
+- Align the bundled Dify prompts with the `result` field required by their
+  structured-output schemas and the CLI.
+- Refuse source, destination, or target-root replacements made after a move plan
+  is reviewed.
+
 ## [0.3.1] - 2026-07-28
 
 ### Added

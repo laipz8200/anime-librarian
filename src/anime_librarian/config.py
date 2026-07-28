@@ -1,67 +1,94 @@
-"""
-Configuration module for the AnimeLibrarian application.
-
-This module provides configuration values for the application, with defaults
-that can be overridden through environment variables.
-Environment variables can be set in a .env file at the root of the project.
-"""
+"""Runtime settings loaded from CLI overrides and the environment."""
 
 import os
+from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load environment variables from .env file if it exists
-_ = load_dotenv()
+from .errors import ConfigurationError
 
-# API configuration
-# NOTE: For security, set these values in your .env file instead of here
-DIFY_WORKFLOW_RUN_ENDPOINT = os.environ.get(
-    "ANIMELIBRARIAN_DIFY_WORKFLOW_RUN_ENDPOINT", "https://api.dify.ai/v1/workflows/run"
-)
-DIFY_API_KEY = os.environ.get(
-    "ANIMELIBRARIAN_DIFY_API_KEY",
-    "",  # Default empty, must be set in .env
-)
-
-# Default paths - should be set in .env to avoid privacy leaks
-DEFAULT_SOURCE_PATH = os.environ.get(
-    "ANIMELIBRARIAN_SOURCE_PATH",
-    "",  # Default empty, must be set in .env
-)
-DEFAULT_TARGET_PATH = os.environ.get(
-    "ANIMELIBRARIAN_TARGET_PATH",
-    "",  # Default empty, must be set in .env
-)
-
-# API request timeout in seconds
-API_TIMEOUT = int(os.environ.get("ANIMELIBRARIAN_API_TIMEOUT", "300"))
-
-# User name for API requests
-USER_NAME = os.environ.get("ANIMELIBRARIAN_USER_NAME", "Anime Librarian")
+DEFAULT_DIFY_ENDPOINT = "https://api.dify.ai/v1/workflows/run"
+DEFAULT_API_TIMEOUT = 300
+DEFAULT_USER_NAME = "Anime Librarian"
 
 
-def get_source_path() -> Path:
-    """
-    Get the source path from environment or use default.
+@dataclass(frozen=True, slots=True)
+class Settings:
+    """Resolved settings for one organization run."""
 
-    Raises:
-        ValueError: If the source path is not set in the environment
-    """
-    if not DEFAULT_SOURCE_PATH:
-        msg = "Source path not set. Please set ANIMELIBRARIAN_SOURCE_PATH in .env file."
-        raise ValueError(msg)
-    return Path(DEFAULT_SOURCE_PATH)
+    source_path: Path
+    target_path: Path
+    api_endpoint: str
+    api_key: str
+    api_timeout: int
+    user_name: str
 
 
-def get_target_path() -> Path:
-    """
-    Get the target path from environment or use default.
+def load_settings(
+    source: Path | None = None,
+    target: Path | None = None,
+    *,
+    environ: Mapping[str, str] | None = None,
+) -> Settings:
+    """Resolve and validate settings without retaining global state."""
+    if environ is None:
+        _ = load_dotenv()
+        environ = os.environ
 
-    Raises:
-        ValueError: If the target path is not set in the environment
-    """
-    if not DEFAULT_TARGET_PATH:
-        msg = "Target path not set. Please set ANIMELIBRARIAN_TARGET_PATH in .env file."
-        raise ValueError(msg)
-    return Path(DEFAULT_TARGET_PATH)
+    source_path = source or _path_from_environment(
+        environ, "ANIMELIBRARIAN_SOURCE_PATH", "source directory"
+    )
+    target_path = target or _path_from_environment(
+        environ, "ANIMELIBRARIAN_TARGET_PATH", "target directory"
+    )
+    api_key = environ.get("ANIMELIBRARIAN_DIFY_API_KEY", "").strip()
+    if not api_key:
+        message = "Dify API key is missing; set ANIMELIBRARIAN_DIFY_API_KEY."
+        raise ConfigurationError(message)
+
+    api_endpoint = environ.get(
+        "ANIMELIBRARIAN_DIFY_WORKFLOW_RUN_ENDPOINT", DEFAULT_DIFY_ENDPOINT
+    ).strip()
+    if not api_endpoint:
+        message = "Dify workflow endpoint cannot be empty."
+        raise ConfigurationError(message)
+
+    timeout_value = environ.get("ANIMELIBRARIAN_API_TIMEOUT", str(DEFAULT_API_TIMEOUT))
+    try:
+        api_timeout = int(timeout_value)
+    except ValueError as error:
+        message = "API timeout must be a positive integer."
+        raise ConfigurationError(message) from error
+    if api_timeout <= 0:
+        message = "API timeout must be a positive integer."
+        raise ConfigurationError(message)
+
+    return Settings(
+        source_path=_expand_path(source_path, "source directory"),
+        target_path=_expand_path(target_path, "target directory"),
+        api_endpoint=api_endpoint,
+        api_key=api_key,
+        api_timeout=api_timeout,
+        user_name=environ.get("ANIMELIBRARIAN_USER_NAME", DEFAULT_USER_NAME).strip()
+        or DEFAULT_USER_NAME,
+    )
+
+
+def _path_from_environment(
+    environ: Mapping[str, str], variable: str, label: str
+) -> Path:
+    value = environ.get(variable, "").strip()
+    if not value:
+        message = f"No {label} configured; pass its CLI option or set {variable}."
+        raise ConfigurationError(message)
+    return Path(value)
+
+
+def _expand_path(path: Path, label: str) -> Path:
+    try:
+        return path.expanduser()
+    except RuntimeError as error:
+        message = f"Cannot expand {label} path: {path}"
+        raise ConfigurationError(message) from error

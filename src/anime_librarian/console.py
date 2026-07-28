@@ -1,298 +1,169 @@
-# ruff: noqa: D102
-"""Plain-text console utilities for AnimeLibrarian."""
+"""One terminal boundary for interactive and machine-readable output."""
 
-from __future__ import annotations
-
-import shutil
-import sys
-import traceback
+import unicodedata
+from collections.abc import Iterable, Sequence
+from contextlib import AbstractContextManager, nullcontext
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
-from anime_librarian.enums import FileOperation, PreviewType, ProcessingStatus
+from rich import box
+from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+)
+from rich.prompt import Confirm
+from rich.table import Table
+from rich.text import Text
 
+from .models import FileMove
 
-class _NullProgress:
-    """Minimal progress helper used when rich is unavailable."""
-
-    def __init__(self, description: str) -> None:
-        self.description = description
-
-    def add_task(self, *_args: Any, **_kwargs: Any) -> int:
-        """Return a dummy task id."""
-        return 0
-
-    def update(self, *_args: Any, **_kwargs: Any) -> None:
-        """Ignore progress updates."""
-
-    def advance(self, *_args: Any, **_kwargs: Any) -> None:
-        """Ignore progress advancement."""
-
-    def stop(self) -> None:
-        """No-op to mirror rich API."""
-
-    def __enter__(self) -> _NullProgress:
-        return self
-
-    def __exit__(self, _exc_type: Any, _exc: Any, _tb: Any) -> bool:
-        return False
+if TYPE_CHECKING:
+    from .main import OutputFormat
 
 
-class BeautifulConsole:
-    """Plain console output handler (no color codes or rich dependencies)."""
+class Terminal:
+    """Render plans on stdout and interaction/status messages on stderr."""
 
-    _last_was_progress: bool
-
-    def __init__(self) -> None:
-        self._last_was_progress = False
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
-    def _terminal_width(self) -> int:
-        return shutil.get_terminal_size((80, 20)).columns
-
-    @property
-    def width(self) -> int:
-        """Expose terminal width for compatibility with existing callers."""
-        return self._terminal_width()
-
-    def _print(self, message: str = "", *, stream: Any = sys.stdout) -> None:
-        print(message, file=stream)
-
-    def input(self, prompt: str = "") -> str:
-        """Read raw input using the built-in prompt."""
-        return input(prompt)
-
-    def _ensure_spacing(self) -> None:
-        if self._last_was_progress:
-            self._print()
-            self._last_was_progress = False
-
-    def _truncate_path(
-        self, path: str, max_length: int = 60, *, preserve_filename: bool = True
-    ) -> str:
-        if len(path) <= max_length:
-            return path
-
-        path_obj = Path(path)
-        filename = path_obj.name
-
-        if preserve_filename:
-            if len(filename) >= max_length:
-                return filename[-max_length:]
-
-            remaining = max_length - len(filename) - 4
-            parent_str = str(path_obj.parent)
-            if len(parent_str) <= remaining:
-                return f"{parent_str}/{filename}"
-
-            if remaining > 10:
-                start = parent_str[: remaining // 2 - 2]
-                end = parent_str[-(remaining // 2 - 2) :]
-                return f"{start}...{end}/{filename}"
-            return f".../{filename}"
-
-        if len(filename) >= max_length - 3:
-            return f"...{filename[-(max_length - 3) :]}"
-        if max_length > 20:
-            return f"...{path[-(max_length - 3) :]}"
-        return f"...{filename}"
-
-    # ------------------------------------------------------------------
-    # Message helpers
-    # ------------------------------------------------------------------
-    def success(self, message: str, title: str | None = None) -> None:
-        self._ensure_spacing()
-        if title:
-            self._print(f"SUCCESS [{title}]: {message}")
-        else:
-            self._print(f"SUCCESS: {message}")
-
-    def info(self, message: str, title: str | None = None) -> None:
-        self._ensure_spacing()
-        if title:
-            self._print(f"INFO [{title}]: {message}")
-        else:
-            self._print(f"INFO: {message}")
-
-    def warning(self, message: str, title: str | None = None) -> None:
-        self._ensure_spacing()
-        if title:
-            self._print(f"WARNING [{title}]: {message}", stream=sys.stderr)
-        else:
-            self._print(f"WARNING: {message}", stream=sys.stderr)
-
-    def error(self, message: str, title: str | None = None) -> None:
-        self._ensure_spacing()
-        if title:
-            self._print(f"ERROR [{title}]: {message}", stream=sys.stderr)
-        else:
-            self._print(f"ERROR: {message}", stream=sys.stderr)
-
-    def debug(self, message: str) -> None:
-        """Ignore debug messages."""
-        _ = message
-
-    def exception(self, message: str, exc_info: Exception | None = None) -> None:
-        self.error(message)
-        if exc_info:
-            traceback.print_exception(
-                exc_info.__class__, exc_info, exc_info.__traceback__
-            )
-
-    # ------------------------------------------------------------------
-    # Structured output helpers
-    # ------------------------------------------------------------------
-    def print_header(self, title: str, subtitle: str | None = None) -> None:
-        self._ensure_spacing()
-        self._print()
-        self._print(title)
-        self._print("=" * len(title))
-        if subtitle:
-            self._print(subtitle)
-        self._print()
-
-    def print_file_operation(
+    def __init__(
         self,
-        operation: str,
-        source: str,
-        target: str | None = None,
-        status: str = "pending",
-        show_full_path: bool = False,
+        *,
+        stdout: Console | None = None,
+        stderr: Console | None = None,
     ) -> None:
-        self._ensure_spacing()
-        status_labels = {
-            "pending": "PENDING",
-            "success": "DONE",
-            "failed": "FAILED",
-            "processing": "WORKING",
-        }
-        label = status_labels.get(status, status.upper())
-        source_name = Path(source).name
-        pieces = [label, operation.capitalize(), source_name]
+        self.stdout = stdout or Console()
+        self.stderr = stderr or Console(stderr=True)
 
-        if target:
-            display_target = (
-                target if show_full_path else self._truncate_path(target, 60)
-            )
-            pieces.append(f"-> {display_target}")
-        line = " ".join(pieces)
-        self._print(line)
-        if show_full_path and target:
-            self._print(f"  from: {source}")
-            self._print(f"    to: {target}")
-
-    def create_progress(self, description: str = "Processing...") -> _NullProgress:
-        self._last_was_progress = True
-        self._print(f"PROGRESS: {description}")
-        return _NullProgress(description)
-
-    def print_summary_table(self, title: str, data: list[tuple[str, str]]) -> None:
-        self._ensure_spacing()
-        self._print(title)
-        self._print("-" * len(title))
-        for key, value in data:
-            self._print(f"{key}: {value}")
-        self._print()
-
-    def print_divider(self, text: str | None = None) -> None:
-        self._ensure_spacing()
-        width = self.width
-        if text:
-            text_str = f" {text} "
-            remaining = max(width - len(text_str), 0)
-            left = remaining // 2
-            right = remaining - left
-            self._print(f"{'-' * left}{text_str}{'-' * right}")
-        else:
-            self._print("-" * width)
-
-    def ask_confirmation(self, question: str, default: bool = False) -> bool:
-        self._ensure_spacing()
-        sanitized = question.rstrip().rstrip("?: ").strip()
-        if not sanitized:
-            sanitized = "Are you sure"
-        choice_hint = "[Y/n]" if default else "[y/N]"
-        prompt = f"{sanitized}? {choice_hint}: "
-        response = self.input(prompt).strip().lower()
-        if not response:
-            return default
-        return response in {"y", "yes"}
-
-    def show_progress(self, status: ProcessingStatus, content: str) -> None:
-        self._ensure_spacing()
-        label = status.name.replace("_", " ").title()
-        self._print(f"{label}: {content}")
-
-    def show_change_preview(
+    def show_plan(
         self,
-        before: str,
-        after: str,
-        preview_type: PreviewType = PreviewType.RENAME_PREVIEW,
+        moves: Sequence[FileMove],
+        target_root: Path,
+        output_format: "OutputFormat",
     ) -> None:
-        self._ensure_spacing()
-        if preview_type == PreviewType.RENAME_PREVIEW:
-            heading = "Rename"
-        elif preview_type == PreviewType.MOVE_PREVIEW:
-            heading = "Move"
-        else:
-            heading = "Conflict"
-        self._print(f"{heading}: {before} -> {after}")
-
-    def show_file_list(self, title: str, files: list[str], style: str = "") -> None:
-        _ = style  # Parameter kept for compatibility; ignored now.
-        if not files:
+        """Render a plan in the selected human or streaming format."""
+        rows = [
+            (move.source.name, self._relative_target(move.target, target_root))
+            for move in moves
+        ]
+        if str(output_format) == "plain":
+            for source, target in rows:
+                self.stdout.print(
+                    f"{_escape_unsafe(source)} -> {_escape_unsafe(target)}",
+                    markup=False,
+                    highlight=False,
+                    soft_wrap=True,
+                )
             return
-        self._ensure_spacing()
-        self._print(title)
-        for file in files:
-            self._print(f"  - {file}")
+        if str(output_format) == "json":
+            import json
 
-    def show_operation_result(
-        self,
-        operation: FileOperation,
-        source: str,
-        target: str | None = None,
-        success: bool = True,
-        message: str | None = None,
-    ) -> None:
-        self._ensure_spacing()
-        verb_map = {
-            FileOperation.RENAME: "Renamed",
-            FileOperation.MOVE: "Moved",
-            FileOperation.COPY: "Copied",
-            FileOperation.DELETE: "Deleted",
-            FileOperation.CREATE_DIR: "Created",
-        }
-        verb = verb_map.get(operation, operation.value.title())
-        status = "OK" if success else "ERROR"
-        if target:
-            line = f"{status} {verb}: {source} -> {target}"
+            for source, target in rows:
+                self.stdout.print(
+                    json.dumps(
+                        {"source": source, "target": target},
+                        ensure_ascii=True,
+                    ),
+                    markup=False,
+                    highlight=False,
+                    soft_wrap=True,
+                )
+            return
+
+        table = Table(
+            title=f"Move plan · {len(rows)} {_plural(len(rows), 'file')}",
+            box=box.ROUNDED,
+            header_style="bold cyan",
+            show_lines=False,
+            expand=True,
+        )
+        table.add_column("Current name", style="yellow", overflow="fold")
+        table.add_column("New location", style="green", overflow="fold")
+        for source, target in rows:
+            table.add_row(Text(_escape_unsafe(source)), Text(_escape_unsafe(target)))
+        self.stdout.print(table)
+
+    def show_paths(self, title: str, paths: Sequence[Path], *, warning: bool) -> None:
+        """Show a compact preflight list."""
+        style = "yellow" if warning else "cyan"
+        lines = Text()
+        lines.append(f"{title}\n", style=f"bold {style}")
+        for path in paths:
+            lines.append("  • ", style=style)
+            lines.append(f"{_escape_unsafe(str(path))}\n")
+        self.stderr.print(lines, end="", soft_wrap=True)
+
+    def info(self, message: str) -> None:
+        """Write an informational status to stderr."""
+        self._message("●", "cyan", message)
+
+    def success(self, message: str) -> None:
+        """Write a success status to stderr."""
+        self._message("✓", "green", message)
+
+    def warning(self, message: str) -> None:
+        """Write a warning status to stderr."""
+        self._message("!", "yellow", message)
+
+    def error(self, message: str) -> None:
+        """Write an error status to stderr."""
+        self._message("x", "red", message)
+
+    def confirm(self, question: str, *, default: bool) -> bool:
+        """Ask one styled yes/no question."""
+        return Confirm.ask(question, default=default, console=self.stderr)
+
+    def status(self, message: str) -> AbstractContextManager[object]:
+        """Show a transient spinner in interactive terminals."""
+        if not self.stderr.is_terminal:
+            return nullcontext()
+        return self.stderr.status(f"[cyan]{message}[/cyan]", spinner="dots")
+
+    def track(self, moves: Sequence[FileMove]) -> Iterable[FileMove]:
+        """Track move progress when stderr is interactive."""
+        if not self.stderr.is_terminal:
+            return moves
+        progress = Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            console=self.stderr,
+            transient=True,
+        )
+        return progress.track(moves, description="Moving files")
+
+    def _message(self, symbol: str, style: str, message: str) -> None:
+        self.stderr.print(
+            Text.assemble((f"{symbol} ", f"bold {style}"), _escape_unsafe(message))
+        )
+
+    @staticmethod
+    def _relative_target(target: Path, target_root: Path) -> str:
+        try:
+            relative = target.relative_to(target_root)
+        except ValueError:
+            relative = target.relative_to(target_root.resolve())
+        return relative.as_posix()
+
+
+def _plural(count: int, noun: str) -> str:
+    return noun if count == 1 else f"{noun}s"
+
+
+def _escape_unsafe(value: str) -> str:
+    escaped: list[str] = []
+    for character in value:
+        if unicodedata.category(character) not in {"Cc", "Cf", "Cs", "Zl", "Zp"}:
+            escaped.append(character)
+            continue
+        codepoint = ord(character)
+        if codepoint <= 0xFF:
+            escaped.append(f"\\x{codepoint:02x}")
+        elif codepoint <= 0xFFFF:
+            escaped.append(f"\\u{codepoint:04x}")
         else:
-            line = f"{status} {verb}: {source}"
-        if message:
-            line += f" ({message})"
-        self._print(line)
-
-    def show_statistics(self, stats: dict[str, int | str]) -> None:
-        self._ensure_spacing()
-        self._print("Statistics")
-        self._print("-" * len("Statistics"))
-        for key, value in stats.items():
-            self._print(f"{key}: {value}")
-        self._print()
-
-    def print_raw(self, content: str, markup: bool = True) -> None:
-        _ = markup  # kept for compatibility
-        self._ensure_spacing()
-        self._print(content)
-
-
-# Global console instance for backward compatibility
-console = BeautifulConsole()
-
-
-def set_verbose_mode(verbose: bool = False) -> None:
-    """Maintain backward compatibility with legacy CLI flags."""
-    _ = verbose
+            escaped.append(f"\\U{codepoint:08x}")
+    return "".join(escaped)

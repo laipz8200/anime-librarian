@@ -4,247 +4,163 @@
 
 [![Code Quality](https://github.com/laipz8200/anime-librarian/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laipz8200/anime-librarian/actions/workflows/code-quality.yml)
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/release/python-3130/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-🎬 AI-powered video file organizer that makes your media library beautiful
-
-[Getting Started](#-quick-start) • [Features](#-key-features) • [Documentation](#-documentation) • [Development](#-development)
-
-![anime-librarian-preview](https://github.com/user-attachments/assets/8e7cd70f-bf70-4dd4-8c05-745287e368e1)
+**Turn release filenames into library-ready paths with one reviewed move.**
 
 </div>
 
-______________________________________________________________________
+AnimeLibrarian sends the filenames in an incoming folder and the existing folders
+in a media library to a Dify workflow. It validates the returned move plan, shows
+exactly what will change, and moves the files only after confirmation.
 
-## ✨ Key Features
+```text
+Before                                      After
+Downloads/                                  Media/
+└── [SubsPlease] Frieren - 01.mkv    →      └── Frieren/
+                                                └── Season 01/
+                                                    └── Frieren - S01E01.mkv
+```
 
-- 🤖 **AI-Powered Naming**: Intelligently renames files using LLM technology
-- 📁 **Smart Organization**: Automatically moves files to appropriate directories
-- 🎯 **Media Player Compatible**: Ensures compatibility with Infuse, Plex, and more
-- 🔍 **Preview Changes**: Dry-run option to review changes before applying
-- 🚀 **Simple CLI**: Plain-text output with readable tables and progress updates
-- 📺 **Universal Support**: Works with anime, movies, TV shows, and more
-- 🎨 **Interactive UX**: Confirmation prompts and concise status updates that work in any terminal
+## Why AnimeLibrarian?
 
-## 🚀 Quick Start
+- A polished Rich table for people, minimal plain text, and script-safe JSON
+  Lines
+- A true dry run that never prompts or changes the filesystem
+- One confirmation for the whole plan, defaulting to **no** when files would be
+  overwritten
+- Strict validation of AI-proposed sources, destinations, extensions, and paths
+- Clean pipelines: plans go to stdout; status, progress, warnings, and prompts go
+  to stderr
+
+## Quick start
+
+Requires Python 3.13, [uv](https://docs.astral.sh/uv/), a published Dify workflow,
+and a Dify API key.
 
 ```bash
-# Install AnimeLibrarian
-pip install git+https://github.com/laipz8200/anime-librarian.git
+git clone https://github.com/laipz8200/anime-librarian.git
+cd anime-librarian
+uv sync
 
-# Set up your environment
 cp .env.example .env
-# Edit .env with your Dify API credentials
+# Edit .env and set ANIMELIBRARIAN_DIFY_API_KEY.
 
-# Run with default settings
-anime-librarian
-
-# Or specify custom paths
-anime-librarian --source ~/Downloads --target ~/Media
+mkdir -p ~/Downloads ~/Media/Frieren
+uv run anime-librarian \
+  --source ~/Downloads \
+  --target ~/Media \
+  --dry-run
 ```
 
-### UNIX-Friendly Modes
+The source and target must already be directories. The source scan is
+non-recursive. The target must contain at least one direct child folder so Dify
+has an existing library catalog to work from.
+
+When the plan looks right, rerun without `--dry-run`.
+
+## Set up the Dify workflow
+
+1. In Dify Studio, import
+   [`Dify DSL File/Anime Librarian.yml`](Dify%20DSL%20File/Anime%20Librarian.yml).
+1. Configure the imported OpenAI model nodes.
+1. Optionally set the workflow secret `TMDB_API_TOKEN` for richer TMDB metadata;
+   the workflow falls back to model-only matching when it is absent.
+1. Publish the workflow, open **API Access**, and create an API key.
+1. Put that key in `.env`. Keep the default workflow endpoint unless your Dify
+   deployment uses another URL.
+
+The CLI supplies the workflow's `files` and `directories` inputs and expects its
+published `text` output to contain `{"result": [...]}` filename pairs.
+
+## Configuration
+
+CLI paths override environment paths. `.env` is loaded automatically.
+
+| Variable                                    | Required?                 | Default / purpose                      |
+| ------------------------------------------- | ------------------------- | -------------------------------------- |
+| `ANIMELIBRARIAN_DIFY_API_KEY`               | Yes                       | Dify workflow API key                  |
+| `ANIMELIBRARIAN_SOURCE_PATH`                | Unless `--source` is used | Existing incoming directory            |
+| `ANIMELIBRARIAN_TARGET_PATH`                | Unless `--target` is used | Existing media-library root            |
+| `ANIMELIBRARIAN_DIFY_WORKFLOW_RUN_ENDPOINT` | No                        | `https://api.dify.ai/v1/workflows/run` |
+| `ANIMELIBRARIAN_API_TIMEOUT`                | No                        | Positive timeout in seconds; `300`     |
+| `ANIMELIBRARIAN_USER_NAME`                  | No                        | Dify request user; `Anime Librarian`   |
+
+## CLI
+
+| Option                   | What it does                                               |
+| ------------------------ | ---------------------------------------------------------- |
+| `-s DIR`, `--source DIR` | Use an incoming directory instead of the environment value |
+| `-t DIR`, `--target DIR` | Use a library root instead of the environment value        |
+| `-n`, `--dry-run`        | Print the plan without prompting or moving files           |
+| `--format table`         | Render the default Rich move table                         |
+| `--format plain`         | Print one `source -> target` line per move                 |
+| `--format json`          | Print one JSON object per move (JSON Lines)                |
+| `-V`, `--version`        | Print the installed version                                |
+| `-h`, `--help`           | Show all options                                           |
+
+For example, stream a machine-readable preview while keeping status messages
+separate:
 
 ```bash
-# Preview only
-anime-librarian --dry-run --format table
-
-# Machine-readable output (newline-delimited JSON for streaming)
-anime-librarian --dry-run --format json
+uv run anime-librarian --dry-run --format json > move-plan.jsonl
 ```
 
-## 📋 Prerequisites
+## Safety and supported files
 
-- [Dify](https://cloud.dify.ai) account
-- Language model access through Dify
-- AnimeLibrarian workflow in your Dify account
+AnimeLibrarian considers only direct, regular files in the source directory. It
+ignores symlinks, other extensions, and nested directories.
 
-## 🛠️ Installation
+- Video: `.mkv`, `.mp4`, `.avi`, `.mov`, `.wmv`, `.flv`, `.webm`, `.m4v`,
+  `.mpg`, `.mpeg`
+- Subtitle: `.srt`, `.ass`, `.ssa`, `.sub`, `.idx`, `.vtt`
 
-### Using pip (for users)
+Every Dify suggestion must name a scanned source exactly, preserve its extension,
+stay within the target root, and have a unique source and destination. Absolute
+paths, traversal, duplicate moves, source-as-target moves, and directory
+destinations are rejected. Source and destination identities are checked again
+before each move, so late file swaps are refused.
+Missing destination folders are listed before the prompt and created only after
+approval.
+
+A normal run asks once and defaults to yes. If any destination already exists,
+the conflict list is shown and that same prompt defaults to no. A dry run never
+asks.
+
+## Architecture
+
+The application is intentionally small and linear:
+
+| Module            | Responsibility                                                               |
+| ----------------- | ---------------------------------------------------------------------------- |
+| `main.py`         | `argparse` interface, dependency setup, and plan → review → move workflow    |
+| `config.py`       | Load and validate immutable runtime `Settings`                               |
+| `dify.py`         | `httpx` adapter for the blocking Dify workflow API                           |
+| `file_renamer.py` | `FileOrganizer` scanning, validated `FileMove` plans, and filesystem changes |
+| `console.py`      | One Rich `Terminal` boundary for stdout, stderr, prompts, and progress       |
+| `models.py`       | Validated Dify `NamePair` values and immutable `FileMove` values             |
+
+## Development
 
 ```bash
-# Install directly from GitHub
-pip install git+https://github.com/laipz8200/anime-librarian.git
+make install      # Sync dependencies
+make lint         # Format and autofix Python, then run Ruff
+make check        # Run Ruff without fixes
+make type-check   # Run strict basedpyright
+make test         # Run the test suite
+make clean        # Remove generated Python caches and coverage files
+make help         # List every target
 ```
 
-### Using uv (recommended for development)
+The focused suite exercises Dify with `httpx.MockTransport`, so tests do not
+open network sockets.
+
+Changes should follow red → green → refactor, then pass:
 
 ```bash
-# Install uv if not already installed
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Clone the repository
-git clone https://github.com/laipz8200/anime-librarian.git
-cd anime-librarian
-
-# Install dependencies with uv
-uv sync
+make lint
+make type-check
+make test
 ```
 
-### Traditional pip setup
-
-```bash
-# Clone the repository
-git clone https://github.com/laipz8200/anime-librarian.git
-cd anime-librarian
-
-# Create a virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install .
-```
-
-## 📖 Documentation
-
-### Dify Workflow Setup
-
-1. Sign up at [Dify](https://cloud.dify.ai)
-1. Configure your language model
-1. Import the workflow:
-   - Use DSL import
-   - Import `Anime Librarian.yml` from `Dify DSL File`
-1. Create an API key
-1. Copy API key and endpoint URL
-
-> [!TIP]
-> Add a TMDB API key to enhance media identification accuracy!
-
-### Configuration
-
-1. Copy and edit the environment file:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-1. Update `.env` values per the comments
-
-⚠️ **Important**: Create media category subdirectories in your `ANIMELIBRARIAN_TARGET_PATH` for optimal AI organization.
-
-### Advanced Usage
-
-```bash
-# Preview changes (dry run)
-anime-librarian --dry-run
-
-# View all options
-anime-librarian --help
-```
-
-## 🔄 How It Works
-
-1. 📂 Scans source directory for videos
-1. 🗂️ Identifies existing media categories
-1. 🤖 AI analyzes filenames via Dify (with progress indicator)
-1. ✨ Generates standardized names
-1. 📝 Shows proposed changes in a formatted table
-1. ✅ Moves and renames with real-time progress bar
-
-## 🎨 Enhanced User Experience
-
-AnimeLibrarian now features a straightforward terminal interface:
-
-- **Clear Status Messages**: Highlights successes, warnings, and errors with simple text cues
-- **Readable Tables**: File moves displayed with plain ASCII tables and lists
-- **Progress Updates**: Lightweight textual progress notifications keep you informed
-- **Smart Prompts**: Interactive confirmation dialogs with sensible defaults
-- **Summary Panels**: Operation summaries rendered in easy-to-scan text blocks
-- **Terminal Compatibility**: Looks the same in basic terminals, CI logs, and remote shells
-
-## 👩‍💻 Development
-
-### Setup Development Environment
-
-```bash
-# Install uv package manager (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Clone and setup
-git clone https://github.com/laipz8200/anime-librarian.git
-cd anime-librarian
-
-# Install dependencies with uv
-uv sync
-
-# Install prek hooks (pre-commit alternative)
-prek install
-```
-
-### Development Workflow
-
-```bash
-# Run linting and formatting
-make lint                 # Format code and fix issues
-make format              # Just format code
-make check               # Check code without fixes
-
-# Run tests
-make test                # Run all tests
-make test-mock           # Run mock server tests only
-pytest --cov             # Run with coverage report
-
-# Clean up
-make clean               # Remove generated files
-```
-
-### Testing with Mock Server
-
-The project includes a comprehensive mock Dify server for testing without API access:
-
-```bash
-# Run integration tests with mock server
-uv run pytest tests/test_integration_with_mock_server.py -v
-
-# Use mock server in your tests
-from tests.fixtures.mock_server_fixtures import run_mock_server
-
-with run_mock_server() as server_url:
-    # Your test code here
-    pass
-```
-
-See `tests/README_MOCK_SERVER.md` for detailed mock server documentation.
-
-### Quality Assurance
-
-- **Pre-commit Hooks**: Automatic code quality checks
-
-  - Linting (ruff)
-  - Formatting (ruff)
-  - Type checking (ty)
-
-- **CI/CD**: GitHub Actions workflow
-
-  - Code quality checks
-  - Test suite execution (98+ tests)
-  - Automated PR validation
-
-- **Make Commands**: Quick development tasks
-
-  ```bash
-  make help     # Show all available commands
-  make lint     # Run full linting
-  make test     # Run all tests
-  ```
-
-## 🔍 Troubleshooting
-
-Common solutions for:
-
-- 🔑 **API Issues**: Verify Dify credentials in `.env`
-- 📁 **Access Errors**: Check directory permissions
-- 🤖 **AI Problems**: Validate Dify workflow setup
-- 📂 **Organization**: Ensure target directories exist
-- 🔍 **Testing**: Use `--dry-run` to preview changes
-- 📝 **Output**: The tool now runs without generating log files
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-
-- 🐛 Report bugs
-- 💡 Suggest features
-- 🔧 Submit pull requests
+Contributions are welcome under the [MIT License](LICENSE).

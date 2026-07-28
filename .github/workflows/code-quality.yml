@@ -59,4 +59,4 @@ jobs:
       run: uv sync --all-extras --dev
 
     - name: Test with pytest and coverage
-      run: uv run pytest --cov=.
+      run: uv run pytest --cov=anime_librarian --cov-report=term-missing

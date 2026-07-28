@@ -500,7 +500,7 @@ workflow:
 
             Your outputs should be JSON objects containing two keys: original_name
             and new_name. You should only output the JSON parts. Make sure to put
-            the results list in the "results" field.
+            the results list in the "result" field.
 
             '
         - id: 9f0e99aa-a883-4311-b436-dd723653d243
@@ -1129,7 +1129,7 @@ workflow:
 
             Your outputs should be JSON objects containing two keys: original_name
             and new_name. You should only output the JSON parts. Make sure to put
-            the results list in the "results" field.
+            the results list in the "result" field.
 
             '
         - id: 9f0e99aa-a883-4311-b436-dd723653d243

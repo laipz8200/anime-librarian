@@ -1,291 +1,283 @@
-"""
-File renaming module for the AnimeLibrarian application.
+"""Scan, validate, and apply media file moves."""
 
-This module provides the FileRenamer class that encapsulates the logic for
-renaming and organizing video files using AI suggestions.
-"""
-
+import ntpath
 import shutil
-from collections.abc import Sequence
-from pathlib import Path
+import unicodedata
+from collections.abc import Callable, Sequence
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import ClassVar
 
-import json_repair
+from .errors import ConfigurationError, InvalidMovePlanError
+from .models import FileMove, NamePair
 
-from . import config
-from .errors import raise_parse_error
-from .http_client import HttpxClient
-from .models import AIResponse, ApiResponse
-from .types import Console, HttpClient
+SuggestNames = Callable[[list[str], list[str]], Sequence[NamePair]]
 
 
-class FileRenamer:
-    """
-    Class for renaming and organizing video files using AI suggestions.
+class FileOrganizer:
+    """Build safe move plans from externally supplied name suggestions."""
 
-    This class encapsulates the logic for:
-    1. Getting file name suggestions from an AI service
-    2. Mapping source files to target files
-    3. Handling the file renaming and organization process
-    """
-
-    # File extension constants
-    VIDEO_EXTENSIONS: ClassVar[set[str]] = {
-        ".mp4",
-        ".mkv",
-        ".avi",
-        ".mov",
-        ".wmv",
-        ".flv",
-        ".webm",
-    }
-    SUBTITLE_EXTENSIONS: ClassVar[set[str]] = {".srt", ".ass", ".ssa", ".sub", ".vtt"}
-    MEDIA_EXTENSIONS: ClassVar[set[str]] = VIDEO_EXTENSIONS.union(SUBTITLE_EXTENSIONS)
-
-    source_path: Path
-    target_path: Path
-    http_client: HttpClient
-    console: Console | None
-    api_endpoint: str
-    api_key: str
-    api_timeout: int
+    MEDIA_EXTENSIONS: ClassVar[frozenset[str]] = frozenset(
+        {
+            ".avi",
+            ".flv",
+            ".m4v",
+            ".mkv",
+            ".mov",
+            ".mp4",
+            ".mpeg",
+            ".mpg",
+            ".webm",
+            ".wmv",
+            ".ass",
+            ".idx",
+            ".srt",
+            ".ssa",
+            ".sub",
+            ".vtt",
+        }
+    )
 
     def __init__(
         self,
         source_path: Path,
         target_path: Path,
-        http_client: HttpClient | None = None,
-        console: Console | None = None,
-        api_endpoint: str = config.DIFY_WORKFLOW_RUN_ENDPOINT,
-        api_key: str = config.DIFY_API_KEY,
-        api_timeout: int = config.API_TIMEOUT,
-    ):
-        """
-        Initialize the FileRenamer.
-
-        Args:
-            source_path: Path to the directory containing source files
-            target_path: Path to the directory containing target directories
-            http_client: Optional HTTP client to use for AI requests
-            console: Optional console for output (if None, no output)
-            api_endpoint: API endpoint for the AI service
-            api_key: API key for the AI service
-            api_timeout: Timeout for API requests in seconds
-        """
+        suggest_names: SuggestNames,
+    ) -> None:
+        if not source_path.is_dir():
+            message = f"Source directory does not exist: {source_path}"
+            raise ConfigurationError(message)
+        if not target_path.is_dir():
+            message = f"Target directory does not exist: {target_path}"
+            raise ConfigurationError(message)
         self.source_path = source_path
         self.target_path = target_path
-        self.http_client = http_client or HttpxClient()
-        self.console = console
-        self.api_endpoint = api_endpoint
-        self.api_key = api_key
-        self.api_timeout = api_timeout
+        self._target_root = target_path.resolve()
+        self._target_identity = _path_identity(self._target_root)
+        self._source_identities: dict[Path, tuple[int, int]] = {}
+        self._conflict_identities: dict[Path, tuple[int, int]] = {}
+        self._suggest_names = suggest_names
 
-    def _get_name_pairs_from_ai(
-        self, source_files_list: list[str], target_files_list: list[str]
-    ) -> list[tuple[str, str]]:
-        """
-        Retrieve name pairs for file renaming from an AI service.
-
-        This method sends a request to an AI service with the list of source files
-        and target directories, and receives suggested new names for the files.
-
-        Args:
-            source_files_list: List of source file names
-            target_files_list: List of target directory names
-
-        Returns:
-            A list of tuples, each containing (original_name, new_name) pairs
-
-        Raises:
-            InvalidResponseError: If the response format is invalid
-            AIParseError: If parsing the AI response fails
-        """
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-        payload: dict[str, dict[str, str] | str] = {
-            "inputs": {
-                "files": "\n".join(str(f) for f in source_files_list),
-                "directories": "\n".join(str(f) for f in target_files_list),
-            },
-            "user": config.USER_NAME,
-            "response_mode": "blocking",
+    def plan_moves(self) -> list[FileMove]:
+        """Scan the configured roots and return one fully validated move plan."""
+        self._source_identities.clear()
+        source_files = sorted(
+            (
+                path
+                for path in self.source_path.iterdir()
+                if not path.is_symlink()
+                and path.is_file()
+                and path.suffix.lower() in self.MEDIA_EXTENSIONS
+            ),
+            key=lambda path: path.name.casefold(),
+        )
+        target_directories = sorted(
+            (path for path in self.target_path.iterdir() if path.is_dir()),
+            key=lambda path: path.name.casefold(),
+        )
+        if not source_files or not target_directories:
+            return []
+        self._validate_catalog_names((*source_files, *target_directories))
+        self._source_identities = {
+            path: _path_identity(path, follow_symlinks=False) for path in source_files
         }
 
-        # Send POST request to the AI service
-        resp = self.http_client.post(
-            self.api_endpoint, headers=headers, json=payload, timeout=self.api_timeout
+        suggestions = self._suggest_names(
+            [path.name for path in source_files],
+            [path.name for path in target_directories],
         )
+        moves = self._validate_suggestions(source_files, suggestions)
+        self._validate_target_root()
+        return moves
 
-        # Response received from API
-
-        # Validate response structure using Pydantic model
-        try:
-            api_response = ApiResponse.model_validate(resp)
-            response_text = api_response.response_text
-        except (ValueError, TypeError, KeyError) as exc:
-            if self.console:
-                self.console.exception(
-                    "Invalid response structure from AI service", exc
-                )
-            raise_parse_error(exc)
-        # Parse the JSON response
-        try:
-            # Repair the JSON response if needed
-            json_response = json_repair.repair_json(response_text, return_objects=True)  # type: ignore[reportUnknownMemberType]
-
-            # Parse the response using Pydantic model
-            ai_response = AIResponse.model_validate(json_response)
-
-            # Convert the Pydantic model to a list of tuples
-            name_pairs: list[tuple[str, str]] = []
-            for pair in ai_response.result:
-                name_pairs.append((pair.original_name, pair.new_name))
-
-        except (ValueError, TypeError, KeyError, AttributeError) as exc:
-            # Log the error and re-raise with a more specific error type
-            if self.console:
-                self.console.exception("Error parsing AI response", exc)
-            # This will always raise, so mypy knows we don't need an else clause
-            raise_parse_error(exc)
-        # Return the name pairs in the try block to satisfy ruff TRY300
-        # and use else to make it clear this is the success path
-        else:
-            return name_pairs
-
-    def get_file_pairs(self) -> Sequence[tuple[Path, Path]]:
-        """
-        Get pairs of source and target file paths.
-
-        Returns:
-            A sequence of tuples containing (source_file_path, target_file_path)
-        """
-        # Get list of files and directories
-        # Filter for video and subtitle files only
-        source_files = [
-            f
-            for f in self.source_path.glob("*")
-            if f.is_file() and f.suffix.lower() in self.MEDIA_EXTENSIONS
-        ]
-
-        # Filter for directories only
-        target_dirs = [d for d in self.target_path.glob("*") if d.is_dir()]
-
-        # Check if we have files to process
-        if not source_files:
-            return []
-
-        # Check if we have target directories
-        if not target_dirs:
-            return []
-
-        # Get just the file/directory names
-        source_file_names = [f.name for f in source_files]
-        target_dir_names = [d.name for d in target_dirs]
-
-        # Get name pairs from AI
-        name_pairs = self._get_name_pairs_from_ai(
-            source_files_list=source_file_names,
-            target_files_list=target_dir_names,
+    def conflicts(self, moves: Sequence[FileMove]) -> list[Path]:
+        """Return existing destinations in deterministic order."""
+        conflicts = sorted(
+            {
+                move.target
+                for move in moves
+                if move.target.exists() or move.target.is_symlink()
+            }
         )
-
-        # Convert string pairs to full Path objects
-        full_path_pairs: list[tuple[Path, Path]] = []
-        for source_name, target_name in name_pairs:
-            source_file = self.source_path / source_name
-
-            # Handle target paths that might include subdirectories
-            if "/" in target_name:
-                # If target includes a directory structure
-                target_dir_name, file_name = target_name.split("/", 1)
-                target_dir = self.target_path / target_dir_name
-                target_file = target_dir / file_name
-            else:
-                target_file = self.target_path / target_name
-
-            full_path_pairs.append((source_file, target_file))
-
-        return full_path_pairs
-
-    def check_for_conflicts(
-        self, file_pairs: Sequence[tuple[Path, Path]]
-    ) -> list[Path]:
-        """
-        Check for potential conflicts in the file renaming operation.
-
-        Args:
-            file_pairs: Sequence of (source, target) file path pairs
-
-        Returns:
-            List of target paths that already exist
-        """
-        conflicts: list[Path] = []
-        for _, target_path in file_pairs:
-            if target_path.exists():
-                conflicts.append(target_path)
+        self._conflict_identities = {
+            path: _path_identity(path, follow_symlinks=False) for path in conflicts
+        }
         return conflicts
 
-    def find_missing_directories(
-        self, file_pairs: Sequence[tuple[Path, Path]]
-    ) -> list[Path]:
-        """
-        Find directories that need to be created for the renaming operation.
+    def missing_directories(self, moves: Sequence[FileMove]) -> list[Path]:
+        """Return destination directories that need to be created."""
+        return sorted(
+            {move.target.parent for move in moves if not move.target.parent.exists()}
+        )
 
-        Args:
-            file_pairs: Sequence of (source, target) file path pairs
-
-        Returns:
-            List of directories that need to be created
-        """
-        missing_dirs: set[Path] = set()
-        for _, target_file in file_pairs:
-            target_dir = target_file.parent
-            if not target_dir.exists():
-                missing_dirs.add(target_dir)
-        return list(missing_dirs)
-
-    def create_directories(self, directories: list[Path]) -> bool:
-        """
-        Create the specified directories.
-
-        Args:
-            directories: List of directories to create
-
-        Returns:
-            True if all directories were created successfully, False otherwise
-        """
+    def create_directories(self, directories: Sequence[Path]) -> None:
+        """Create destination directories and their parents."""
         for directory in directories:
-            try:
-                directory.mkdir(parents=True, exist_ok=True)
-                if self.console:
-                    self.console.debug(f"Successfully created directory: {directory}")
-            except OSError as e:
-                if self.console:
-                    self.console.exception(f"Error creating directory {directory}", e)
-                return False
-        return True
+            self._validate_directory_at_creation_time(directory)
+            # ponytail: immediate validation closes normal races; portable atomic
+            # no-follow directory creation is not available in pathlib.
+            directory.mkdir(parents=True, exist_ok=True)
+            self._validate_directory_at_creation_time(directory)
 
-    def rename_files(
-        self, file_pairs: Sequence[tuple[Path, Path]]
-    ) -> list[tuple[Path, Path, str]]:
-        """
-        Rename files according to the specified pairs.
+    def move(self, move: FileMove, *, overwrite: bool = False) -> None:
+        """Apply one validated move."""
+        self._validate_destination_at_move_time(move, overwrite=overwrite)
+        # ponytail: this narrows normal races; fully atomic cross-filesystem moves
+        # would require platform-specific transactions.
+        _ = shutil.move(move.source, move.target)
 
-        Args:
-            file_pairs: Sequence of (source, target) file path pairs
+    def _validate_suggestions(
+        self,
+        source_files: Sequence[Path],
+        suggestions: Sequence[NamePair],
+    ) -> list[FileMove]:
+        sources_by_name = {path.name: path for path in source_files}
+        source_keys = {_portable_path_key(path) for path in source_files}
+        seen_sources: set[Path] = set()
+        seen_targets: set[str] = set()
+        moves: list[FileMove] = []
 
-        Returns:
-            List of (source, target, error) tuples for failed operations
-        """
-        errors: list[tuple[Path, Path, str]] = []
-        for source_file, target_file in file_pairs:
-            try:
-                _ = shutil.move(str(source_file), str(target_file))
-            except (OSError, shutil.Error) as e:
-                error_msg = str(e)
-                # Avoid leaking raw exception repr in user-facing output
-                if self.console:
-                    self.console.exception(f"Error moving {source_file}", e)
-                errors.append((source_file, target_file, error_msg))
-        return errors
+        for suggestion in suggestions:
+            source = sources_by_name.get(suggestion.original_name)
+            if source is None:
+                message = (
+                    f"Dify suggested an unknown source file: {suggestion.original_name}"
+                )
+                raise InvalidMovePlanError(message)
+            if (
+                not source.is_file()
+                or _path_identity(source, follow_symlinks=False)
+                != self._source_identities[source]
+            ):
+                message = f"Source changed while Dify built the plan: {source.name}"
+                raise InvalidMovePlanError(message)
+
+            target = self._target_path(suggestion.new_name)
+            target_key = _portable_path_key(target)
+            if source in seen_sources:
+                message = f"Dify suggested more than one move for: {source.name}"
+                raise InvalidMovePlanError(message)
+            if target_key in seen_targets:
+                message = f"Dify suggested duplicate destination: {suggestion.new_name}"
+                raise InvalidMovePlanError(message)
+            if target_key in source_keys:
+                message = (
+                    f"Dify suggested another source as the destination: "
+                    f"{suggestion.new_name}"
+                )
+                raise InvalidMovePlanError(message)
+            if source.suffix.lower() != target.suffix.lower():
+                message = f"Dify changed the file extension for: {source.name}"
+                raise InvalidMovePlanError(message)
+            if target.exists() and target.is_dir():
+                message = f"Dify suggested a directory as a file destination: {target}"
+                raise InvalidMovePlanError(message)
+
+            seen_sources.add(source)
+            seen_targets.add(target_key)
+            moves.append(FileMove(source=source, target=target))
+
+        return moves
+
+    def _target_path(self, suggested_name: str) -> Path:
+        normalized = suggested_name.replace("\\", "/")
+        posix_path = PurePosixPath(normalized)
+        windows_path = PureWindowsPath(suggested_name)
+        parts = normalized.split("/")
+        if (
+            not suggested_name
+            or posix_path.is_absolute()
+            or windows_path.is_absolute()
+            or windows_path.drive
+            or ntpath.isreserved(normalized)
+            or any(part in {"", ".", ".."} for part in parts)
+            or _contains_unsafe_character(suggested_name)
+        ):
+            message = f"Dify suggested an unsafe destination: {suggested_name}"
+            raise InvalidMovePlanError(message)
+
+        target = self._target_root.joinpath(*parts)
+        if not target.resolve(strict=False).is_relative_to(self._target_root):
+            message = (
+                f"Dify suggested a destination outside the library: {suggested_name}"
+            )
+            raise InvalidMovePlanError(message)
+        return target
+
+    @staticmethod
+    def _validate_catalog_names(paths: Sequence[Path]) -> None:
+        for path in paths:
+            if _contains_unsafe_character(path.name):
+                message = (
+                    "Catalog names cannot contain control or formatting "
+                    f"characters: {path.name!a}"
+                )
+                raise ConfigurationError(message)
+
+    def _validate_destination_at_move_time(
+        self, move: FileMove, *, overwrite: bool
+    ) -> None:
+        self._validate_target_root()
+        if not move.source.is_file():
+            message = f"Source is no longer a file: {move.source}"
+            if move.source.is_dir():
+                raise IsADirectoryError(message)
+            raise FileNotFoundError(message)
+        expected_source = self._source_identities.get(move.source)
+        if (
+            expected_source is not None
+            and _path_identity(move.source, follow_symlinks=False) != expected_source
+        ):
+            message = f"Source changed after the move plan was created: {move.source}"
+            raise OSError(message)
+        if not move.target.resolve(strict=False).is_relative_to(self._target_root):
+            message = f"Destination escaped the target directory: {move.target}"
+            raise PermissionError(message)
+        if move.target.is_dir():
+            message = f"Destination became a directory: {move.target}"
+            raise IsADirectoryError(message)
+        destination_exists = move.target.exists() or move.target.is_symlink()
+        if destination_exists and overwrite:
+            expected_target = self._conflict_identities.get(move.target)
+            if (
+                expected_target is None
+                or _path_identity(move.target, follow_symlinks=False) != expected_target
+            ):
+                message = f"Destination changed after confirmation: {move.target}"
+                raise FileExistsError(message)
+        elif destination_exists:
+            message = f"Destination appeared after confirmation: {move.target}"
+            raise FileExistsError(message)
+
+    def _validate_directory_at_creation_time(self, directory: Path) -> None:
+        self._validate_target_root()
+        if not directory.resolve(strict=False).is_relative_to(self._target_root):
+            message = f"Directory escaped the target root: {directory}"
+            raise PermissionError(message)
+
+    def _validate_target_root(self) -> None:
+        if (
+            not self.target_path.is_dir()
+            or self.target_path.resolve() != self._target_root
+            or _path_identity(self._target_root) != self._target_identity
+        ):
+            message = "Target directory changed after the move plan was created."
+            raise PermissionError(message)
+
+
+def _portable_path_key(path: Path) -> str:
+    """Normalize destination identity across common media-library filesystems."""
+    return unicodedata.normalize(
+        "NFC", path.resolve(strict=False).as_posix()
+    ).casefold()
+
+
+def _contains_unsafe_character(value: str) -> bool:
+    return any(
+        unicodedata.category(character) in {"Cc", "Cf", "Cs", "Zl", "Zp"}
+        for character in value
+    )
+
+
+def _path_identity(path: Path, *, follow_symlinks: bool = True) -> tuple[int, int]:
+    details = path.stat(follow_symlinks=follow_symlinks)
+    return details.st_dev, details.st_ino
