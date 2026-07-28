@@ -49,8 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Align the bundled Dify prompts with the `result` field required by their
   structured-output schemas and the CLI.
-- Refuse source, destination, or target-root replacements made after a move plan
-  is reviewed.
+- Refuse source content changes and source, destination, or target-root
+  replacements made after a move plan is reviewed.
 
 ## [0.3.1] - 2026-07-28
 

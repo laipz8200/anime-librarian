@@ -11,6 +11,8 @@ from .errors import ConfigurationError, InvalidMovePlanError
 from .models import FileMove, NamePair
 
 SuggestNames = Callable[[list[str], list[str]], Sequence[NamePair]]
+type PathIdentity = tuple[int, int]
+type FileIdentity = tuple[int, int, int, int, int, int]
 
 
 class FileOrganizer:
@@ -53,8 +55,8 @@ class FileOrganizer:
         self.target_path = target_path
         self._target_root = target_path.resolve()
         self._target_identity = _path_identity(self._target_root)
-        self._source_identities: dict[Path, tuple[int, int]] = {}
-        self._conflict_identities: dict[Path, tuple[int, int]] = {}
+        self._source_identities: dict[Path, FileIdentity] = {}
+        self._conflict_identities: dict[Path, FileIdentity] = {}
         self._suggest_names = suggest_names
 
     def plan_moves(self) -> list[FileMove]:
@@ -78,7 +80,7 @@ class FileOrganizer:
             return []
         self._validate_catalog_names((*source_files, *target_directories))
         self._source_identities = {
-            path: _path_identity(path, follow_symlinks=False) for path in source_files
+            path: _file_identity(path, follow_symlinks=False) for path in source_files
         }
 
         suggestions = self._suggest_names(
@@ -99,7 +101,7 @@ class FileOrganizer:
             }
         )
         self._conflict_identities = {
-            path: _path_identity(path, follow_symlinks=False) for path in conflicts
+            path: _file_identity(path, follow_symlinks=False) for path in conflicts
         }
         return conflicts
 
@@ -145,7 +147,7 @@ class FileOrganizer:
                 raise InvalidMovePlanError(message)
             if (
                 not source.is_file()
-                or _path_identity(source, follow_symlinks=False)
+                or _file_identity(source, follow_symlinks=False)
                 != self._source_identities[source]
             ):
                 message = f"Source changed while Dify built the plan: {source.name}"
@@ -225,7 +227,7 @@ class FileOrganizer:
         expected_source = self._source_identities.get(move.source)
         if (
             expected_source is not None
-            and _path_identity(move.source, follow_symlinks=False) != expected_source
+            and _file_identity(move.source, follow_symlinks=False) != expected_source
         ):
             message = f"Source changed after the move plan was created: {move.source}"
             raise OSError(message)
@@ -240,7 +242,7 @@ class FileOrganizer:
             expected_target = self._conflict_identities.get(move.target)
             if (
                 expected_target is None
-                or _path_identity(move.target, follow_symlinks=False) != expected_target
+                or _file_identity(move.target, follow_symlinks=False) != expected_target
             ):
                 message = f"Destination changed after confirmation: {move.target}"
                 raise FileExistsError(message)
@@ -278,6 +280,18 @@ def _contains_unsafe_character(value: str) -> bool:
     )
 
 
-def _path_identity(path: Path, *, follow_symlinks: bool = True) -> tuple[int, int]:
+def _path_identity(path: Path, *, follow_symlinks: bool = True) -> PathIdentity:
     details = path.stat(follow_symlinks=follow_symlinks)
     return details.st_dev, details.st_ino
+
+
+def _file_identity(path: Path, *, follow_symlinks: bool = True) -> FileIdentity:
+    details = path.stat(follow_symlinks=follow_symlinks)
+    return (
+        details.st_dev,
+        details.st_ino,
+        details.st_mode,
+        details.st_size,
+        details.st_mtime_ns,
+        details.st_ctime_ns,
+    )

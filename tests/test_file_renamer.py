@@ -377,6 +377,32 @@ def test_plan_moves_rejects_source_changed_during_dify(tmp_path: Path) -> None:
     assert source_file.read_text() == "replacement"
 
 
+def test_plan_moves_rejects_source_modified_in_place_during_dify(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    source.mkdir()
+    target.mkdir()
+    source_file = source / "episode.mkv"
+    source_file.write_text("original")
+    (target / "Series").mkdir()
+
+    def modify_source(_source: list[str], _target: list[str]) -> Sequence[NamePair]:
+        source_file.write_text("modified in place")
+        return [
+            NamePair(
+                original_name="episode.mkv",
+                new_name="Series/Episode.mkv",
+            )
+        ]
+
+    organizer = FileOrganizer(source, target, modify_source)
+
+    with pytest.raises(InvalidMovePlanError, match="Source changed"):
+        organizer.plan_moves()
+
+
 def test_plan_moves_rejects_target_root_replaced_during_dify(
     tmp_path: Path,
 ) -> None:
